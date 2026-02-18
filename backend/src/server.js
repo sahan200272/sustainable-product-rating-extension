@@ -1,7 +1,8 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const cors = require("cors");
-const connectDB = require("./config/db");
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import connectDB from "./config/db.js";
+
 dotenv.config();
 
 connectDB();
@@ -16,6 +17,7 @@ app.use("/", (req, res) => {
     res.send("backend is working");
 });
 
+// Start the server
 app.listen(PORT, () => {
     console.log(`app is running on http://localhost:${PORT}`);
 });
