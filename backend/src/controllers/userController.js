@@ -148,3 +148,18 @@ export async function getUserByEmailAdmin(req, res) {
         });
     }
 }
+
+// Controller function to get all users (Admin only)
+export async function getAllUsers(req, res) {
+    try {
+        const users = await userService.getAllUsers();
+        res.status(200).json(users);
+
+    } catch (error) {
+        console.error("Get all users error:", error);
+        res.status(500).json({ 
+            error: "Failed to retrieve users" 
+        });
+    }
+}
+

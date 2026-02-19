@@ -73,3 +73,17 @@ export async function getUserByEmail(email) {
     
     return userResponse;
 }
+
+// Service function to get all users
+export async function getAllUsers() {
+    const users = await User.find();
+    
+    // Return users without passwords
+    const usersResponse = users.map(user => {
+        const userObj = user.toObject();
+        delete userObj.password;
+        return userObj;
+    });
+    
+    return usersResponse;
+}
