@@ -1,17 +1,20 @@
 import express from 'express';
-import { registerUser, loginUser, getUser, getUserByEmailAdmin } from '../controllers/userController.js';
+import { registerUser, loginUser, getUser, getUserByEmailAdmin, getAllUsers } from '../controllers/userController.js';
 import { authenticate, isAdmin } from '../middlewares/authMiddleware.js';
 
 const userRouter = express.Router();
 
-// Public routes
+//Register route
 userRouter.post('/register', registerUser);
+
+//Login route
 userRouter.post('/login', loginUser);
 
-// Protected routes - Any authenticated user
+//Get user details (for both Admin and Customer)
 userRouter.get('/getUser', authenticate, getUser);
 
 // Admin-only routes
 userRouter.post('/admin/getUserByEmail', authenticate, isAdmin, getUserByEmailAdmin);
+userRouter.get('/admin/getAllUsers', authenticate, isAdmin, getAllUsers);
 
 export default userRouter;
