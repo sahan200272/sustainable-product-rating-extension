@@ -1,6 +1,7 @@
 import * as userService from '../services/userService.js';
 import jwt from 'jsonwebtoken';
 
+// Controller function to register a new user
 export async function registerUser(req, res) {
     try {
         const { email, password } = req.body;
@@ -33,7 +34,6 @@ export async function registerUser(req, res) {
     }
 }
 
-
 // Controller function to login a user
 export async function loginUser(req, res) {
     try {
@@ -62,7 +62,7 @@ export async function loginUser(req, res) {
                 emailVerified: user.emailVerified
             },
             process.env.JWT_SECRET,
-            { expiresIn: '24h' } // Token expires in 24 hours
+            { expiresIn: '24h' }
         );
 
         res.status(200).json({
@@ -90,6 +90,61 @@ export async function loginUser(req, res) {
 
         res.status(500).json({ 
             error: "Login failed"
+        });
+    }
+}
+
+// Controller function to get logged-in user's own data
+export async function getUser(req, res) {
+    try {
+        // req.user is guaranteed to exist because of authenticate middleware
+        const user = await userService.getUserByEmail(req.user.email);
+
+        res.status(200).json(user);
+
+    } catch (error) {
+        console.error("Get user error:", error);
+
+        if (error.message === 'User not found') {
+            return res.status(404).json({ 
+                error: "User not found" 
+            });
+        }
+
+        res.status(500).json({ 
+            error: "Failed to retrieve user data" 
+        });
+    }
+}
+
+// Controller function for admin to get any user by email
+export async function getUserByEmailAdmin(req, res) {
+    try {
+        const { email } = req.body;
+
+        // Validate email
+        if (!email) {
+            return res.status(400).json({ 
+                error: "Email is required" 
+            });
+        }
+
+        // Call service to get user
+        const user = await userService.getUserByEmail(email);
+
+        res.status(200).json(user);
+
+    } catch (error) {
+        console.error("Get user by email error:", error);
+
+        if (error.message === 'User not found') {
+            return res.status(404).json({ 
+                error: "User not found" 
+            });
+        }
+
+        res.status(500).json({ 
+            error: "Failed to retrieve user data" 
         });
     }
 }
