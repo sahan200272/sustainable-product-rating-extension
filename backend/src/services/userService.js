@@ -1,10 +1,9 @@
 import User from '../models/user.js';
 import bcrypt from 'bcrypt';
 
-
 // Service function to register a new user
 export async function registerUser(userData) {
-    const { email, password} = userData;
+    const { email, password } = userData;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -58,4 +57,33 @@ export async function loginUser(credentials) {
     delete userResponse.password;
 
     return userResponse;
+}
+
+// Service function to get user by email
+export async function getUserByEmail(email) {
+    const user = await User.findOne({ email });
+    
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    // Return user without password
+    const userResponse = user.toObject();
+    delete userResponse.password;
+    
+    return userResponse;
+}
+
+// Service function to get all users
+export async function getAllUsers() {
+    const users = await User.find();
+    
+    // Return users without passwords
+    const usersResponse = users.map(user => {
+        const userObj = user.toObject();
+        delete userObj.password;
+        return userObj;
+    });
+    
+    return usersResponse;
 }

@@ -1,22 +1,20 @@
 import express from 'express';
-import { registerUser, loginUser } from '../controllers/userController.js';
+import { registerUser, loginUser, getUser, getUserByEmailAdmin, getAllUsers } from '../controllers/userController.js';
+import { authenticate, isAdmin } from '../middlewares/authMiddleware.js';
 
 const userRouter = express.Router();
 
-//Register a new user
+//Register route
 userRouter.post('/register', registerUser);
 
-
-//Login user
+//Login route
 userRouter.post('/login', loginUser);
 
-// POST /api/users/login - Login user
-//router.post('/login', userController.loginUser);
+//Get user details (for both Admin and Customer)
+userRouter.get('/getUser', authenticate, getUser);
 
-// GET /api/users/profile - Get user profile (protected route)
-//router.get('/profile', userController.getUserProfile);
-
-// PUT /api/users/profile - Update user profile (protected route)
-//router.put('/profile', userController.updateUserProfile);
+// Admin-only routes
+userRouter.post('/admin/getUserByEmail', authenticate, isAdmin, getUserByEmailAdmin);
+userRouter.get('/admin/getAllUsers', authenticate, isAdmin, getAllUsers);
 
 export default userRouter;
