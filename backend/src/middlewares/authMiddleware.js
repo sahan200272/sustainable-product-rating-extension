@@ -21,7 +21,7 @@ export function authenticate(req, res, next) {
 // Check if user is Admin
 export function isAdmin(req, res, next) {
     if (req.user && req.user.role === "Admin") {
-        next(); // User is admin, continue
+        next();
     } else {
         return res.status(403).json({ error: "Admin access required" });
     }
@@ -30,7 +30,7 @@ export function isAdmin(req, res, next) {
 // Check if user is Customer
 export function isCustomer(req, res, next) {
     if (req.user && req.user.role === "Customer") {
-        next(); // User is customer, continue
+        next();
     } else {
         return res.status(403).json({ error: "Customer access required" });
     }
