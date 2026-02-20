@@ -1,16 +1,15 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import RegisterPage from "./pages/register/RegisterPage";
-import LoginPage from "./pages/login/LoginPage";
+import { AuthProvider } from "./context/AuthContext";
+import AppRoutes from "./routes";
 
 function App() {
   return (
     <BrowserRouter>
-      <Toaster position="top-right" />
-      <Routes>
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/login" element={<LoginPage />} />
-      </Routes>
+      <AuthProvider>
+        <Toaster position="top-right" />
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   );
 }
