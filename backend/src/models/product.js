@@ -2,6 +2,11 @@
 
 const mongoose = require("mongoose");
 
+const imageSchema = new mongoose.Schema({
+    public_id: { type: String, required: true },
+    url: { type: String, required: true }
+});
+
 const sustainabilitySchema = new mongoose.Schema({
     recyclableMaterial: { type: Boolean, default: false },
     biodegradable: { type: Boolean, default: false },
@@ -20,6 +25,8 @@ const productSchema = new mongoose.Schema(
         category: { type: String, required: true },
         price: { type: Number, required: true },
         description: { type: String },
+
+        images: [imageSchema],
 
         sustainability: sustainabilitySchema,
 
