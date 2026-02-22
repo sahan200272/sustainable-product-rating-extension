@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import productRoutes from "./routes/product.routes.js";
 
+// Load environment variables first
 dotenv.config();
 
 connectDB();

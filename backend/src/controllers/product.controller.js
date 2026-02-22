@@ -1,8 +1,14 @@
 import * as productService from "../services/product.service.js";
+import cloudinaryUpload from "../utils/cloudinaryUpload.js";
 
 export const createProduct = async (req, res) => {
   try {
-    const { name, brand, category, description, images, sustainability } = req.body;
+    const { name, brand, category, description, sustainability, sustainabilityScore } = req.body;
+    const files = req.files;
+
+    let images;
+    //console.log(req.body);
+    //console.log("files", files);
 
     // Basic validation
     if (!name || !brand || !category || !description || !sustainability) {
@@ -12,7 +18,26 @@ export const createProduct = async (req, res) => {
       });
     }
 
-    const product = await productService.createProduct(req.body);
+    // photos upload to the cloudinary and take url and public_if from cloudinary
+    if (req.files && req.files.length > 0) {
+
+      // call the seperate function to handle photo upload logic
+      images = await cloudinaryUpload(req.files);
+    } else {
+      console.log("No file uploaded.");
+    }
+
+    //console.log("images array ", images);
+
+    const product = await productService.createProduct({
+      name,
+      brand,
+      category,
+      description,
+      images,
+      sustainability,
+      sustainabilityScore
+    });
 
     return res.status(201).json({
       success: true,
