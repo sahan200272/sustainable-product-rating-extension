@@ -1,6 +1,6 @@
 // models/Product.js
 
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const imageSchema = new mongoose.Schema({
     public_id: { type: String, required: true },
@@ -23,7 +23,6 @@ const productSchema = new mongoose.Schema(
         name: { type: String, required: true },
         brand: { type: String, required: true },
         category: { type: String, required: true },
-        price: { type: Number, required: true },
         description: { type: String },
 
         images: [imageSchema],
@@ -35,4 +34,5 @@ const productSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-module.exports = mongoose.model("Product", productSchema);
+const Product = mongoose.model("Product", productSchema);
+export default Product;
