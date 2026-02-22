@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
+import comparisonRoutes from './routes/comparison.routes.js';
 
 dotenv.config();
 
@@ -22,6 +23,8 @@ app.use("/api/users", userRoutes);
 app.use("/", (req, res) => {
     res.send("backend is working");
 });
+
+app.use("/api/comparison", comparisonRoutes);
 
 // Start the server
 app.listen(PORT, () => {
