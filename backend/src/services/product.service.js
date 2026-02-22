@@ -20,3 +20,20 @@ export const createProduct = async (data) => {
     throw error; // let controller handle HTTP response
   }
 };
+
+/**
+ * Get all products from database
+ * @returns {Promise<Array>} List of products
+ */
+export const getAllProducts = async () => {
+  try {
+    const products = await Product.find().lean();
+
+    return products;
+  } catch (error) {
+    console.error("[ProductService] getAllProducts Error:", error.message);
+
+    // Re-throwing error so controller can handle response
+    throw new Error("Failed to fetch products");
+  }
+};

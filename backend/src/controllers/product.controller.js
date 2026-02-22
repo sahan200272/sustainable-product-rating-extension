@@ -54,3 +54,25 @@ export const createProduct = async (req, res) => {
     });
   }
 };
+
+export const getAllProducts = async(req, res) => {
+
+  try {
+
+    const products = await productService.getAllProducts();
+
+    return res.status(201).json({
+      success: true,
+      message: "Products retrived successfully",
+      data: products
+    });
+    
+  } catch (error) {
+    console.log("Retrive All Products Error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error while retriving products"
+    });
+  }
+}
