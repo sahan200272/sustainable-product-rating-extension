@@ -1,4 +1,4 @@
-import * as userService from '../services/userService.js';
+import * as userService from '../services/user.service.js';
 import jwt from 'jsonwebtoken';
 
 // Controller function to register a new user
