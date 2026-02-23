@@ -63,7 +63,7 @@ export const getAllProducts = async(req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "Products retrived successfully",
+      message: "Products retrieved successfully",
       data: products
     });
     
@@ -89,7 +89,7 @@ export const getSingleProduct = async(req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "Product retrived successfully",
+      message: "Product retrieved successfully",
       data: product
     })
 
