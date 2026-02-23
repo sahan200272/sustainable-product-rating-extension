@@ -4,6 +4,7 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import productRoutes from "./routes/product.routes.js";
+import comparisonRoutes from './routes/comparison.routes.js';
 
 // Load environment variables first
 dotenv.config();
@@ -28,6 +29,8 @@ app.use("/api/products", productRoutes);
 app.use("/", (req, res) => {
     res.send("backend is working");
 });
+
+app.use("/api/comparison", comparisonRoutes);
 
 // Start the server
 app.listen(PORT, () => {
