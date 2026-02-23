@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
+import blogRoutes from "./routes/blogRoutes.js";
 import productRoutes from "./routes/product.routes.js";
 import comparisonRoutes from './routes/comparison.routes.js';
 
@@ -24,6 +25,7 @@ app.use(express.json()); // IMPORTANT: Parse JSON bodies
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use("/api/blogs", blogRoutes);
 app.use("/api/products", productRoutes);
 
 app.use("/", (req, res) => {
