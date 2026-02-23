@@ -63,7 +63,7 @@ export const getAllProducts = async(req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "Products retrived successfully",
+      message: "Products retrieved successfully",
       data: products
     });
     
@@ -82,14 +82,13 @@ export const getSingleProduct = async(req, res) => {
   try {
     
     //console.log(req.params);
-
     const {id} = req.params;
 
     const product = await productService.getSingleProduct(id);
 
     return res.status(201).json({
       success: true,
-      message: "Product retrived successfully",
+      message: "Product retrieved successfully",
       data: product
     })
 
@@ -101,4 +100,23 @@ export const getSingleProduct = async(req, res) => {
       message: "Server error while retriving a product"
     })
   }
+}
+
+export const updateProduct = async(req, res) => {
+
+  const {id} = req.params;
+  const files = req.files;
+  const data = req.body;
+
+  //console.log("ID", id);
+  //console.log("files", files);
+  //console.log("Data", data);
+
+  const updatedProduct = await productService.updateProduct(id, data, files);
+
+  return res.status(201).json({
+    success: true,
+    messgae: "Product updated successfully",
+    updatedData: updatedProduct
+  })
 }
