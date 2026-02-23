@@ -1,5 +1,5 @@
 // backend/controllers/comparison.controller.js
-import Product from '../models/Product.js';
+import Product from '../models/product.js';
 import comparisonService from '../services/comparison.service.js';
 import Comparison from '../models/comparison.js';
 
