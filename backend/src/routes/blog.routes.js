@@ -7,7 +7,7 @@ import {
     deleteBlog, 
     likeBlog,
     unlikeBlog 
-} from '../controllers/blogController.js';
+} from '../controllers/blog.controller.js';
 import { authenticate, authorizeRoles } from '../middlewares/authMiddleware.js';
 
 const blogRouter = express.Router();
