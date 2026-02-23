@@ -8,7 +8,10 @@ import productRoutes from "./routes/product.routes.js";
 // Load environment variables first
 dotenv.config();
 
-connectDB();
+// server connect wih mongoDB when node environment not in test environment
+if(process.env.NODE_ENV !== "test"){
+    connectDB();
+};
 
 const PORT = process.env.PORT;
 
