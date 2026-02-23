@@ -6,5 +6,6 @@ const productRoutes = express.Router();
 
 productRoutes.post("/", upload.array("images", 5), productController.createProduct);
 productRoutes.get("/", productController.getAllProducts);
+productRoutes.get("/:id", productController.getSingleProduct);
 
 export default productRoutes;

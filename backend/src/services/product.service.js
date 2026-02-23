@@ -37,3 +37,17 @@ export const getAllProducts = async () => {
     throw new Error("Failed to fetch products");
   }
 };
+
+export const getSingleProduct = async(id) => {
+  try {
+    
+    const product = await Product.findById(id);
+
+    return product;
+
+  } catch (error) {
+    console.log("[ProductService] getSingleProduct Error:", error.message);
+
+    throw new Error("Failed to fetch product");
+  }
+}

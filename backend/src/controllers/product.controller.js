@@ -46,7 +46,7 @@ export const createProduct = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Create Product Error:", error.message);
+    console.error("[ProductController] Create Product Error:", error.message);
 
     return res.status(500).json({
       success: false,
@@ -68,11 +68,37 @@ export const getAllProducts = async(req, res) => {
     });
     
   } catch (error) {
-    console.log("Retrive All Products Error:", error.message);
+    console.log("[ProductController] Retrive All Products Error:", error.message);
 
     return res.status(500).json({
       success: false,
       message: "Server error while retriving products"
     });
+  }
+}
+
+export const getSingleProduct = async(req, res) => {
+
+  try {
+    
+    //console.log(req.params);
+
+    const {id} = req.params;
+
+    const product = await productService.getSingleProduct(id);
+
+    return res.status(201).json({
+      success: true,
+      message: "Product retrived successfully",
+      data: product
+    })
+
+  } catch (error) {
+    console.log("[ProductController] Product Retrive Error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error while retriving a product"
+    })
   }
 }
