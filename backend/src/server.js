@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
+import blogRoutes from "./routes/blogRoutes.js";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(express.json()); // IMPORTANT: Parse JSON bodies
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use("/api/blogs", blogRoutes);
 
 app.use("/", (req, res) => {
     res.send("backend is working");
