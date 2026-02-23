@@ -34,5 +34,7 @@ const productSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-const Product = mongoose.model("Product", productSchema);
+// Check if model exists before creating
+const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
+
 export default Product;
