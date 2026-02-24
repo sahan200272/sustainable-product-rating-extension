@@ -8,5 +8,6 @@ productRoutes.post("/", upload.array("images", 5), productController.createProdu
 productRoutes.get("/", productController.getAllProducts);
 productRoutes.get("/:id", productController.getSingleProduct);
 productRoutes.put("/:id", upload.array("images", 5), productController.updateProduct);
+productRoutes.delete("/:id", productController.deleteProduct);
 
 export default productRoutes;

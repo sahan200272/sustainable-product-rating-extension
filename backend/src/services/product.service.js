@@ -106,37 +106,17 @@ export const updateProduct = async (id, data, files) => {
   return await product.save();
 };
 
-/* export const updateProduct = async (id, data, files) => {
+export const deleteProduct = async(id) => {
 
-  const product = await Product.findById(id);
-
-  if (!product) {
-    throw new Error("Product not found")
+  if(!id){
+    throw new Error("Product id not received");
   }
 
-  if (files && files.length > 0) {
+  const product = await Product.findByIdAndDelete(id);
 
-    const newImages = await cloudinaryUpload(files);
-    const updatedImages = [...product.images, ...newImages];
-
-  } else {
-    console.log("No file uploaded");
+  if(!product){
+    throw new Error("Product not found");
   }
 
-  const newProduct = new Product({
-    name: product.name || data.name,
-    brand: product.brand || data.brand,
-    category: product.category || data.category,
-    description: product.description || data.description,
-    images: product.images || updatedImages,
-
-    sustainability: {
-      recyclableMaterial: product.recyclableMaterial || data.recyclableMaterial,
-      biodegradable: product.biodegradable || data.biodegradable,
-      plasticFree: product.plasticFree || data.plasticFree,
-      carbonFootprint: product.carbonFootprint || data.carbonFootprint,
-      crueltyFree: product.crueltyFree || data.crueltyFree
-    }
-
-  })
-} */
+  return product;
+}
