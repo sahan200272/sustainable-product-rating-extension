@@ -24,13 +24,14 @@ const productSchema = new mongoose.Schema(
         brand: { type: String, required: true },
         category: { type: String, required: true },
         description: { type: String },
-        materials: { type: String },
 
         images: [imageSchema],
 
         sustainability: sustainabilitySchema,
 
-        sustainabilityScore: { type: Number, default: 0 }
+        sustainabilityScore: { type: Number, default: 0 },
+        aiSustainablityScore: { type: Number, default: 0 },
+        aiSustainabilityDescription: { type: String }
     },
     { timestamps: true }
 );
