@@ -344,7 +344,7 @@ class ComparisonService {
             recommendations,
             ecoDescription,
             summary: {
-                bestFor: winner ? (winner === product1._id ? product1.name : product2.name) : 'Both products',
+                bestFor: winner ? (winner.equals(product1._id) ? product1.name : product2.name) : 'Both products',
                 keyDifference: this.getKeyDifference(product1, product2, product1Result, product2Result)
             }
         };

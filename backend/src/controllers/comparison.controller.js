@@ -2,6 +2,7 @@
 import Product from '../models/product.js';
 import comparisonService from '../services/comparison.service.js';
 import Comparison from '../models/comparison.js';
+import mongoose from 'mongoose';
 
 /**
  * Compare two products
@@ -15,6 +16,22 @@ export async function compareProducts(req, res) {
             return res.status(400).json({
                 success: false,
                 message: 'Both product IDs are required'
+            });
+        }
+
+        //Validate product IDs before querying Mongo
+        if (!mongoose.Types.ObjectId.isValid(productId1) || !mongoose.Types.ObjectId.isValid(productId2)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid product ID format'
+            });
+        }
+
+        //Prevent comparing the same product with itself
+        if (productId1 === productId2) {
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot compare the same product with itself'
             });
         }
 
@@ -130,10 +147,12 @@ export async function quickCompareByName(req, res) {
 
         // Find products by name (case insensitive)
         const product1 = await Product.findOne({ 
-            name: { $regex: new RegExp(name1, 'i') } 
+            //name: { $regex: new RegExp(name1, 'i') } 
+            name: { $regex: `^${name1}`, $options: 'i' }
         });
         const product2 = await Product.findOne({ 
-            name: { $regex: new RegExp(name2, 'i') } 
+            //name: { $regex: new RegExp(name1, 'i') } 
+            name: { $regex: `^${name2}`, $options: 'i' }
         });
 
         if (!product1 || !product2) {

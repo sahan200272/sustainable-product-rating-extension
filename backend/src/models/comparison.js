@@ -39,26 +39,27 @@ const comparisonSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    products: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
-        required: true,
-        validate: {
-            validator: function(v) {
-                return v.length === 2;
+    products: {
+    type: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Product',
+                required: true
+            }
+            ],
+            validate: {
+                validator: function (arr) {
+                    return arr.length === 2;
+                },
+                message: 'Comparison must have exactly 2 products'
             },
-            message: 'Comparison must have exactly 2 products'
-        }
-    }],
+            required: true
+        },
     comparisonScore: comparisonScoreSchema,
     sustainabilityHighlights: sustainabilityHighlightsSchema,
     comparisonGraph: comparisonGraphSchema,
     externalData: externalDataSchema,
-    recommendations: recommendationsSchema,
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
+    recommendations: recommendationsSchema
 }, { timestamps: true });
 
 // Index for efficient querying
