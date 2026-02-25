@@ -9,7 +9,13 @@ export const createProduct = async (data) => {
       throw new Error("Invalid product data");
     }
 
-    const aiSustainabilityScore = await generateSustainabilityData();
+    const AISustainability = await generateSustainabilityData(data);
+    //console.log("AI Sus ", AISustainability);
+
+    data.aiSustainablityScore = AISustainability.score;
+    data.aiSustainabilityDescription = AISustainability.analysis;
+
+    console.log(data);
 
     // Create product instance
     const newProduct = new Product(data);
