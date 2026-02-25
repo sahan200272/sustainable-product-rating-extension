@@ -98,6 +98,14 @@ export async function getComparisonHistory(req, res) {
  */
 export async function getComparisonById(req, res) {
     try {
+        
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid comparison ID format'
+            });
+        }
+
         const comparison = await comparisonService.getComparisonById(req.params.id);
 
         if (!comparison) {
@@ -243,6 +251,14 @@ export async function getComparisonStats(req, res) {
  */
 export async function deleteComparison(req, res) {
     try {
+
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid comparison ID format'
+            });
+        }
+        
         const comparison = await Comparison.findById(req.params.id);
 
         if (!comparison) {
