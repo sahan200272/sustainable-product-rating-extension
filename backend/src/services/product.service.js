@@ -1,5 +1,6 @@
 import Product from "../models/product.js";
 import cloudinaryUpload from "../utils/cloudinaryUpload.js";
+import { generateSustainabilityData } from "./ai.service.js";
 
 export const createProduct = async (data) => {
   try {
@@ -7,6 +8,8 @@ export const createProduct = async (data) => {
     if (!data || typeof data !== "object") {
       throw new Error("Invalid product data");
     }
+
+    const aiSustainabilityScore = await generateSustainabilityData();
 
     // Create product instance
     const newProduct = new Product(data);
