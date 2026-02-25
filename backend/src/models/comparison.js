@@ -39,6 +39,7 @@ const comparisonSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    aiVerdict: { type: String },
     products: {
     type: [
             {
