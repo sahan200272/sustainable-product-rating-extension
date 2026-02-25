@@ -28,11 +28,11 @@ app.use("/api/users", userRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/products", productRoutes);
 
+app.use("/api/comparison", comparisonRoutes);
+
 app.use("/", (req, res) => {
     res.send("backend is working");
 });
-
-app.use("/api/comparison", comparisonRoutes);
 
 // Start the server
 app.listen(PORT, () => {
