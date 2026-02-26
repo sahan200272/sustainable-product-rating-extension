@@ -29,7 +29,9 @@ const productSchema = new mongoose.Schema(
 
         sustainability: sustainabilitySchema,
 
-        sustainabilityScore: { type: Number, default: 0 }
+        sustainabilityScore: { type: Number, default: 0 },
+        aiSustainablityScore: { type: Number, default: 0 },
+        aiSustainabilityDescription: { type: String }
     },
     { timestamps: true }
 );

@@ -2,6 +2,7 @@
 import Product from '../models/product.js';
 import comparisonService from '../services/comparison.service.js';
 import Comparison from '../models/comparison.js';
+import mongoose from 'mongoose';
 
 /**
  * Compare two products
@@ -15,6 +16,22 @@ export async function compareProducts(req, res) {
             return res.status(400).json({
                 success: false,
                 message: 'Both product IDs are required'
+            });
+        }
+
+        //Validate product IDs before querying Mongo
+        if (!mongoose.Types.ObjectId.isValid(productId1) || !mongoose.Types.ObjectId.isValid(productId2)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid product ID format'
+            });
+        }
+
+        //Prevent comparing the same product with itself
+        if (productId1 === productId2) {
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot compare the same product with itself'
             });
         }
 
@@ -32,14 +49,20 @@ export async function compareProducts(req, res) {
         // Perform comparison
         const comparisonResult = await comparisonService.compareProducts(product1, product2);
 
+        let savedComparison;
+
         // Save to history if user is authenticated
         if (req.user) {
-            await comparisonService.saveComparison(req.user.id, comparisonResult);
+        try {
+            savedComparison = await comparisonService.saveComparison(req.user.id, comparisonResult);
+        } catch (err) {
+                console.error("Failed to save comparison:", err);
         }
+ }
 
         res.status(200).json({
             success: true,
-            data: comparisonResult
+            data: savedComparison || comparisonResult
         });
 
     } catch (error) {
@@ -81,6 +104,14 @@ export async function getComparisonHistory(req, res) {
  */
 export async function getComparisonById(req, res) {
     try {
+        
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid comparison ID format'
+            });
+        }
+
         const comparison = await comparisonService.getComparisonById(req.params.id);
 
         if (!comparison) {
@@ -114,6 +145,60 @@ export async function getComparisonById(req, res) {
 }
 
 /**
+ * Update comparison (e.g., admin notes or verdict)
+ * PUT /api/comparison/:id
+ */
+export async function updateComparison(req, res) {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid comparison ID format"
+      });
+    }
+
+    const comparison = await Comparison.findById(id);
+
+    if (!comparison) {
+      return res.status(404).json({
+        success: false,
+        message: "Comparison not found"
+      });
+    }
+
+    if (comparison.user.toString() !== req.user.id && req.user.role !== "Admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to update this comparison"
+      });
+    }
+
+    const { aiVerdict, recommendations } = req.body;
+
+    if (aiVerdict) comparison.aiVerdict = aiVerdict;
+    if (recommendations) comparison.recommendations = recommendations;
+
+    await comparison.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Comparison updated successfully",
+      data: comparison
+    });
+
+  } catch (error) {
+    console.error("Update comparison error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating comparison",
+      error: error.message
+    });
+  }
+}
+
+/**
  * Quick compare by product names
  * GET /api/comparison/quick?name1=xxx&name2=xxx
  */
@@ -130,10 +215,12 @@ export async function quickCompareByName(req, res) {
 
         // Find products by name (case insensitive)
         const product1 = await Product.findOne({ 
-            name: { $regex: new RegExp(name1, 'i') } 
+            //name: { $regex: new RegExp(name1, 'i') } 
+            name: { $regex: `^${name1}`, $options: 'i' }
         });
         const product2 = await Product.findOne({ 
-            name: { $regex: new RegExp(name2, 'i') } 
+            //name: { $regex: new RegExp(name1, 'i') } 
+            name: { $regex: `^${name2}`, $options: 'i' }
         });
 
         if (!product1 || !product2) {
@@ -224,6 +311,14 @@ export async function getComparisonStats(req, res) {
  */
 export async function deleteComparison(req, res) {
     try {
+
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid comparison ID format'
+            });
+        }
+        
         const comparison = await Comparison.findById(req.params.id);
 
         if (!comparison) {

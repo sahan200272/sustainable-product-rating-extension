@@ -7,7 +7,8 @@ import {
     quickCompareByName,
     getComparisonStats,
     deleteComparison,
-    clearHistory
+    clearHistory,
+    updateComparison
 } from '../controllers/comparison.controller.js';
 import { authenticate, isAdmin } from '../middlewares/authMiddleware.js';
 
@@ -19,11 +20,10 @@ comparisonRouter.get('/quick', quickCompareByName);
 // Protected routes (require authentication)
 comparisonRouter.post('/compare', authenticate, compareProducts);
 comparisonRouter.get('/history', authenticate, getComparisonHistory);
+comparisonRouter.get('/stats/admin', authenticate, isAdmin, getComparisonStats);// Admin only routes
 comparisonRouter.get('/:id', authenticate, getComparisonById);
+comparisonRouter.put('/:id', authenticate, updateComparison);
 comparisonRouter.delete('/:id', authenticate, deleteComparison);
 comparisonRouter.delete('/history/clear', authenticate, clearHistory);
-
-// Admin only routes
-comparisonRouter.get('/stats/admin', authenticate, isAdmin, getComparisonStats);
 
 export default comparisonRouter;
