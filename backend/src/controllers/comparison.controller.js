@@ -139,6 +139,60 @@ export async function getComparisonById(req, res) {
 }
 
 /**
+ * Update comparison (e.g., admin notes or verdict)
+ * PUT /api/comparison/:id
+ */
+export async function updateComparison(req, res) {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid comparison ID format"
+      });
+    }
+
+    const comparison = await Comparison.findById(id);
+
+    if (!comparison) {
+      return res.status(404).json({
+        success: false,
+        message: "Comparison not found"
+      });
+    }
+
+    if (comparison.user.toString() !== req.user.id && req.user.role !== "Admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to update this comparison"
+      });
+    }
+
+    const { aiVerdict, recommendations } = req.body;
+
+    if (aiVerdict) comparison.aiVerdict = aiVerdict;
+    if (recommendations) comparison.recommendations = recommendations;
+
+    await comparison.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Comparison updated successfully",
+      data: comparison
+    });
+
+  } catch (error) {
+    console.error("Update comparison error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating comparison",
+      error: error.message
+    });
+  }
+}
+
+/**
  * Quick compare by product names
  * GET /api/comparison/quick?name1=xxx&name2=xxx
  */
