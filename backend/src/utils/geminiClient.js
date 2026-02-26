@@ -8,7 +8,7 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
 // Use the same model product is using
 export const geminiModel = genAI.getGenerativeModel({ 
-  model: "gemini-1.5-flash", 
+  model: "gemini-3-flash-preview", 
 });
 
 export default geminiModel;

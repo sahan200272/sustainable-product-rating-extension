@@ -191,8 +191,12 @@ class ComparisonService {
      * Compare two products
      */
     async compareProducts(product1, product2) {
-        const score1 = product1.aiSustainablityScore;
-        const score2 = product2.aiSustainablityScore;
+        //const score1 = product1.aiSustainablityScore;
+        //const score2 = product2.aiSustainablityScore;
+
+        //(prefer sustainabilityScore, fallback to aiSustainablityScore)
+        const score1 = product1.sustainabilityScore ?? product1.aiSustainablityScore ?? 0;
+        const score2 = product2.sustainabilityScore ?? product2.aiSustainablityScore ?? 0;
 
         let winner = null;
         if (score1 > score2) winner = product1._id;

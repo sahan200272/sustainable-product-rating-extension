@@ -49,14 +49,20 @@ export async function compareProducts(req, res) {
         // Perform comparison
         const comparisonResult = await comparisonService.compareProducts(product1, product2);
 
+        let savedComparison;
+
         // Save to history if user is authenticated
         if (req.user) {
-            await comparisonService.saveComparison(req.user.id, comparisonResult);
+        try {
+            savedComparison = await comparisonService.saveComparison(req.user.id, comparisonResult);
+        } catch (err) {
+                console.error("Failed to save comparison:", err);
         }
+ }
 
         res.status(200).json({
             success: true,
-            data: comparisonResult
+            data: savedComparison || comparisonResult
         });
 
     } catch (error) {
