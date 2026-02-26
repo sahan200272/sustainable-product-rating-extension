@@ -22,11 +22,6 @@ const comparisonGraphSchema = new mongoose.Schema({
     }]
 });
 
-const externalDataSchema = new mongoose.Schema({
-    product1: { type: mongoose.Schema.Types.Mixed },
-    product2: { type: mongoose.Schema.Types.Mixed }
-});
-
 const recommendationsSchema = new mongoose.Schema({
     general: [{ type: String }],
     product1Suggestions: [{ type: String }],
@@ -59,7 +54,6 @@ const comparisonSchema = new mongoose.Schema({
     comparisonScore: comparisonScoreSchema,
     sustainabilityHighlights: sustainabilityHighlightsSchema,
     comparisonGraph: comparisonGraphSchema,
-    externalData: externalDataSchema,
     recommendations: recommendationsSchema
 }, { timestamps: true });
 
