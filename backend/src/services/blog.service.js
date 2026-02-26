@@ -30,6 +30,202 @@ export async function createBlogService(blogData) {
     return blog;
 }
 
+// New workflow functions
+
+// 1) Create blog with workflow
+export async function createBlog(data, userId) {
+    const { title, content, category, tags, imageUrl } = data;
+
+    // Validate category
+    const validCategories = ["Responsible Consumption", "Greenwashing", "Sustainable Brands"];
+    if (!validCategories.includes(category)) {
+        const error = new Error("Invalid category. Must be one of: " + validCategories.join(", "));
+        error.status = 400;
+        throw error;
+    }
+
+    // Create new blog with PENDING status
+    const blog = new Blog({
+        title,
+        content,
+        category,
+        tags: tags || [],
+        author: userId,
+        imageUrl: imageUrl || "",
+        status: "PENDING"
+    });
+
+    await blog.save();
+    await blog.populate('author', 'firstName lastName email');
+
+    return blog;
+}
+
+// 2) Get published blogs for public view
+export async function getPublishedBlogs({ page = 1, limit = 10, category, search }) {
+    const filter = { status: "PUBLISHED" };
+    
+    if (category) {
+        filter.category = category;
+    }
+    
+    if (search) {
+        filter.title = { $regex: search, $options: 'i' };
+    }
+
+    const skip = (page - 1) * limit;
+
+    const blogs = await Blog.find(filter)
+        .populate('author', 'firstName lastName')
+        .sort({ publishedAt: -1, createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const total = await Blog.countDocuments(filter);
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+        total,
+        currentPage: page,
+        totalPages,
+        blogs
+    };
+}
+
+// 3) Get blog by ID
+export async function getBlogById(id) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        const error = new Error("Invalid blog ID");
+        error.status = 400;
+        throw error;
+    }
+
+    const blog = await Blog.findById(id)
+        .populate('author', 'firstName lastName email profilePicture')
+        .populate('approvedBy', 'firstName lastName');
+
+    if (!blog) {
+        const error = new Error("Blog not found");
+        error.status = 404;
+        throw error;
+    }
+
+    return blog;
+}
+
+// 4) Get blogs for admin with all statuses
+export async function getBlogsForAdmin({ page = 1, limit = 10, status, search }) {
+    const filter = {};
+    
+    if (status) {
+        filter.status = status;
+    }
+    
+    if (search) {
+        filter.title = { $regex: search, $options: 'i' };
+    }
+
+    const skip = (page - 1) * limit;
+
+    const blogs = await Blog.find(filter)
+        .populate('author', 'firstName lastName email')
+        .populate('approvedBy', 'firstName lastName')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const total = await Blog.countDocuments(filter);
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+        total,
+        currentPage: page,
+        totalPages,
+        blogs
+    };
+}
+
+// 5) Approve blog
+export async function approveBlog(id, adminId) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        const error = new Error("Invalid blog ID");
+        error.status = 400;
+        throw error;
+    }
+
+    const blog = await Blog.findById(id);
+
+    if (!blog) {
+        const error = new Error("Blog not found");
+        error.status = 404;
+        throw error;
+    }
+
+    if (blog.status === "PUBLISHED") {
+        const error = new Error("Blog is already published");
+        error.status = 400;
+        throw error;
+    }
+
+    const now = new Date();
+    blog.status = "PUBLISHED";
+    blog.approvedBy = adminId;
+    blog.approvedAt = now;
+    blog.publishedAt = now;
+    blog.rejectionReason = null;
+
+    await blog.save();
+    await blog.populate([
+        { path: 'author', select: 'firstName lastName email' },
+        { path: 'approvedBy', select: 'firstName lastName' }
+    ]);
+
+    return blog;
+}
+
+// 6) Reject blog
+export async function rejectBlog(id, adminId, rejectionReason) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        const error = new Error("Invalid blog ID");
+        error.status = 400;
+        throw error;
+    }
+
+    if (!rejectionReason || rejectionReason.trim() === "") {
+        const error = new Error("Rejection reason is required");
+        error.status = 400;
+        throw error;
+    }
+
+    const blog = await Blog.findById(id);
+
+    if (!blog) {
+        const error = new Error("Blog not found");
+        error.status = 404;
+        throw error;
+    }
+
+    if (blog.status === "REJECTED") {
+        const error = new Error("Blog is already rejected");
+        error.status = 400;
+        throw error;
+    }
+
+    const now = new Date();
+    blog.status = "REJECTED";
+    blog.approvedBy = adminId;
+    blog.approvedAt = now;
+    blog.rejectionReason = rejectionReason.trim();
+
+    await blog.save();
+    await blog.populate([
+        { path: 'author', select: 'firstName lastName email' },
+        { path: 'approvedBy', select: 'firstName lastName' }
+    ]);
+
+    return blog;
+}
+
 // Service function to get all blogs with filters and pagination
 export async function getAllBlogsService({ page = 1, limit = 10, category, search }) {
     // Build query filters
