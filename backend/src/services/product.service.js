@@ -1,6 +1,6 @@
 import Product from "../models/product.js";
 import cloudinaryUpload from "../utils/cloudinaryUpload.js";
-import { generateSustainabilityData } from "./ai.service.js";
+import { generateSustainability, generateSustainabilityData } from "./ai.service.js";
 
 export const createProduct = async (data) => {
   try {
@@ -79,7 +79,15 @@ export const searchProductsByName = async (searchName) => {
       name: { $regex: searchName, $options: "i" }
     }).lean();
 
-    return products;
+    if (products.length == 0) {
+
+      const data = await generateSustainability(searchName);
+
+      return data;
+
+    } else {
+      return products;
+    }
 
   } catch (error) {
     console.error("[ProductService] searchProductsByName Error:", error.message);
@@ -140,15 +148,15 @@ export const updateProduct = async (id, data, files) => {
   return await product.save();
 };
 
-export const deleteProduct = async(id) => {
+export const deleteProduct = async (id) => {
 
-  if(!id){
+  if (!id) {
     throw new Error("Product id not received");
   }
 
   const product = await Product.findByIdAndDelete(id);
 
-  if(!product){
+  if (!product) {
     throw new Error("Product not found");
   }
 

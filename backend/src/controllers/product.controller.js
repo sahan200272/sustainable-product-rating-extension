@@ -40,7 +40,7 @@ export const createProduct = async (req, res) => {
       description: description,
       images: images,
       sustainability: sustainability,
-      sustainabilityScore : score
+      sustainabilityScore: score
     });
 
     return res.status(201).json({
@@ -59,7 +59,7 @@ export const createProduct = async (req, res) => {
   }
 };
 
-export const getAllProducts = async(req, res) => {
+export const getAllProducts = async (req, res) => {
 
   try {
 
@@ -70,7 +70,7 @@ export const getAllProducts = async(req, res) => {
       message: "Products retrieved successfully",
       data: products
     });
-    
+
   } catch (error) {
     console.log("[ProductController] Retrive All Products Error:", error.message);
 
@@ -81,12 +81,12 @@ export const getAllProducts = async(req, res) => {
   }
 }
 
-export const getSingleProduct = async(req, res) => {
+export const getSingleProduct = async (req, res) => {
 
   try {
-    
+
     //console.log(req.params);
-    const {id} = req.params;
+    const { id } = req.params;
 
     const product = await productService.getSingleProduct(id);
 
@@ -106,7 +106,7 @@ export const getSingleProduct = async(req, res) => {
   }
 }
 
-export const searchProducts = async(req, res) => {
+export const searchProducts = async (req, res) => {
   try {
     const { name } = req.query;
 
@@ -120,12 +120,20 @@ export const searchProducts = async(req, res) => {
 
     const products = await productService.searchProductsByName(name);
 
-    return res.status(200).json({
-      success: true,
-      message: `Found ${products.length} product(s) matching "${name}"`,
-      count: products.length,
-      data: products
-    });
+    if (Array.isArray(products)) {
+      return res.status(200).json({
+        success: true,
+        message: `Found ${products.length} product(s) matching "${name}"`,
+        count: products.length,
+        data: products
+      });
+    } else {
+      return res.status(200).json({
+        success: true,
+        message: `Found AI based product data "${name}"`,
+        data: products
+      });
+    }
 
   } catch (error) {
     console.log("[ProductController] Search Products Error:", error.message);
@@ -137,10 +145,10 @@ export const searchProducts = async(req, res) => {
   }
 }
 
-export const updateProduct = async(req, res) => {
+export const updateProduct = async (req, res) => {
 
   try {
-    const {id} = req.params;
+    const { id } = req.params;
     const files = req.files;
     const data = req.body;
 
@@ -166,13 +174,13 @@ export const updateProduct = async(req, res) => {
   }
 }
 
-export const deleteProduct = async(req, res) => {
+export const deleteProduct = async (req, res) => {
 
   try {
 
-    const {id} = req.params;
+    const { id } = req.params;
     console.log(id);
-    
+
     const product = await productService.deleteProduct(id);
 
     return res.status(201).json({
@@ -180,7 +188,7 @@ export const deleteProduct = async(req, res) => {
       message: "Product deleted successfully",
       data: product
     });
-  
+
   } catch (error) {
     console.log("[ProductController] Product delete Error:", error.message);
 
