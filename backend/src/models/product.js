@@ -31,10 +31,15 @@ const productSchema = new mongoose.Schema(
 
         sustainabilityScore: { type: Number, default: 0 },
         aiSustainablityScore: { type: Number, default: 0 },
-        aiSustainabilityDescription: { type: String }
+        aiSustainabilityDescription: { type: String },
+
+        // NEW FIELDS FOR REVIEW COMPONENT
+        averageUserRating: { type: Number, default: 0 },
+        totalApprovedReviews: { type: Number, default: 0 }
     },
     { timestamps: true }
 );
+
 
 // Check if model exists before creating
 const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
