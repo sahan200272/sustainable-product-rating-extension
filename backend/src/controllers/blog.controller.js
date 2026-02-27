@@ -1,4 +1,5 @@
 import * as blogService from '../services/blog.service.js';
+import { testGeminiConnection } from '../services/blog-ai.service.js';
 
 // Public Routes
 
@@ -371,6 +372,23 @@ export async function unlikeBlog(req, res) {
         }
         res.status(500).json({
             error: "Internal server error"
+        });
+    }
+}
+
+// Test AI API connection
+export async function testAI(req, res) {
+    try {
+        const result = await testGeminiConnection();
+        
+        res.status(200).json({
+            message: "AI API is working!",
+            response: result
+        });
+    } catch (error) {
+        res.status(500).json({
+            error: "AI API failed",
+            details: error.message
         });
     }
 }

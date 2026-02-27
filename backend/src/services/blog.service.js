@@ -1,6 +1,6 @@
 import Blog from '../models/blog.js';
 import mongoose from 'mongoose';
-import { moderateBlogContent } from './ai.service.js';
+import { moderateBlogContent } from './blog-ai.service.js';
 
 // Service function to create a new blog
 export async function createBlogService(blogData) {

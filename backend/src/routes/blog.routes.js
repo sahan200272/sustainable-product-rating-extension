@@ -12,7 +12,8 @@ import {
     adminRejectBlog,
     createBlogLegacy,
     getAllBlogsLegacy,
-    getBlogByIdLegacy
+    getBlogByIdLegacy,
+    testAI
 } from '../controllers/blog.controller.js';
 import { authenticate, authorizeRoles } from '../middlewares/authMiddleware.js';
 
@@ -27,6 +28,9 @@ const isAdmin = (req, res, next) => {
 };
 
 // =================== APPROVAL WORKFLOW ROUTES ===================
+
+// Test route (use different path to avoid conflict)
+blogRouter.get('/admin/test-ai', authenticate, authorizeRoles('Admin'), testAI); // GET /api/blogs/admin/test-ai
 
 // Public routes (no authentication required)
 blogRouter.get('/', getAllBlogs); // GET /api/blogs - only published blogs
