@@ -67,6 +67,66 @@ export const moderateBlogContent = async (title, content) => {
 };
 
 /**
+ * Validate if content is related to SDG-12 before generating education guide
+ * @param {string} title - The content title
+ * @param {string} content - The content text
+ * @returns {Promise<Object>} Validation result with relevance check
+ */
+export const validateSDG12Content = async (title, content) => {
+  try {
+    const genAI = getGenAI();
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const validationPrompt = `
+You are an expert in UN SDG-12 (Responsible Consumption and Production). Analyze the following content to determine if it's relevant to SDG-12.
+
+Title: "${title}"
+Content: "${content}"
+
+SDG-12 covers:
+- Responsible consumption patterns
+- Sustainable production practices
+- Circular economy and waste reduction
+- Eco-friendly products and materials
+- Life cycle assessment
+- Resource efficiency
+- Sustainable supply chains
+- Consumer behavior for sustainability
+
+Respond with ONLY a JSON object:
+{
+  "isSDG12Relevant": true/false,
+  "relevanceScore": 0-100,
+  "reason": "Brief explanation of why it is or isn't SDG-12 relevant",
+  "sdg12Aspects": ["list of relevant SDG-12 aspects found"] or []
+}
+
+Be strict - only approve content directly related to consumption, production, circular economy, or eco-friendly products.
+`;
+
+    const result = await model.generateContent(validationPrompt);
+    let responseText = result.response.text().trim();
+    
+    // Clean response
+    responseText = responseText.replace(/^```json\s*/i, '').replace(/```\s*$/, '');
+    responseText = responseText.replace(/^```\s*/, '').replace(/```\s*$/, '');
+    
+    const validation = JSON.parse(responseText);
+    return validation;
+    
+  } catch (error) {
+    console.error('Error validating SDG-12 content:', error);
+    // If validation fails, be conservative and reject
+    return {
+      isSDG12Relevant: false,
+      relevanceScore: 0,
+      reason: "Unable to validate content relevance to SDG-12",
+      sdg12Aspects: []
+    };
+  }
+};
+
+/**
  * Generate Education Hub content from blog posts
  * @param {string} title - The blog title
  * @param {string} content - The blog content
@@ -83,55 +143,96 @@ export const generateEducationGuide = async (title, content) => {
       throw new Error('Content is required and must be a non-empty string');
     }
 
-    // Initialize Gemini model
+    // STEP 1: Validate if content is SDG-12 relevant
+    console.log('Validating SDG-12 relevance...');
+    const validation = await validateSDG12Content(title, content);
+    
+    if (!validation.isSDG12Relevant || validation.relevanceScore < 60) {
+      const error = new Error(`This content is not relevant to SDG-12 (Responsible Consumption and Production). Education Hub only covers sustainable consumption, eco-friendly products, circular economy, and responsible production. Reason: ${validation.reason}`);
+      error.status = 400;
+      error.code = 'NOT_SDG12_RELEVANT';
+      throw error;
+    }
+
+    console.log(`✅ Content validated as SDG-12 relevant (Score: ${validation.relevanceScore}%)`);
+
+    // STEP 2: Generate education guide (only for validated content)
     const genAI = getGenAI();
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
-You are an educational content creator specializing in sustainability. Create an educational guide from this blog post.
+You are an expert educator specializing EXCLUSIVELY in UN SDG-12 (Responsible Consumption and Production). This content has been pre-validated as SDG-12 relevant.
 
-Blog Title: "${title}"
-Blog Content: "${content}"
+Validated Content:
+Title: "${title}"
+Content: "${content}"
+SDG-12 Aspects Found: ${validation.sdg12Aspects.join(', ')}
 
-Create educational content that helps users learn about sustainability topics. Return ONLY valid JSON in exactly this format:
+STRICT SDG-12 FOCUS AREAS ONLY:
+- Responsible consumption patterns and consumer choices
+- Sustainable production practices and manufacturing
+- Circular economy principles (reduce, reuse, recycle)
+- Eco-friendly product lifecycle and materials
+- Resource efficiency and waste minimization
+- Sustainable supply chain management
+- Environmental footprint reduction
+- Green purchasing and procurement
+
+Create STRICTLY SDG-12 focused educational content. Reject any deviation from these themes. Return ONLY valid JSON:
 
 {
-  "summary": "A concise 2-3 sentence summary of the main topic",
-  "keyPoints": ["Point 1", "Point 2", "Point 3", "Point 4", "Point 5"],
+  "summary": "2-3 sentences connecting this topic directly to SDG-12 responsible consumption and production goals",
+  "keyPoints": [
+    "SDG-12 responsible consumption principle from this content",
+    "Sustainable production practice or circular economy aspect",
+    "Eco-friendly product selection or lifecycle consideration",
+    "Resource efficiency or waste reduction strategy",
+    "Consumer behavior change for sustainable consumption"
+  ],
   "quiz": [
     {
-      "question": "Question about the topic?",
-      "options": ["Option A", "Option B", "Option C", "Option D"],
-      "correctAnswer": 0,
-      "explanation": "Why this answer is correct"
-    },
-    {
-      "question": "Another question?",
-      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "question": "According to SDG-12 principles, what is the most important factor when choosing eco-friendly products?",
+      "options": ["Lowest price available", "Product lifecycle and environmental impact", "Brand popularity", "Packaging design"],
       "correctAnswer": 1,
-      "explanation": "Explanation for the correct answer"
+      "explanation": "SDG-12 emphasizes considering the entire lifecycle and environmental impact of products to ensure responsible consumption and production patterns."
     },
     {
-      "question": "Third question?",
-      "options": ["Option A", "Option B", "Option C", "Option D"],
-      "correctAnswer": 2,
-      "explanation": "Explanation for this answer"
+      "question": "How does choosing eco-friendly products contribute to ecosystem health?",
+      "options": ["It has no real impact", "It reduces pollution and resource depletion", "It only benefits manufacturers", "It's just a marketing trend"],
+      "correctAnswer": 1,
+      "explanation": "Eco-friendly products typically use sustainable materials, generate less pollution, and require fewer natural resources, directly benefiting ecosystem health and biodiversity."
+    },
+    {
+      "question": "What circular economy principle best supports SDG-12 goals?",
+      "options": ["Buy new products frequently", "Reduce, Reuse, Recycle approach", "Focus only on recycling", "Ignore product lifespan"],
+      "correctAnswer": 1,
+      "explanation": "The 3Rs (Reduce, Reuse, Recycle) embody circular economy principles by minimizing waste, extending product life, and keeping materials in productive use, aligning with SDG-12's sustainable consumption goals."
     }
   ],
   "glossary": [
-    { "term": "Important Term 1", "definition": "Clear definition" },
-    { "term": "Important Term 2", "definition": "Clear definition" },
-    { "term": "Important Term 3", "definition": "Clear definition" }
-  ]
+    { "term": "SDG-12", "definition": "UN Sustainable Development Goal 12: Responsible Consumption and Production - aims to ensure sustainable consumption and production patterns worldwide" },
+    { "term": "Circular Economy", "definition": "An economic model that eliminates waste by keeping products and materials in use for as long as possible through reuse, sharing, repair, and recycling" },
+    { "term": "Life Cycle Assessment (LCA)", "definition": "A method to evaluate the environmental impacts of a product throughout its entire life cycle, from raw material extraction to disposal" },
+    { "term": "Eco-footprint", "definition": "The measure of human demand on Earth's ecosystems, representing the amount of biologically productive land and sea area needed to sustain consumption" }
+  ],
+  "actionableTips": [
+    "Look for eco-labels and certifications when shopping (Energy Star, EPEAT, Forest Stewardship Council)",
+    "Choose products with minimal, recyclable, or biodegradable packaging",
+    "Prioritize durability and repairability over disposable alternatives",
+    "Support companies with transparent sustainability reporting and circular business models",
+    "Calculate your consumption footprint and set reduction goals aligned with SDG-12 targets"
+  ],
+  "sdg12Connection": "Explains how this topic directly supports SDG-12 targets of sustainable consumption patterns, responsible production practices, and ecosystem protection"
 }
 
 Requirements:
-- summary: 2-3 sentences max
-- keyPoints: exactly 5 bullet points
-- quiz: exactly 3 questions with 4 options each
-- correctAnswer: index (0, 1, 2, or 3)
-- glossary: 3-5 relevant terms
-- Focus on sustainability, environment, and responsible consumption
+- summary: Must connect to SDG-12 and responsible consumption ONLY
+- keyPoints: Focus STRICTLY on SDG-12 practical knowledge
+- quiz: Educational questions ONLY about SDG-12 consumption and production
+- glossary: Include SDG-12 and related sustainability terms ONLY
+- actionableTips: 5 practical SDG-12 aligned actions users can take
+- sdg12Connection: Clear link to specific SDG-12 targets and objectives
+- REJECT any content not directly related to responsible consumption and production
 - Return ONLY the JSON object, no markdown, no text before or after
 `;
 
@@ -208,7 +309,7 @@ const validateEducationGuide = (guide) => {
   }
 
   // Check required fields
-  const requiredFields = ['summary', 'keyPoints', 'quiz', 'glossary'];
+  const requiredFields = ['summary', 'keyPoints', 'quiz', 'glossary', 'actionableTips', 'sdg12Connection'];
   for (const field of requiredFields) {
     if (!(field in guide)) {
       return `Missing required field: ${field}`;
@@ -250,6 +351,16 @@ const validateEducationGuide = (guide) => {
     if (!term.term || !term.definition) {
       return `Invalid glossary term structure at index ${i}`;
     }
+  }
+
+  // Validate actionableTips
+  if (!Array.isArray(guide.actionableTips) || guide.actionableTips.length !== 5) {
+    return 'actionableTips must be an array with exactly 5 elements';
+  }
+
+  // Validate sdg12Connection
+  if (typeof guide.sdg12Connection !== 'string' || guide.sdg12Connection.trim().length === 0) {
+    return 'sdg12Connection must be a non-empty string';
   }
 
   return null; // Valid
