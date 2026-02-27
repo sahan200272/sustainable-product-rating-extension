@@ -10,10 +10,10 @@ const userSchema = new mongoose.Schema ({
         type : String,
         required : true,
     },
-    role : {
-        type : String,
-        required : true,
-        default : "Customer"
+    role: {
+        type: String,
+        enum: ["Admin", "Customer"],
+        default: "Customer"
     },
     firstName : {
         type : String,  

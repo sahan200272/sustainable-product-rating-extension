@@ -86,47 +86,6 @@ class ComparisonService {
         }
     }
 
-    /**
-     * Generate description from external data
-     */
-    generateExternalDescription(externalData) {
-        if (!externalData) return "No external sustainability data available.";
-
-        let description = '';
-
-        // Eco-score based description
-        if (externalData.ecoscore_grade) {
-            const gradeMap = {
-                'a': '🌟 Excellent environmental rating',
-                'b': '✅ Good environmental rating',
-                'c': '⚡ Average environmental rating',
-                'd': '⚠️ Below average environmental rating',
-                'e': '❌ Poor environmental rating'
-            };
-            description += gradeMap[externalData.ecoscore_grade] || '';
-        }
-
-        // Additives info
-        if (externalData.additives > 0) {
-            description += ` Contains ${externalData.additives} additives. `;
-            if (externalData.additives > 5) {
-                description += 'High number of additives may impact eco-score. ';
-            }
-        }
-
-        // Packaging info
-        if (externalData.packaging) {
-            description += ` Packaging: ${externalData.packaging}. `;
-        }
-
-        // Labels info
-        if (externalData.labels && externalData.labels.length > 0) {
-            description += ` Certified with: ${externalData.labels.slice(0, 3).join(', ')}. `;
-        }
-
-        return description || "Basic sustainability information available.";
-    }
-
     /** * Calculate sustainability insights based on product attributes * Using Product.js schema fields */
     calculateSustainabilityInsights(product) {
         const advantages = [];
@@ -232,8 +191,12 @@ class ComparisonService {
      * Compare two products
      */
     async compareProducts(product1, product2) {
-        const score1 = product1.aiSustainablityScore;
-        const score2 = product2.aiSustainablityScore;
+        //const score1 = product1.aiSustainablityScore;
+        //const score2 = product2.aiSustainablityScore;
+
+        //(prefer sustainabilityScore, fallback to aiSustainablityScore)
+        const score1 = product1.sustainabilityScore ?? product1.aiSustainablityScore ?? 0;
+        const score2 = product2.sustainabilityScore ?? product2.aiSustainablityScore ?? 0;
 
         let winner = null;
         if (score1 > score2) winner = product1._id;
@@ -274,23 +237,6 @@ class ComparisonService {
     }
 
     /**
-     * Get key difference between products
-     */
-    getKeyDifference(product1, product2, result1, result2) {
-        if (result1.advantages.length === 0 && result2.advantages.length === 0) {
-            return "Both products need significant sustainability improvements";
-        }
-
-        if (result1.advantages.length > result2.advantages.length) {
-            return `${product1.name} has more sustainability features (${result1.advantages.length} vs ${result2.advantages.length})`;
-        } else if (result2.advantages.length > result1.advantages.length) {
-            return `${product2.name} has more sustainability features (${result2.advantages.length} vs ${result1.advantages.length})`;
-        } else {
-            return "Both products have similar sustainability features";
-        }
-    }
-
-    /**
      * Save comparison to user history
      */
     async saveComparison(userId, comparisonData) {
@@ -307,7 +253,6 @@ class ComparisonService {
             },
             sustainabilityHighlights: comparisonData.sustainabilityHighlights,
             comparisonGraph: comparisonData.comparisonGraph,
-            externalData: comparisonData.externalData,
             recommendations: comparisonData.recommendations,
             aiVerdict: comparisonData.aiVerdict 
         });
