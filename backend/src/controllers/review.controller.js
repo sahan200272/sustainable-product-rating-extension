@@ -1,5 +1,7 @@
+// Controller for handling review-related HTTP requests
 import * as reviewService from "../services/review.service.js";
 
+// Creates a new product review with AI moderation
 export const createReview = async (req, res, next) => {
   try {
     const review = await reviewService.createReview(
@@ -16,6 +18,7 @@ export const createReview = async (req, res, next) => {
     });
 
   } catch (error) {
+    // Handle validation errors
     if (error.message.includes("required fields") || 
         error.message.includes("Rating must") ||
         error.message.includes("already reviewed")) {
@@ -25,6 +28,7 @@ export const createReview = async (req, res, next) => {
       });
     }
 
+    // Handle blocked user error
     if (error.message.includes("blocked")) {
       return res.status(403).json({
         success: false,
@@ -43,6 +47,7 @@ export const createReview = async (req, res, next) => {
   }
 };
 
+// Retrieves all approved reviews for a specific product
 export const getApprovedReviews = async (req, res, next) => {
   try {
     const reviews = await reviewService.getApprovedReviews(
@@ -60,6 +65,23 @@ export const getApprovedReviews = async (req, res, next) => {
   }
 };
 
+// Retrieves all reviews by the logged-in user
+export const getMyReviews = async (req, res, next) => {
+  try {
+    const reviews = await reviewService.getMyReviews(req.user.id);
+
+    return res.status(200).json({
+      success: true,
+      count: reviews.length,
+      data: reviews
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Retrieves all pending reviews (admin only)
 export const getPendingReviews = async (req, res, next) => {
   try {
     const reviews = await reviewService.getPendingReviews();
@@ -75,6 +97,7 @@ export const getPendingReviews = async (req, res, next) => {
   }
 };
 
+// Approves a pending review (admin only)
 export const approveReview = async (req, res, next) => {
   try {
     const review = await reviewService.approveReview(req.params.id);
@@ -104,6 +127,7 @@ export const approveReview = async (req, res, next) => {
   }
 };
 
+// Rejects a review with optional admin comment (admin only)
 export const rejectReview = async (req, res, next) => {
   try {
     const review = await reviewService.rejectReview(
@@ -136,6 +160,7 @@ export const rejectReview = async (req, res, next) => {
   }
 };
 
+// Deletes a review (owner or admin only)
 export const deleteReview = async (req, res, next) => {
   try {
     const result = await reviewService.deleteReview(

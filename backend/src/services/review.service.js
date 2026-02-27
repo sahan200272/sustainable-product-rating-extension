@@ -1,9 +1,12 @@
+// Service for managing product reviews including creation, moderation, and CRUD operations
 import Review from "../models/review.model.js";
 import Product from "../models/product.js";
 import User from "../models/user.js";
 import { analyzeToxicity } from "./moderation.service.js";
 import recalculateProductRating from "../utils/recalculateProductRating.js";
 
+// Creates a new review with AI-based toxicity moderation
+// Auto-approves reviews with low toxicity scores
 export const createReview = async (data, userId) => {
   // Validate required fields
   if (!data.product || !data.reviewText || !data.overallRating) {
@@ -24,7 +27,7 @@ export const createReview = async (data, userId) => {
     throw new Error("You are blocked from submitting reviews");
   }
 
-  // Check for duplicate review (will throw error if unique constraint violated)
+  // Check for duplicate review from same user on same product
   const existingReview = await Review.findOne({
     product: data.product,
     user: userId
@@ -40,13 +43,20 @@ export const createReview = async (data, userId) => {
     throw new Error("Product not found");
   }
 
-  // Call AI moderation
+  // Call AI moderation to check for toxic content
   const toxicityScore = await analyzeToxicity(data.reviewText);
 
+  // Auto-approve reviews with low toxicity (< 0.2)
   let status = "PENDING";
 
   if (toxicityScore < 0.2) {
     status = "APPROVED";
+  }
+
+  // Additional rule: Flag very low ratings (1-2 stars) for manual review
+  // This helps prevent spam/fake negative reviews from auto-approving
+  if (data.overallRating <= 2) {
+    status = "PENDING";
   }
 
   const review = await Review.create({
@@ -64,6 +74,7 @@ export const createReview = async (data, userId) => {
   return review;
 };
 
+// Retrieves all approved reviews for a product
 export const getApprovedReviews = async (productId) => {
   const reviews = await Review.find({
     product: productId,
@@ -75,6 +86,16 @@ export const getApprovedReviews = async (productId) => {
   return reviews;
 };
 
+// Retrieves all reviews by a specific user (for "My Reviews" page)
+export const getMyReviews = async (userId) => {
+  const reviews = await Review.find({ user: userId })
+    .populate("product", "name brand images")
+    .sort({ createdAt: -1 });
+
+  return reviews;
+};
+
+// Retrieves all pending reviews for admin moderation
 export const getPendingReviews = async () => {
   const reviews = await Review.find({ status: "PENDING" })
     .populate("user", "firstName lastName email")
@@ -84,6 +105,7 @@ export const getPendingReviews = async () => {
   return reviews;
 };
 
+// Approves a pending review and updates product rating
 export const approveReview = async (reviewId) => {
   const review = await Review.findById(reviewId);
 
@@ -104,6 +126,7 @@ export const approveReview = async (reviewId) => {
   return review;
 };
 
+// Rejects a review with optional admin comment
 export const rejectReview = async (reviewId, adminComment) => {
   const review = await Review.findById(reviewId);
 
@@ -124,7 +147,7 @@ export const rejectReview = async (reviewId, adminComment) => {
   
   await review.save();
 
-  // If review was previously approved, recalculate product rating
+  // Recalculate rating only if the review was previously approved
   if (previousStatus === "APPROVED") {
     await recalculateProductRating(review.product);
   }
@@ -132,6 +155,7 @@ export const rejectReview = async (reviewId, adminComment) => {
   return review;
 };
 
+// Deletes a review (owner or admin only) and updates product rating if needed
 export const deleteReview = async (reviewId, userId, userRole) => {
   const review = await Review.findById(reviewId);
 
@@ -139,7 +163,7 @@ export const deleteReview = async (reviewId, userId, userRole) => {
     throw new Error("Review not found");
   }
 
-  // Check if user is owner or admin
+  // Only review owner or admin can delete
   const isOwner = review.user.toString() === userId.toString();
   const isAdmin = userRole === "Admin";
 
@@ -152,7 +176,7 @@ export const deleteReview = async (reviewId, userId, userRole) => {
 
   await Review.findByIdAndDelete(reviewId);
 
-  // If deleted review was approved, recalculate product rating
+  // Recalculate rating if deleted review was approved
   if (wasApproved) {
     await recalculateProductRating(productId);
   }

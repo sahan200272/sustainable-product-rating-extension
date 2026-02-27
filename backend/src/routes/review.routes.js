@@ -13,6 +13,13 @@ reviewRouter.post(
 
 reviewRouter.get("/product/:productId", reviewController.getApprovedReviews);
 
+// Get logged-in user's own reviews (to see rejection reasons)
+reviewRouter.get(
+  "/my-reviews",
+  authenticate,
+  reviewController.getMyReviews
+);
+
 reviewRouter.get(
   "/pending",
   authenticate,
