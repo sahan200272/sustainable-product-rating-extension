@@ -13,7 +13,8 @@ import {
     createBlogLegacy,
     getAllBlogsLegacy,
     getBlogByIdLegacy,
-    testAI
+    testAI,
+    generateBlogEducationGuide
 } from '../controllers/blog.controller.js';
 import { authenticate, authorizeRoles } from '../middlewares/authMiddleware.js';
 
@@ -31,6 +32,9 @@ const isAdmin = (req, res, next) => {
 
 // Test route (use different path to avoid conflict)
 blogRouter.get('/admin/test-ai', authenticate, authorizeRoles('Admin'), testAI); // GET /api/blogs/admin/test-ai
+
+// AI-powered features
+blogRouter.post('/generate-education-guide', generateBlogEducationGuide); // POST /api/blogs/generate-education-guide
 
 // Public routes (no authentication required)
 blogRouter.get('/', getAllBlogs); // GET /api/blogs - only published blogs

@@ -1,5 +1,5 @@
 import * as blogService from '../services/blog.service.js';
-import { testGeminiConnection } from '../services/blog-ai.service.js';
+import { testGeminiConnection, generateEducationGuide } from '../services/blog-ai.service.js';
 
 // Public Routes
 
@@ -391,6 +391,66 @@ export async function testAI(req, res) {
     } catch (error) {
         res.status(500).json({
             error: "AI API failed",
+            details: error.message
+        });
+    }
+}
+
+// Generate Education Guide from Blog Content (SDG-12 Only)
+export async function generateBlogEducationGuide(req, res) {
+    try {
+        const { title, content } = req.body;
+
+        // Validate required fields
+        if (!title || !content) {
+            return res.status(400).json({
+                error: "Title and content are required"
+            });
+        }
+
+        // Generate education guide using AI service (includes SDG-12 validation)
+        const educationGuide = await generateEducationGuide(title, content);
+
+        res.status(200).json({
+            message: "SDG-12 Education guide generated successfully",
+            educationGuide,
+            sdg12Focus: "This education guide focuses exclusively on UN SDG-12: Responsible Consumption and Production"
+        });
+    } catch (error) {
+        console.error("Error generating education guide:", error);
+        
+        // Handle SDG-12 relevance rejection
+        if (error.code === 'NOT_SDG12_RELEVANT') {
+            return res.status(400).json({ 
+                error: "Content Not Relevant to SDG-12",
+                message: error.message,
+                allowedTopics: [
+                    "Responsible consumption patterns",
+                    "Sustainable production practices",
+                    "Circular economy and waste reduction",
+                    "Eco-friendly products and materials",
+                    "Resource efficiency",
+                    "Sustainable supply chains",
+                    "Green purchasing decisions"
+                ],
+                sdg12Info: "Education Hub only covers UN SDG-12: Responsible Consumption and Production topics"
+            });
+        }
+        
+        // Handle other validation errors
+        if (error.message.includes('Title is required') || error.message.includes('Content is required')) {
+            return res.status(400).json({ error: error.message });
+        }
+        
+        if (error.message.includes('Invalid JSON response') || error.message.includes('Invalid response structure')) {
+            return res.status(502).json({ 
+                error: "AI service returned invalid response",
+                details: error.message
+            });
+        }
+
+        res.status(500).json({
+            error: "Failed to generate education guide",
             details: error.message
         });
     }
