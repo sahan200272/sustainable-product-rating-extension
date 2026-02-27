@@ -15,7 +15,7 @@ export const createProduct = async (data) => {
     data.aiSustainablityScore = AISustainability.score;
     data.aiSustainabilityDescription = AISustainability.analysis;
 
-    console.log(data);
+    //console.log(data);
 
     // Create product instance
     const newProduct = new Product(data);
@@ -40,6 +40,7 @@ export const getAllProducts = async () => {
     const products = await Product.find().lean();
 
     return products;
+
   } catch (error) {
     console.error("[ProductService] getAllProducts Error:", error.message);
 
@@ -61,6 +62,30 @@ export const getSingleProduct = async (id) => {
     throw new Error("Failed to fetch product");
   }
 }
+
+/**
+ * Search products by name
+ * @param {string} searchName - The product name to search for
+ * @returns {Promise<Array>} List of matching products
+ */
+export const searchProductsByName = async (searchName) => {
+  try {
+    if (!searchName) {
+      throw new Error("Search name is required");
+    }
+
+    // Case-insensitive search using regex (regular expression)
+    const products = await Product.find({
+      name: { $regex: searchName, $options: "i" }
+    }).lean();
+
+    return products;
+
+  } catch (error) {
+    console.error("[ProductService] searchProductsByName Error:", error.message);
+    throw new Error("Failed to search products");
+  }
+};
 
 export const updateProduct = async (id, data, files) => {
 
