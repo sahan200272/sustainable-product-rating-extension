@@ -1,37 +1,44 @@
 import express from "express";
-import { authenticate, authorizeRoles } from "../middlewares/auth.js";
+import { authenticate, authorizeRoles } from "../middlewares/authMiddleware.js";
 import * as reviewController from "../controllers/review.controller.js";
 
-const router = express.Router();
+const reviewRouter = express.Router();
 
-router.post(
+reviewRouter.post(
   "/",
   authenticate,
   authorizeRoles("Customer"),
   reviewController.createReview
 );
 
-router.get("/product/:productId", reviewController.getApprovedReviews);
+reviewRouter.get("/product/:productId", reviewController.getApprovedReviews);
 
-router.get(
+reviewRouter.get(
   "/pending",
   authenticate,
   authorizeRoles("Admin"),
   reviewController.getPendingReviews
 );
 
-router.patch(
+reviewRouter.patch(
   "/:id/approve",
   authenticate,
   authorizeRoles("Admin"),
   reviewController.approveReview
 );
 
-router.patch(
+reviewRouter.patch(
   "/:id/reject",
   authenticate,
   authorizeRoles("Admin"),
   reviewController.rejectReview
 );
 
-export default router;
+reviewRouter.delete(
+  "/:id",
+  authenticate,
+  authorizeRoles("Customer", "Admin"),
+  reviewController.deleteReview
+);
+
+export default reviewRouter;
