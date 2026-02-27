@@ -1,6 +1,8 @@
 # Sustainable Product Rating Extension
 
-A full-stack application for rating and comparing products based on sustainability metrics. The platform includes AI-powered sustainability analysis, user reviews with moderation, blog content management, and product comparison features.
+SDG Goal: Responsible Consumption and Production (SDG 12)
+
+Our app helps online shoppers make eco-friendly choices by rating products based on sustainability factors like materials, packaging, and ethical production. Each product gets an eco-score, guiding users to buy responsibly and support sustainable consumption.
 
 ## Table of Contents
 - [Features](#features)
@@ -8,7 +10,6 @@ A full-stack application for rating and comparing products based on sustainabili
 - [Setup Instructions](#setup-instructions)
 - [API Documentation](#api-documentation)
 - [Environment Variables](#environment-variables)
-- [Testing](#testing)
 
 ## Features
 
@@ -243,7 +244,7 @@ PERSPECTIVE_API_KEY=your_perspective_api_key
 2. Enable Perspective Comment Analyzer API
 3. Create credentials and copy the API key
 
----
+
 
 ---
 
@@ -310,102 +311,6 @@ This project is licensed under the ISC License.
 
 For issues and questions, please contact the development team or create an issue in the repository.
 
----
-
-**Last Updated:** February 2026
-
-
-### Backend Environment Variables
-
-Create a `.env` file in the `backend` directory:
-
-```env
-# Server Configuration
-PORT=5000
-NODE_ENV=development
-
-# Database Configuration
-MONGODB_URL=mongodb://localhost:27017/sustainable-products
-MONGODB_URL_TEST=mongodb://localhost:27017/sustainable-products-test
-
-# JWT Authentication
-JWT_SECRET=your_jwt_secret_key_here_min_32_characters
-
-# Cloudinary Configuration (Image Upload)
-CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-
-# Google AI Configuration (Gemini)
-GOOGLE_API_KEY=your_google_gemini_api_key
-GEMINI_API_KEY=your_google_gemini_api_key
-
-# Perspective API (Content Moderation)
-PERSPECTIVE_API_KEY=your_perspective_api_key
-```
-
-### Environment Variable Details
-
-| Variable | Description | Required | Example |
-|----------|-------------|----------|---------|
-| `PORT` | Server port number | Yes | `5000` |
-| `NODE_ENV` | Environment mode | No | `development` or `production` |
-| `MONGODB_URL` | MongoDB connection string | Yes | `mongodb://localhost:27017/dbname` |
-| `MONGODB_URL_TEST` | Test database URL | For testing | `mongodb://localhost:27017/test-db` |
-| `JWT_SECRET` | Secret key for JWT tokens | Yes | Min 32 characters |
-| `CLOUDINARY_CLOUD_NAME` | Cloudinary account name | Yes | From Cloudinary dashboard |
-| `CLOUDINARY_API_KEY` | Cloudinary API key | Yes | From Cloudinary dashboard |
-| `CLOUDINARY_API_SECRET` | Cloudinary API secret | Yes | From Cloudinary dashboard |
-| `GOOGLE_API_KEY` | Google Gemini API key | Yes | From Google AI Studio |
-| `GEMINI_API_KEY` | Alternative Gemini key | Yes | Same as GOOGLE_API_KEY |
-| `PERSPECTIVE_API_KEY` | Google Perspective API key | Yes | From Google Cloud Console |
-
-### Getting API Keys
-
-**Cloudinary:**
-1. Sign up at [cloudinary.com](https://cloudinary.com)
-2. Navigate to Dashboard
-3. Copy Cloud Name, API Key, and API Secret
-
-**Google Gemini AI:**
-1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Create a new API key
-3. Copy the generated key
-
-**Perspective API:**
-1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Enable Perspective Comment Analyzer API
-3. Create credentials and copy the API key
-
----
-
-
----
-
-## HTTP Status Codes
-
-| Status Code | Meaning | Common Causes |
-|-------------|---------|---------------|
-| 200 | OK | Successful request |
-| 201 | Created | Resource successfully created |
-| 400 | Bad Request | Invalid request body, missing required fields |
-| 401 | Unauthorized | Missing or invalid JWT token |
-| 403 | Forbidden | Insufficient permissions for the requested action |
-| 404 | Not Found | Resource does not exist |
-| 409 | Conflict | Duplicate entry (e.g., email already exists) |
-| 500 | Server Error | Server-side error, check logs |
-
----
-
-## License
-
-This project is licensed under the ISC License.
-
----
-
-## Support
-
-For issues and questions, please contact the development team or create an issue in the repository.
 
 ---
 
