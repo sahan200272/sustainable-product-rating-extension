@@ -23,7 +23,7 @@ class ComparisonService {
             return this.aiCache.get(cacheKey);
         }
 
-        // Determine winner name
+        // Resolve winner name for prompt
         let winnerName = "Tie";
         if (comparisonResult.winner) {
             winnerName = comparisonResult.winner.toString() === comparisonResult.products[0]._id.toString() 
@@ -31,6 +31,7 @@ class ComparisonService {
                 : comparisonResult.products[1].name;
         }
 
+        // Build strict prompt for AI
         const prompt = `
                 Write a friendly 2-sentence sustainability comparison using ONLY the data below.
 
@@ -60,7 +61,7 @@ class ComparisonService {
             // Cache the verdict
             this.aiCache.set(cacheKey, verdict);
             
-            // Optional: Clear cache after 1 hour (you can adjust this)
+            // Clear cache after 1 hour
             setTimeout(() => {
                 this.aiCache.delete(cacheKey);
             }, 60 * 60 * 1000); // 1 hour
@@ -91,10 +92,12 @@ class ComparisonService {
         const advantages = [];
         const suggestions = [];
 
+        // Handle missing sustainability data
         if (!product.sustainability) {
             return { advantages, suggestions };
         }
 
+        // Evaluate sustainability attributes
         if (product.sustainability.recyclableMaterial) advantages.push('Made from recyclable materials');
         else suggestions.push('Consider using recyclable materials');
 
@@ -137,6 +140,7 @@ class ComparisonService {
             'Energy Efficiency'
         ];
 
+        // Convert sustainability fields to chart values
         const getCategoryValue = (product, category) => {
             if (!product.sustainability) return 0;
 
@@ -166,6 +170,7 @@ class ComparisonService {
             }
         };
 
+        // Return chart config for frontend
         return {
             labels: categories,
             datasets: [
@@ -198,10 +203,12 @@ class ComparisonService {
         const score1 = product1.sustainabilityScore ?? product1.aiSustainablityScore ?? 0;
         const score2 = product2.sustainabilityScore ?? product2.aiSustainablityScore ?? 0;
 
+        // Determine winner
         let winner = null;
         if (score1 > score2) winner = product1._id;
         else if (score2 > score1) winner = product2._id;
 
+        // Generate sustainability insights
         const product1Insights = this.calculateSustainabilityInsights(product1);
         const product2Insights = this.calculateSustainabilityInsights(product2);
 
@@ -209,8 +216,10 @@ class ComparisonService {
         console.log("Product 1 sustainability insights:", product1Insights);
         console.log("Product 2 sustainability insights:", product2Insights);
 
+        // Generate chart data
         const comparisonGraph = this.generateComparisonGraphData(product1, product2, score1, score2);
 
+        // Build response payload
         const comparisonResult = {
             products: [product1, product2],
             scores: {
@@ -230,6 +239,7 @@ class ComparisonService {
             comparisonGraph
         };
 
+        // Attach AI verdict
         const aiVerdict = await this.generateAIVerdict(comparisonResult);
         comparisonResult.aiVerdict = aiVerdict;
 

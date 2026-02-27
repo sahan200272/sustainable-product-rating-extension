@@ -18,15 +18,15 @@ const comparisonRouter = express.Router();
 comparisonRouter.get('/quick', quickCompareByName);
 
 // Protected routes (require authentication)
-comparisonRouter.post('/items', authenticate, compareProducts);
-comparisonRouter.get('/items', authenticate, getComparisonHistory);
-comparisonRouter.delete('/items', authenticate, clearHistory);
+comparisonRouter.post('/items', authenticate, compareProducts);      // Create a new comparison
+comparisonRouter.get('/items', authenticate, getComparisonHistory);   // Get user's comparison history
+comparisonRouter.delete('/items', authenticate, clearHistory);         // Clear user's comparison history
 
-comparisonRouter.get('/stats', authenticate, isAdmin, getComparisonStats);// Admin only routes
+comparisonRouter.get('/stats', authenticate, isAdmin, getComparisonStats);   // Get comparison statistics Admin only routes
 
-comparisonRouter.get('/items/:id', authenticate, getComparisonById);
-comparisonRouter.put('/items/:id', authenticate, updateComparison);
-comparisonRouter.delete('/items/:id', authenticate, deleteComparison);
+comparisonRouter.get('/items/:id', authenticate, getComparisonById);    // Get a single comparison by ID
+comparisonRouter.put('/items/:id', authenticate, updateComparison);     // Update a comparison (owner or admin)
+comparisonRouter.delete('/items/:id', authenticate, deleteComparison);   // Delete a comparison (owner or admin)
 
 
 export default comparisonRouter;
