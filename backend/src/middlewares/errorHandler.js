@@ -1,4 +1,6 @@
 const errorHandler = (err, req, res, next) => {
+
+  // This prints the full error stack in your terminal for debugging.
   console.error(err.stack);
   
   const statusCode = err.statusCode || err.status || 500;
