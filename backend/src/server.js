@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
+import errorHandler from "./middlewares/errorHandler.js";
 import userRoutes from "./routes/user.routes.js";
 import blogRoutes from "./routes/blog.routes.js";
 import productRoutes from "./routes/product.routes.js";
@@ -34,6 +35,9 @@ app.use("/api/comparison", comparisonRoutes);
 app.use("/", (req, res) => {
     res.send("backend is working");
 });
+
+// Error handling middleware (must be last)
+app.use(errorHandler);
 
 // Start the server
 app.listen(PORT, () => {
