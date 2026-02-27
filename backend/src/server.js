@@ -28,7 +28,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/products", productRoutes);
 
-app.use("/api/comparison", comparisonRoutes);
+app.use("/api/comparisons", comparisonRoutes);
 
 app.use("/", (req, res) => {
     res.send("backend is working");

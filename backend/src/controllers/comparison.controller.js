@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 
 /**
  * Compare two products
- * POST /api/comparison/compare
+ * POST /api/comparisons/items
  */
 export async function compareProducts(req, res) {
     try {
@@ -60,7 +60,7 @@ export async function compareProducts(req, res) {
         }
  }
 
-        res.status(200).json({
+        res.status(201).json({
             success: true,
             data: savedComparison || comparisonResult
         });
@@ -77,7 +77,7 @@ export async function compareProducts(req, res) {
 
 /**
  * Get user's recent comparisons
- * GET /api/comparison/history
+ * GET /api/comparisons/items
  */
 export async function getComparisonHistory(req, res) {
     try {
@@ -100,7 +100,7 @@ export async function getComparisonHistory(req, res) {
 
 /**
  * Get specific comparison by ID
- * GET /api/comparison/:id
+ * GET /api/comparisons/items/:id
  */
 export async function getComparisonById(req, res) {
     try {
@@ -146,7 +146,7 @@ export async function getComparisonById(req, res) {
 
 /**
  * Update comparison (e.g., admin notes or verdict)
- * PUT /api/comparison/:id
+ * PUT /api/comparisons/items/:id
  */
 export async function updateComparison(req, res) {
   try {
@@ -200,7 +200,7 @@ export async function updateComparison(req, res) {
 
 /**
  * Quick compare by product names
- * GET /api/comparison/quick?name1=xxx&name2=xxx
+ * GET /api/comparisons/quick?name1=xxx&name2=xxx
  */
 export async function quickCompareByName(req, res) {
     try {
@@ -250,7 +250,7 @@ export async function quickCompareByName(req, res) {
 
 /**
  * Get comparison statistics (Admin only)
- * GET /api/comparison/stats
+ * GET /api/comparisons/stats
  */
 export async function getComparisonStats(req, res) {
     try {
@@ -307,7 +307,7 @@ export async function getComparisonStats(req, res) {
 
 /**
  * Delete comparison from history
- * DELETE /api/comparison/:id
+ * DELETE /api/comparisons/items/:id
  */
 export async function deleteComparison(req, res) {
     try {
@@ -355,7 +355,7 @@ export async function deleteComparison(req, res) {
 
 /**
  * Clear all comparison history for user
- * DELETE /api/comparison/history/clear
+ * DELETE /api/comparisons/items
  */
 export async function clearHistory(req, res) {
     try {
