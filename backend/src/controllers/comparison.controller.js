@@ -12,6 +12,7 @@ export async function compareProducts(req, res, next) {
     try {
         const { productId1, productId2 } = req.body;
 
+        // Validate request body
         if (!productId1 || !productId2) {
             return res.status(400).json({
                 success: false,
@@ -94,7 +95,7 @@ export async function getComparisonHistory(req, res, next) {
  */
 export async function getComparisonById(req, res, next) {
     try {
-        
+        // Validate comparison ID
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({
                 success: false,
@@ -102,8 +103,10 @@ export async function getComparisonById(req, res, next) {
             });
         }
 
+        // Fetch comparison
         const comparison = await comparisonService.getComparisonById(req.params.id);
 
+        // Check existence
         if (!comparison) {
             return res.status(404).json({
                 success: false,
@@ -144,6 +147,7 @@ export async function updateComparison(req, res, next) {
       });
     }
 
+    // Fetch comparison
     const comparison = await Comparison.findById(id);
 
     if (!comparison) {
@@ -153,6 +157,7 @@ export async function updateComparison(req, res, next) {
       });
     }
 
+    // Check permissions
     if (comparison.user.toString() !== req.user.id && req.user.role !== "Admin") {
       return res.status(403).json({
         success: false,
@@ -162,6 +167,7 @@ export async function updateComparison(req, res, next) {
 
     const { aiVerdict, recommendations } = req.body;
 
+    // Update allowed fields
     if (aiVerdict) comparison.aiVerdict = aiVerdict;
     if (recommendations) comparison.recommendations = recommendations;
 
@@ -210,7 +216,7 @@ export async function quickCompareByName(req, res, next) {
             });
         }
 
-        // Perform comparison
+        // Run comparison logic
         const comparisonResult = await comparisonService.compareProducts(product1, product2);
 
         return res.status(200).json({
@@ -229,6 +235,7 @@ export async function quickCompareByName(req, res, next) {
  */
 export async function getComparisonStats(req, res, next) {
     try {
+        // Get most compared products
         const mostCompared = await comparisonService.getMostComparedProducts();
         
         // Get total comparisons count
@@ -324,6 +331,7 @@ export async function deleteComparison(req, res, next) {
  */
 export async function clearHistory(req, res, next) {
     try {
+        // Remove all comparisons for current user
         await Comparison.deleteMany({ user: req.user.id });
 
         return res.status(200).json({
