@@ -8,14 +8,15 @@ import mongoose from 'mongoose';
  * Compare two products
  * POST /api/comparison/compare
  */
-export async function compareProducts(req, res) {
+export async function compareProducts(req, res, next) {
     try {
         const { productId1, productId2 } = req.body;
 
+        // Validate request body
         if (!productId1 || !productId2) {
             return res.status(400).json({
                 success: false,
-                message: 'Both product IDs are required'
+                error: 'Both product IDs are required'
             });
         }
 
@@ -23,7 +24,7 @@ export async function compareProducts(req, res) {
         if (!mongoose.Types.ObjectId.isValid(productId1) || !mongoose.Types.ObjectId.isValid(productId2)) {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid product ID format'
+                error: 'Invalid product ID format'
             });
         }
 
@@ -31,7 +32,7 @@ export async function compareProducts(req, res) {
         if (productId1 === productId2) {
             return res.status(400).json({
                 success: false,
-                message: 'Cannot compare the same product with itself'
+                error: 'Cannot compare the same product with itself'
             });
         }
 
@@ -42,7 +43,7 @@ export async function compareProducts(req, res) {
         if (!product1 || !product2) {
             return res.status(404).json({
                 success: false,
-                message: 'One or both products not found'
+                error: 'One or both products not found'
             });
         }
 
@@ -53,25 +54,20 @@ export async function compareProducts(req, res) {
 
         // Save to history if user is authenticated
         if (req.user) {
-        try {
-            savedComparison = await comparisonService.saveComparison(req.user.id, comparisonResult);
-        } catch (err) {
+            try {
+                savedComparison = await comparisonService.saveComparison(req.user.id, comparisonResult);
+            } catch (err) {
                 console.error("Failed to save comparison:", err);
+            }
         }
- }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: savedComparison || comparisonResult
         });
 
     } catch (error) {
-        console.error('Comparison error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error comparing products',
-            error: error.message
-        });
+        next(error);
     }
 }
 
@@ -79,22 +75,17 @@ export async function compareProducts(req, res) {
  * Get user's recent comparisons
  * GET /api/comparison/history
  */
-export async function getComparisonHistory(req, res) {
+export async function getComparisonHistory(req, res, next) {
     try {
         const comparisons = await comparisonService.getUserRecentComparisons(req.user.id);
         
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: comparisons
         });
 
     } catch (error) {
-        console.error('Error fetching comparison history:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching comparison history',
-            error: error.message
-        });
+        next(error);
     }
 }
 
@@ -102,22 +93,24 @@ export async function getComparisonHistory(req, res) {
  * Get specific comparison by ID
  * GET /api/comparison/:id
  */
-export async function getComparisonById(req, res) {
+export async function getComparisonById(req, res, next) {
     try {
-        
+        // Validate comparison ID
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid comparison ID format'
+                error: 'Invalid comparison ID format'
             });
         }
 
+        // Fetch comparison
         const comparison = await comparisonService.getComparisonById(req.params.id);
 
+        // Check existence
         if (!comparison) {
             return res.status(404).json({
                 success: false,
-                message: 'Comparison not found'
+                error: 'Comparison not found'
             });
         }
 
@@ -125,22 +118,17 @@ export async function getComparisonById(req, res) {
         if (comparison.user.toString() !== req.user.id && req.user.role !== 'Admin') {
             return res.status(403).json({
                 success: false,
-                message: 'Not authorized to view this comparison'
+                error: 'Not authorized to view this comparison'
             });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: comparison
         });
 
     } catch (error) {
-        console.error('Error fetching comparison:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching comparison',
-            error: error.message
-        });
+        next(error);
     }
 }
 
@@ -148,53 +136,51 @@ export async function getComparisonById(req, res) {
  * Update comparison (e.g., admin notes or verdict)
  * PUT /api/comparison/:id
  */
-export async function updateComparison(req, res) {
+export async function updateComparison(req, res, next) {
   try {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid comparison ID format"
+        error: "Invalid comparison ID format"
       });
     }
 
+    // Fetch comparison
     const comparison = await Comparison.findById(id);
 
     if (!comparison) {
       return res.status(404).json({
         success: false,
-        message: "Comparison not found"
+        error: "Comparison not found"
       });
     }
 
+    // Check permissions
     if (comparison.user.toString() !== req.user.id && req.user.role !== "Admin") {
       return res.status(403).json({
         success: false,
-        message: "Not authorized to update this comparison"
+        error: "Not authorized to update this comparison"
       });
     }
 
     const { aiVerdict, recommendations } = req.body;
 
+    // Update allowed fields
     if (aiVerdict) comparison.aiVerdict = aiVerdict;
     if (recommendations) comparison.recommendations = recommendations;
 
     await comparison.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Comparison updated successfully",
       data: comparison
     });
 
   } catch (error) {
-    console.error("Update comparison error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error updating comparison",
-      error: error.message
-    });
+    next(error);
   }
 }
 
@@ -202,14 +188,14 @@ export async function updateComparison(req, res) {
  * Quick compare by product names
  * GET /api/comparison/quick?name1=xxx&name2=xxx
  */
-export async function quickCompareByName(req, res) {
+export async function quickCompareByName(req, res, next) {
     try {
         const { name1, name2 } = req.query;
 
         if (!name1 || !name2) {
             return res.status(400).json({
                 success: false,
-                message: 'Both product names are required'
+                error: 'Both product names are required'
             });
         }
 
@@ -226,25 +212,20 @@ export async function quickCompareByName(req, res) {
         if (!product1 || !product2) {
             return res.status(404).json({
                 success: false,
-                message: 'Products not found for one or both names'
+                error: 'Products not found for one or both names'
             });
         }
 
-        // Perform comparison
+        // Run comparison logic
         const comparisonResult = await comparisonService.compareProducts(product1, product2);
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: comparisonResult
         });
 
     } catch (error) {
-        console.error('Quick comparison error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error performing quick comparison',
-            error: error.message
-        });
+        next(error);
     }
 }
 
@@ -252,8 +233,9 @@ export async function quickCompareByName(req, res) {
  * Get comparison statistics (Admin only)
  * GET /api/comparison/stats
  */
-export async function getComparisonStats(req, res) {
+export async function getComparisonStats(req, res, next) {
     try {
+        // Get most compared products
         const mostCompared = await comparisonService.getMostComparedProducts();
         
         // Get total comparisons count
@@ -285,7 +267,7 @@ export async function getComparisonStats(req, res) {
             }
         ]);
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: {
                 totalComparisons,
@@ -296,12 +278,7 @@ export async function getComparisonStats(req, res) {
         });
 
     } catch (error) {
-        console.error('Error fetching comparison stats:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching comparison statistics',
-            error: error.message
-        });
+        next(error);
     }
 }
 
@@ -309,13 +286,13 @@ export async function getComparisonStats(req, res) {
  * Delete comparison from history
  * DELETE /api/comparison/:id
  */
-export async function deleteComparison(req, res) {
+export async function deleteComparison(req, res, next) {
     try {
 
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid comparison ID format'
+                error: 'Invalid comparison ID format'
             });
         }
         
@@ -324,7 +301,7 @@ export async function deleteComparison(req, res) {
         if (!comparison) {
             return res.status(404).json({
                 success: false,
-                message: 'Comparison not found'
+                error: 'Comparison not found'
             });
         }
 
@@ -332,24 +309,19 @@ export async function deleteComparison(req, res) {
         if (comparison.user.toString() !== req.user.id && req.user.role !== 'Admin') {
             return res.status(403).json({
                 success: false,
-                message: 'Not authorized to delete this comparison'
+                error: 'Not authorized to delete this comparison'
             });
         }
 
         await comparison.deleteOne();
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: 'Comparison deleted successfully'
         });
 
     } catch (error) {
-        console.error('Error deleting comparison:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error deleting comparison',
-            error: error.message
-        });
+        next(error);
     }
 }
 
@@ -357,21 +329,17 @@ export async function deleteComparison(req, res) {
  * Clear all comparison history for user
  * DELETE /api/comparison/history/clear
  */
-export async function clearHistory(req, res) {
+export async function clearHistory(req, res, next) {
     try {
+        // Remove all comparisons for current user
         await Comparison.deleteMany({ user: req.user.id });
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: 'Comparison history cleared successfully'
         });
 
     } catch (error) {
-        console.error('Error clearing history:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error clearing comparison history',
-            error: error.message
-        });
+        next(error);
     }
 }

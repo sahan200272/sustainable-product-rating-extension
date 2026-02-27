@@ -1,56 +1,67 @@
+// Import Product model
 import Product from "../models/product.js";
-import cloudinaryUpload from "../utils/cloudinaryUpload.js";
-import { generateSustainabilityData } from "./ai.service.js";
 
+// Import Cloudinary upload utility
+import cloudinaryUpload from "../utils/cloudinaryUpload.js";
+
+// Import AI functions for sustainability analysis
+import { generateSustainability, generateSustainabilityData } from "./ai.service.js";
+
+
+// CREATE PRODUCT
 export const createProduct = async (data) => {
   try {
-    // Basic input check
+    // Basic input validation
     if (!data || typeof data !== "object") {
       throw new Error("Invalid product data");
     }
 
+    // Generate AI-based sustainability score and description
     const AISustainability = await generateSustainabilityData(data);
-    //console.log("AI Sus ", AISustainability);
 
+    // Attach AI results to product data
     data.aiSustainablityScore = AISustainability.score;
     data.aiSustainabilityDescription = AISustainability.analysis;
 
-    console.log(data);
-
-    // Create product instance
+    // Create new Product instance
     const newProduct = new Product(data);
 
-    // Save instance to database
+    // Save product to database
     const savedProduct = await newProduct.save();
 
     return savedProduct;
 
   } catch (error) {
     console.error("Product Service Error:", error.message);
-    throw error; // let controller handle HTTP response
+
+    // Throw error so controller can handle HTTP response
+    throw error;
   }
 };
 
-/**
- * Get all products from database
- * @returns {Promise<Array>} List of products
- */
+
+// GET ALL PRODUCTS
 export const getAllProducts = async () => {
   try {
+    // Fetch all products from database
+    // .lean() returns plain JavaScript objects instead of Mongoose documents
     const products = await Product.find().lean();
 
     return products;
+
   } catch (error) {
     console.error("[ProductService] getAllProducts Error:", error.message);
 
-    // Re-throwing error so controller can handle response
+    // Re-throw error for controller handling
     throw new Error("Failed to fetch products");
   }
 };
 
+
+// GET SINGLE PRODUCT BY ID
 export const getSingleProduct = async (id) => {
   try {
-
+    // Find product using MongoDB ID
     const product = await Product.findById(id);
 
     return product;
@@ -60,33 +71,71 @@ export const getSingleProduct = async (id) => {
 
     throw new Error("Failed to fetch product");
   }
-}
+};
 
+
+// SEARCH PRODUCTS BY NAME
+export const searchProductsByName = async (searchName) => {
+  try {
+    // Validate search input
+    if (!searchName) {
+      throw new Error("Search name is required");
+    }
+
+    // Perform case-insensitive search using regular expression
+    const products = await Product.find({
+      name: { $regex: searchName, $options: "i" }
+    }).lean();
+
+    // If no products found in DB, call AI to generate sustainability data
+    if (products.length == 0) {
+      const data = await generateSustainability(searchName);
+      return data;
+    } else {
+      return products;
+    }
+
+  } catch (error) {
+    console.error("[ProductService] searchProductsByName Error:", error.message);
+    throw new Error("Failed to search products");
+  }
+};
+
+
+// UPDATE PRODUCT
 export const updateProduct = async (id, data, files) => {
 
+  // Find product by ID
   const product = await Product.findById(id);
 
+  // If product not found, throw error
   if (!product) {
     throw new Error("Product not found");
   }
 
-  let updatedImages = product.images; // start with existing images
+  // Start with existing images
+  let updatedImages = product.images;
 
+  // If new image files are provided, upload and merge with old images
   if (files && files.length > 0) {
     const newImages = await cloudinaryUpload(files);
 
-    // Merge old + new
+    // Combine existing and new images
     updatedImages = [...product.images, ...newImages];
   }
 
+  // Update basic product fields (if new value exists)
   product.name = data.name ?? product.name;
   product.brand = data.brand ?? product.brand;
   product.category = data.category ?? product.category;
   product.description = data.description ?? product.description;
 
+  // Update images
   product.images = updatedImages;
 
+  // Update sustainability fields if provided
   if (data.sustainability) {
+
     product.sustainability.recyclableMaterial =
       data.sustainability.recyclableMaterial ?? product.sustainability.recyclableMaterial;
 
@@ -112,20 +161,26 @@ export const updateProduct = async (id, data, files) => {
       data.sustainability.energyEfficiencyRating ?? product.sustainability.energyEfficiencyRating;
   }
 
+  // Save updated product
   return await product.save();
 };
 
-export const deleteProduct = async(id) => {
 
-  if(!id){
+// DELETE PRODUCT
+export const deleteProduct = async (id) => {
+
+  // Validate ID
+  if (!id) {
     throw new Error("Product id not received");
   }
 
+  // Find and delete product
   const product = await Product.findByIdAndDelete(id);
 
-  if(!product){
+  // If no product found
+  if (!product) {
     throw new Error("Product not found");
   }
 
   return product;
-}
+};

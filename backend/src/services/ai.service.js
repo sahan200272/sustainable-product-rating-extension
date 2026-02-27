@@ -29,3 +29,30 @@ export const generateSustainabilityData = async (product) => {
 
   return JSON.parse(cleanedResponse);
 };
+
+export const generateSustainability = async (name) => {
+  const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+
+  const prompt = `
+  You are a sustainability evaluation expert.
+
+  Product Name: ${name}
+
+  1. Generate a professional sustainability explanation.
+  2. Give a sustainability score from 0 to 100.
+  3. Return response in JSON format like:
+
+  {
+    "analysis": "...",
+    "score": 85
+  }
+  `;
+
+  const result = await model.generateContent(prompt);
+  const response = result.response.text();
+
+  // Remove markdown code fences if present
+  const cleanedResponse = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+  return JSON.parse(cleanedResponse);
+};
