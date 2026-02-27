@@ -53,6 +53,12 @@ export const createReview = async (data, userId) => {
     status = "APPROVED";
   }
 
+  // Additional rule: Flag very low ratings (1-2 stars) for manual review
+  // This helps prevent spam/fake negative reviews from auto-approving
+  if (data.overallRating <= 2) {
+    status = "PENDING";
+  }
+
   const review = await Review.create({
     ...data,
     user: userId,
@@ -75,6 +81,15 @@ export const getApprovedReviews = async (productId) => {
     status: "APPROVED"
   })
     .populate("user", "firstName lastName profilePicture")
+    .sort({ createdAt: -1 });
+
+  return reviews;
+};
+
+// Retrieves all reviews by a specific user (for "My Reviews" page)
+export const getMyReviews = async (userId) => {
+  const reviews = await Review.find({ user: userId })
+    .populate("product", "name brand images")
     .sort({ createdAt: -1 });
 
   return reviews;
