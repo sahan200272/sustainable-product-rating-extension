@@ -4,7 +4,7 @@ import { testGeminiConnection, generateEducationGuide } from '../services/blog-a
 // Public Routes
 
 // Get all published blogs (Public access)
-export async function getAllBlogs(req, res) {
+export async function getAllBlogs(req, res, next) {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
@@ -17,14 +17,12 @@ export async function getAllBlogs(req, res) {
         res.status(200).json(result);
     } catch (error) {
         console.error("Error fetching blogs:", error);
-        res.status(500).json({
-            error: "Internal server error"
-        });
+        next(error);
     }
 }
 
 // Get blog by ID with access control (Public/Auth based on status)
-export async function getBlogById(req, res) {
+export async function getBlogById(req, res, next) {
     try {
         const { id } = req.params;
 
@@ -62,16 +60,14 @@ export async function getBlogById(req, res) {
         if (error.status === 404) {
             return res.status(404).json({ error: error.message });
         }
-        res.status(500).json({
-            error: "Internal server error"
-        });
+        next(error);
     }
 }
 
 // Auth Required Routes
 
 // Create blog (Authenticated users)
-export async function createBlog(req, res) {
+export async function createBlog(req, res, next) {
     try {
         const { title, content, category, tags, imageUrl } = req.body;
 
@@ -103,16 +99,14 @@ export async function createBlog(req, res) {
         if (error.status === 409) {
             return res.status(409).json({ error: error.message });
         }
-        res.status(500).json({
-            error: "Internal server error"
-        });
+        next(error);
     }
 }
 
 // Admin Routes
 
 // Get all blogs for admin dashboard
-export async function adminGetBlogs(req, res) {
+export async function adminGetBlogs(req, res, next) {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
@@ -125,14 +119,12 @@ export async function adminGetBlogs(req, res) {
         res.status(200).json(result);
     } catch (error) {
         console.error("Error fetching blogs for admin:", error);
-        res.status(500).json({
-            error: "Internal server error"
-        });
+        next(error);
     }
 }
 
 // Approve blog (Admin only)
-export async function adminApproveBlog(req, res) {
+export async function adminApproveBlog(req, res, next) {
     try {
         const { id } = req.params;
 
@@ -151,14 +143,12 @@ export async function adminApproveBlog(req, res) {
         if (error.status === 404) {
             return res.status(404).json({ error: error.message });
         }
-        res.status(500).json({
-            error: "Internal server error"
-        });
+        next(error);
     }
 }
 
 // Reject blog (Admin only)
-export async function adminRejectBlog(req, res) {
+export async function adminRejectBlog(req, res, next) {
     try {
         const { id } = req.params;
         const { rejectionReason } = req.body;
@@ -182,16 +172,14 @@ export async function adminRejectBlog(req, res) {
         if (error.status === 404) {
             return res.status(404).json({ error: error.message });
         }
-        res.status(500).json({
-            error: "Internal server error"
-        });
+        next(error);
     }
 }
 
 // Legacy/Backward Compatibility Routes
 
 // Create a new blog (Admin only) - Original method
-export async function createBlogLegacy(req, res) {
+export async function createBlogLegacy(req, res, next) {
     try {
         const { title, content, category, tags, imageUrl, isFeatured } = req.body;
 
@@ -222,14 +210,12 @@ export async function createBlogLegacy(req, res) {
         if (error.message.includes("Invalid category")) {
             return res.status(400).json({ error: error.message });
         }
-        res.status(500).json({
-            error: "Internal server error"
-        });
+        next(error);
     }
 }
 
 // Get all blogs (Legacy - no status filtering)
-export async function getAllBlogsLegacy(req, res) {
+export async function getAllBlogsLegacy(req, res, next) {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
@@ -242,14 +228,12 @@ export async function getAllBlogsLegacy(req, res) {
         res.status(200).json(result);
     } catch (error) {
         console.error("Error fetching blogs:", error);
-        res.status(500).json({
-            error: "Internal server error"
-        });
+        next(error);
     }
 }
 
 // Get blog by ID (Legacy - no access control)
-export async function getBlogByIdLegacy(req, res) {
+export async function getBlogByIdLegacy(req, res, next) {
     try {
         const { id } = req.params;
 
@@ -267,14 +251,12 @@ export async function getBlogByIdLegacy(req, res) {
         if (error.message === "Blog not found") {
             return res.status(404).json({ error: error.message });
         }
-        res.status(500).json({
-            error: "Internal server error"
-        });
+        next(error);
     }
 }
 
 // Update blog (Admin only)
-export async function updateBlog(req, res) {
+export async function updateBlog(req, res, next) {
     try {
         const { id } = req.params;
         const { title, content, category, tags, imageUrl, isFeatured } = req.body;
@@ -296,14 +278,12 @@ export async function updateBlog(req, res) {
         if (error.message === "Blog not found") {
             return res.status(404).json({ error: error.message });
         }
-        res.status(500).json({
-            error: "Internal server error"
-        });
+        next(error);
     }
 }
 
 // Delete blog (Admin only)
-export async function deleteBlog(req, res) {
+export async function deleteBlog(req, res, next) {
     try {
         const { id } = req.params;
 
@@ -319,14 +299,12 @@ export async function deleteBlog(req, res) {
         if (error.message === "Blog not found") {
             return res.status(404).json({ error: error.message });
         }
-        res.status(500).json({
-            error: "Internal server error"
-        });
+        next(error);
     }
 }
 
 // Like blog (Authenticated users only)
-export async function likeBlog(req, res) {
+export async function likeBlog(req, res, next) {
     try {
         const { id } = req.params;
         const userId = req.user.id;
@@ -346,14 +324,12 @@ export async function likeBlog(req, res) {
         if (error.message === "Blog not found") {
             return res.status(404).json({ error: error.message });
         }
-        res.status(500).json({
-            error: "Internal server error"
-        });
+        next(error);
     }
 }
 
 // Unlike blog (Authenticated users only)
-export async function unlikeBlog(req, res) {
+export async function unlikeBlog(req, res, next) {
     try {
         const { id } = req.params;
         const userId = req.user.id;
@@ -373,14 +349,12 @@ export async function unlikeBlog(req, res) {
         if (error.message === "Blog not found") {
             return res.status(404).json({ error: error.message });
         }
-        res.status(500).json({
-            error: "Internal server error"
-        });
+        next(error);
     }
 }
 
 // Test AI API connection
-export async function testAI(req, res) {
+export async function testAI(req, res, next) {
     try {
         const result = await testGeminiConnection();
         
@@ -389,15 +363,13 @@ export async function testAI(req, res) {
             response: result
         });
     } catch (error) {
-        res.status(500).json({
-            error: "AI API failed",
-            details: error.message
-        });
+        console.error("Error testing AI API:", error);
+        next(error);
     }
 }
 
 // Generate Education Guide from Blog Content (SDG-12 Only)
-export async function generateBlogEducationGuide(req, res) {
+export async function generateBlogEducationGuide(req, res, next) {
     try {
         const { title, content } = req.body;
 
@@ -449,9 +421,6 @@ export async function generateBlogEducationGuide(req, res) {
             });
         }
 
-        res.status(500).json({
-            error: "Failed to generate education guide",
-            details: error.message
-        });
+        next(error);
     }
 }
