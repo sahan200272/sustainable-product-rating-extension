@@ -167,12 +167,9 @@ export async function adminRejectBlog(req, res) {
         }
 
         // Reject the blog
-        const blog = await blogService.rejectBlog(id, req.user.id, rejectionReason);
+        const result = await blogService.rejectBlog(id, req.user.id, rejectionReason);
 
-        res.status(200).json({
-            message: "Blog rejected successfully",
-            blog
-        });
+        res.status(200).json(result);
     } catch (error) {
         console.error("Error rejecting blog:", error);
         if (error.status === 400) {

@@ -1,5 +1,6 @@
 import Blog from '../models/blog.js';
 import mongoose from 'mongoose';
+import { moderateBlogContent } from './ai.service.js';
 
 // Service function to create a new blog
 export async function createBlogService(blogData) {
@@ -44,7 +45,10 @@ export async function createBlog(data, userId) {
         throw error;
     }
 
-    // Create new blog with PENDING status
+    // Perform AI moderation on content
+    const moderationResult = await moderateBlogContent(title, content);
+
+    // Create new blog with PENDING status and moderation results
     const blog = new Blog({
         title,
         content,
@@ -52,7 +56,10 @@ export async function createBlog(data, userId) {
         tags: tags || [],
         author: userId,
         imageUrl: imageUrl || "",
-        status: "PENDING"
+        status: "PENDING",
+        moderationFlagged: moderationResult.flagged,
+        moderationScore: moderationResult.score,
+        moderationReasons: moderationResult.reasons
     });
 
     await blog.save();
@@ -197,7 +204,7 @@ export async function rejectBlog(id, adminId, rejectionReason) {
         throw error;
     }
 
-    const blog = await Blog.findById(id);
+    const blog = await Blog.findById(id).populate('author', 'firstName lastName email');
 
     if (!blog) {
         const error = new Error("Blog not found");
@@ -211,19 +218,44 @@ export async function rejectBlog(id, adminId, rejectionReason) {
         throw error;
     }
 
-    const now = new Date();
-    blog.status = "REJECTED";
-    blog.approvedBy = adminId;
-    blog.approvedAt = now;
-    blog.rejectionReason = rejectionReason.trim();
+    // Get admin details for the rejection notification
+    const admin = await mongoose.model('User').findById(adminId).select('firstName lastName');
 
-    await blog.save();
-    await blog.populate([
-        { path: 'author', select: 'firstName lastName email' },
-        { path: 'approvedBy', select: 'firstName lastName' }
-    ]);
+    // Create rejection notification data for the user
+    const rejectionData = {
+        blogTitle: blog.title,
+        authorName: `${blog.author.firstName} ${blog.author.lastName}`,
+        authorEmail: blog.author.email,
+        adminName: admin ? `${admin.firstName} ${admin.lastName}` : 'Admin',
+        rejectionReason: rejectionReason.trim(),
+        rejectedAt: new Date()
+    };
 
-    return blog;
+    // TODO: Here you can add notification logic such as:
+    // - Send email to author
+    // - Create in-app notification
+    // - Log to notification service
+    console.log('Blog Rejection Notification:', {
+        message: `Your blog post "${rejectionData.blogTitle}" has been rejected`,
+        reason: rejectionData.rejectionReason,
+        author: rejectionData.authorEmail,
+        rejectedBy: rejectionData.adminName,
+        date: rejectionData.rejectedAt
+    });
+
+    // Delete the blog from database
+    await Blog.findByIdAndDelete(id);
+
+    return {
+        message: "Blog rejected and removed from database",
+        rejectionData: {
+            blogTitle: rejectionData.blogTitle,
+            authorEmail: rejectionData.authorEmail,
+            rejectionReason: rejectionData.rejectionReason,
+            rejectedBy: rejectionData.adminName,
+            rejectedAt: rejectionData.rejectedAt
+        }
+    };
 }
 
 // Service function to get all blogs with filters and pagination

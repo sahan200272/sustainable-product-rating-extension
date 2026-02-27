@@ -66,6 +66,18 @@ const blogSchema = new mongoose.Schema({
         type: String,
         trim: true,
         default: null
+    },
+    moderationFlagged: {
+        type: Boolean,
+        default: false
+    },
+    moderationScore: {
+        type: Number,
+        default: 0
+    },
+    moderationReasons: {
+        type: [String],
+        default: []
     }
 }, {
     timestamps: true
