@@ -2,10 +2,12 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
+import errorHandler from "./middlewares/errorHandler.js";
 import userRoutes from "./routes/user.routes.js";
 import blogRoutes from "./routes/blog.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import comparisonRoutes from './routes/comparison.routes.js';
+import reviewRoutes from "./routes/review.routes.js";
 
 // Load environment variables first
 dotenv.config();
@@ -27,12 +29,15 @@ app.use(express.json()); // IMPORTANT: Parse JSON bodies
 app.use("/api/users", userRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/products", productRoutes);
-
-app.use("/api/comparisons", comparisonRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/comparison", comparisonRoutes);
 
 app.use("/", (req, res) => {
     res.send("backend is working");
 });
+
+// Error handling middleware (must be last)
+app.use(errorHandler);
 
 // Start the server
 app.listen(PORT, () => {
