@@ -1,5 +1,6 @@
 import Blog from '../models/blog.js';
 import mongoose from 'mongoose';
+import { moderateBlogContent } from './blog-ai.service.js';
 
 // Service function to create a new blog
 export async function createBlogService(blogData) {
@@ -28,6 +29,245 @@ export async function createBlogService(blogData) {
     await blog.populate('author', 'firstName lastName email');
 
     return blog;
+}
+
+// New workflow functions
+
+// 1) Create blog with workflow
+export async function createBlog(data, userId) {
+    const { title, content, category, tags, imageUrl } = data;
+
+    // Validate category
+    const validCategories = ["Responsible Consumption", "Greenwashing", "Sustainable Brands"];
+    if (!validCategories.includes(category)) {
+        const error = new Error("Invalid category. Must be one of: " + validCategories.join(", "));
+        error.status = 400;
+        throw error;
+    }
+
+    // Check for duplicate posts (same title by same author)
+    const existingBlog = await Blog.findOne({
+        title: { $regex: new RegExp(`^${title.trim()}$`, 'i') }, // Case-insensitive exact match
+        author: userId
+    });
+
+    if (existingBlog) {
+        const error = new Error("You have already submitted a blog with this title. Please choose a different title.");
+        error.status = 409; // Conflict status code
+        throw error;
+    }
+
+    // Perform AI moderation on content
+    const moderationResult = await moderateBlogContent(title, content);
+
+    // Create new blog with PENDING status and moderation results
+    const blog = new Blog({
+        title,
+        content,
+        category,
+        tags: tags || [],
+        author: userId,
+        imageUrl: imageUrl || "",
+        status: "PENDING",
+        moderationFlagged: moderationResult.flagged,
+        moderationScore: moderationResult.score,
+        moderationReasons: moderationResult.reasons
+    });
+
+    await blog.save();
+    await blog.populate('author', 'firstName lastName email');
+
+    return blog;
+}
+
+// 2) Get published blogs for public view
+export async function getPublishedBlogs({ page = 1, limit = 10, category, search }) {
+    const filter = { status: "PUBLISHED" };
+    
+    if (category) {
+        filter.category = category;
+    }
+    
+    if (search) {
+        filter.title = { $regex: search, $options: 'i' };
+    }
+
+    const skip = (page - 1) * limit;
+
+    const blogs = await Blog.find(filter)
+        .populate('author', 'firstName lastName')
+        .sort({ publishedAt: -1, createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const total = await Blog.countDocuments(filter);
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+        total,
+        currentPage: page,
+        totalPages,
+        blogs
+    };
+}
+
+// 3) Get blog by ID
+export async function getBlogById(id) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        const error = new Error("Invalid blog ID");
+        error.status = 400;
+        throw error;
+    }
+
+    const blog = await Blog.findById(id)
+        .populate('author', 'firstName lastName email profilePicture')
+        .populate('approvedBy', 'firstName lastName');
+
+    if (!blog) {
+        const error = new Error("Blog not found");
+        error.status = 404;
+        throw error;
+    }
+
+    return blog;
+}
+
+// 4) Get blogs for admin with all statuses
+export async function getBlogsForAdmin({ page = 1, limit = 10, status, search }) {
+    const filter = {};
+    
+    if (status) {
+        filter.status = status;
+    }
+    
+    if (search) {
+        filter.title = { $regex: search, $options: 'i' };
+    }
+
+    const skip = (page - 1) * limit;
+
+    const blogs = await Blog.find(filter)
+        .populate('author', 'firstName lastName email')
+        .populate('approvedBy', 'firstName lastName')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const total = await Blog.countDocuments(filter);
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+        total,
+        currentPage: page,
+        totalPages,
+        blogs
+    };
+}
+
+// 5) Approve blog
+export async function approveBlog(id, adminId) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        const error = new Error("Invalid blog ID");
+        error.status = 400;
+        throw error;
+    }
+
+    const blog = await Blog.findById(id);
+
+    if (!blog) {
+        const error = new Error("Blog not found");
+        error.status = 404;
+        throw error;
+    }
+
+    if (blog.status === "PUBLISHED") {
+        const error = new Error("Blog is already published");
+        error.status = 400;
+        throw error;
+    }
+
+    const now = new Date();
+    blog.status = "PUBLISHED";
+    blog.approvedBy = adminId;
+    blog.approvedAt = now;
+    blog.publishedAt = now;
+    blog.rejectionReason = null;
+
+    await blog.save();
+    await blog.populate([
+        { path: 'author', select: 'firstName lastName email' },
+        { path: 'approvedBy', select: 'firstName lastName' }
+    ]);
+
+    return blog;
+}
+
+// 6) Reject blog
+export async function rejectBlog(id, adminId, rejectionReason) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        const error = new Error("Invalid blog ID");
+        error.status = 400;
+        throw error;
+    }
+
+    if (!rejectionReason || rejectionReason.trim() === "") {
+        const error = new Error("Rejection reason is required");
+        error.status = 400;
+        throw error;
+    }
+
+    const blog = await Blog.findById(id).populate('author', 'firstName lastName email');
+
+    if (!blog) {
+        const error = new Error("Blog not found");
+        error.status = 404;
+        throw error;
+    }
+
+    if (blog.status === "REJECTED") {
+        const error = new Error("Blog is already rejected");
+        error.status = 400;
+        throw error;
+    }
+
+    // Get admin details for the rejection notification
+    const admin = await mongoose.model('User').findById(adminId).select('firstName lastName');
+
+    // Create rejection notification data for the user
+    const rejectionData = {
+        blogTitle: blog.title,
+        authorName: `${blog.author.firstName} ${blog.author.lastName}`,
+        authorEmail: blog.author.email,
+        adminName: admin ? `${admin.firstName} ${admin.lastName}` : 'Admin',
+        rejectionReason: rejectionReason.trim(),
+        rejectedAt: new Date()
+    };
+
+    // TODO: Here you can add notification logic such as:
+    // - Send email to author
+    // - Create in-app notification
+    // - Log to notification service
+    console.log('Blog Rejection Notification:', {
+        message: `Your blog post "${rejectionData.blogTitle}" has been rejected`,
+        reason: rejectionData.rejectionReason,
+        author: rejectionData.authorEmail,
+        rejectedBy: rejectionData.adminName,
+        date: rejectionData.rejectedAt
+    });
+
+    // Delete the blog from database
+    await Blog.findByIdAndDelete(id);
+
+    return {
+        message: "Blog rejected and removed from database",
+        rejectionData: {
+            blogTitle: rejectionData.blogTitle,
+            authorEmail: rejectionData.authorEmail,
+            rejectionReason: rejectionData.rejectionReason,
+            rejectedBy: rejectionData.adminName,
+            rejectedAt: rejectionData.rejectedAt
+        }
+    };
 }
 
 // Service function to get all blogs with filters and pagination

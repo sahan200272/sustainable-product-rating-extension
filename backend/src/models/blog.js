@@ -43,6 +43,41 @@ const blogSchema = new mongoose.Schema({
     isFeatured: {
         type: Boolean,
         default: false
+    },
+    status: {
+        type: String,
+        enum: ["PENDING", "PUBLISHED", "REJECTED"],
+        default: "PENDING"
+    },
+    approvedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null
+    },
+    approvedAt: {
+        type: Date,
+        default: null
+    },
+    publishedAt: {
+        type: Date,
+        default: null
+    },
+    rejectionReason: {
+        type: String,
+        trim: true,
+        default: null
+    },
+    moderationFlagged: {
+        type: Boolean,
+        default: false
+    },
+    moderationScore: {
+        type: Number,
+        default: 0
+    },
+    moderationReasons: {
+        type: [String],
+        default: []
     }
 }, {
     timestamps: true
