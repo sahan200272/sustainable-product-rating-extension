@@ -6,6 +6,7 @@ const productRoutes = express.Router();
 
 productRoutes.post("/", upload.array("images", 5), productController.createProduct);
 productRoutes.get("/", productController.getAllProducts);
+productRoutes.get("/search", productController.searchProducts);
 productRoutes.get("/:id", productController.getSingleProduct);
 productRoutes.put("/:id", upload.array("images", 5), productController.updateProduct);
 productRoutes.delete("/:id", productController.deleteProduct);

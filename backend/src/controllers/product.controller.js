@@ -106,6 +106,37 @@ export const getSingleProduct = async(req, res) => {
   }
 }
 
+export const searchProducts = async(req, res) => {
+  try {
+    const { name } = req.query;
+
+    // Validate query parameter
+    if (!name || name.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "Search name is required"
+      });
+    }
+
+    const products = await productService.searchProductsByName(name);
+
+    return res.status(200).json({
+      success: true,
+      message: `Found ${products.length} product(s) matching "${name}"`,
+      count: products.length,
+      data: products
+    });
+
+  } catch (error) {
+    console.log("[ProductController] Search Products Error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error while searching products"
+    });
+  }
+}
+
 export const updateProduct = async(req, res) => {
 
   try {
