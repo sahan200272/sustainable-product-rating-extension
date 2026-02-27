@@ -100,6 +100,9 @@ export async function createBlog(req, res) {
         if (error.status === 400) {
             return res.status(400).json({ error: error.message });
         }
+        if (error.status === 409) {
+            return res.status(409).json({ error: error.message });
+        }
         res.status(500).json({
             error: "Internal server error"
         });

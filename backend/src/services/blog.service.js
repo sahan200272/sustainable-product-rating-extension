@@ -45,6 +45,18 @@ export async function createBlog(data, userId) {
         throw error;
     }
 
+    // Check for duplicate posts (same title by same author)
+    const existingBlog = await Blog.findOne({
+        title: { $regex: new RegExp(`^${title.trim()}$`, 'i') }, // Case-insensitive exact match
+        author: userId
+    });
+
+    if (existingBlog) {
+        const error = new Error("You have already submitted a blog with this title. Please choose a different title.");
+        error.status = 409; // Conflict status code
+        throw error;
+    }
+
     // Perform AI moderation on content
     const moderationResult = await moderateBlogContent(title, content);
 
