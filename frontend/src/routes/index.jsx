@@ -4,6 +4,7 @@ import RegisterPage from "../pages/register/RegisterPage";
 import HomePage from "../pages/home/HomePage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import ProtectedRoute from "./ProtectedRoute";
+import AddProductPage from "../pages/product/AddProductPage";
 
 export default function AppRoutes() {
     return (
@@ -21,6 +22,11 @@ export default function AppRoutes() {
                 } 
             />
             <Route path="*" element={<Navigate to="/login" replace />} />
+
+            {/*Product & Sustainability Evaluation Component Routes*/}
+
+             <Route path="/add-product" element={<AddProductPage/>} />
+
         </Routes>
     );
 }
