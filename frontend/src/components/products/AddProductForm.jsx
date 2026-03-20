@@ -2,37 +2,78 @@ import { useState } from "react";
 import { addProduct } from "../../services/productServices";
 
 export default function AddProductForm() {
-  // without using multiple useStates for each and every input use one
   const [formData, setFormData] = useState({
     name: "",
     brand: "",
     category: "",
     description: "",
-    recyclableMaterial: true,
-    biodegradable: true,
-    plasticFree: true,
-    carbonFootprint: 0,
-    crueltyFree: true,
-    fairTradeCertified: true,
-    renewableEnergyUsed: true,
-    energyEfficiencyRating: 0,
+    image: null,
+    sustainability: {
+        recyclableMaterial: true,
+        biodegradable: true,
+        plasticFree: true,
+        carbonFootprint: 0,
+        crueltyFree: true,
+        fairTradeCertified: true,
+        renewableEnergyUsed: true,
+        energyEfficiencyRating: 0,
+    },
   });
 
-  // store for data in formData object
+  // FIXED handler
   const handleFormData = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const { name, value, type, files } = e.target;
 
-  console.log("form data ", formData);
+  // fields inside sustainability
+  const sustainabilityFields = [
+    "recyclableMaterial",
+    "biodegradable",
+    "plasticFree",
+    "carbonFootprint",
+    "crueltyFree",
+    "fairTradeCertified",
+    "renewableEnergyUsed",
+    "energyEfficiencyRating",
+  ];
+
+  // convert values
+  let finalValue =
+    type === "file"
+      ? files[0]
+      : type === "radio"
+      ? value === "true"
+      : type === "number"
+      ? Number(value)
+      : value;
+
+  // ✅ if field belongs to sustainability
+  if (sustainabilityFields.includes(name)) {
+    setFormData({
+      ...formData,
+      sustainability: {
+        ...formData.sustainability,
+        [name]: finalValue,
+      },
+    });
+  } else {
+    // normal fields
+    setFormData({
+      ...formData,
+      [name]: finalValue,
+    });
+  }
+};
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // stop page reload
+    e.preventDefault();
 
     try {
+      console.log("Sending data:", formData);
+
       const response = await addProduct(formData);
       console.log("Success:", response);
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error:", error.response?.data || error.message);
     }
   };
 
@@ -40,208 +81,85 @@ export default function AddProductForm() {
     <form onSubmit={handleSubmit}>
       <label>
         Product Name :
-        <input type="text" name="name" onChange={(e) => handleFormData(e)} />
+        <input type="text" name="name" onChange={handleFormData} />
       </label>
-      <br></br>
+      <br />
 
       <label>
         Product Brand :
-        <input type="text" name="brand" onChange={(e) => handleFormData(e)} />
+        <input type="text" name="brand" onChange={handleFormData} />
       </label>
-      <br></br>
+      <br />
 
       <label>
         Product Category :
-        <input
-          type="text"
-          name="category"
-          onChange={(e) => handleFormData(e)}
-        />
+        <input type="text" name="category" onChange={handleFormData} />
       </label>
-      <br></br>
+      <br />
 
       <label>
         Product Description :
-        <input
-          type="text"
-          name="description"
-          onChange={(e) => handleFormData(e)}
-        />
-      </label>
-      <br></br>
-
-      <label>
-        Product Images :
-        <input type="file" />
-      </label>
-      <br></br>
-
-      <label>Is recyclable material?</label>
-      <br />
-
-      <label>
-        <input
-          type="radio"
-          name="recyclableMaterial"
-          value={true}
-          onChange={(e) => handleFormData(e)}
-        />
-        Yes
-      </label>
-
-      <label>
-        <input
-          type="radio"
-          name="recyclableMaterial"
-          value={false}
-          onChange={(e) => handleFormData(e)}
-        />
-        No
-      </label>
-      <br />
-
-      <label>Is biodegradable?</label>
-      <br />
-
-      <label>
-        <input
-          type="radio"
-          name="biodegradable"
-          value={true}
-          onChange={(e) => handleFormData(e)}
-        />
-        Yes
-      </label>
-
-      <label>
-        <input
-          type="radio"
-          name="biodegradable"
-          value={false}
-          onChange={(e) => handleFormData(e)}
-        />
-        No
-      </label>
-      <br />
-
-      <label>Is plastic free?</label>
-      <br />
-
-      <label>
-        <input
-          type="radio"
-          name="plasticFree"
-          value={true}
-          onChange={(e) => handleFormData(e)}
-        />
-        Yes
-      </label>
-
-      <label>
-        <input
-          type="radio"
-          name="plasticFree"
-          value={false}
-          onChange={(e) => handleFormData(e)}
-        />
-        No
+        <input type="text" name="description" onChange={handleFormData} />
       </label>
       <br />
 
       <label>
-        carbon footprint value?
-        <input
-          type="number"
-          name="carbonFootprint"
-          onChange={(e) => handleFormData(e)}
-        />
+        Product Image :
+        <input type="file" name="image" onChange={handleFormData} />
       </label>
       <br />
 
-      <label>Is cruelty free?</label>
+      {/* ✅ Recyclable */}
+      <label>Is recyclable material?</label><br />
+      <input type="radio" name="recyclableMaterial" value="true" onChange={handleFormData} /> Yes
+      <input type="radio" name="recyclableMaterial" value="false" onChange={handleFormData} /> No
       <br />
 
-      <label>
-        <input
-          type="radio"
-          name="crueltyFree"
-          value={true}
-          onChange={(e) => handleFormData(e)}
-        />
-        Yes
-      </label>
-
-      <label>
-        <input
-          type="radio"
-          name="crueltyFree"
-          value={false}
-          onChange={(e) => handleFormData(e)}
-        />
-        No
-      </label>
+      {/* ✅ Biodegradable */}
+      <label>Is biodegradable?</label><br />
+      <input type="radio" name="biodegradable" value="true" onChange={handleFormData} /> Yes
+      <input type="radio" name="biodegradable" value="false" onChange={handleFormData} /> No
       <br />
 
-      <label>Is fair trade certified?</label>
+      {/* ✅ Plastic Free */}
+      <label>Is plastic free?</label><br />
+      <input type="radio" name="plasticFree" value="true" onChange={handleFormData} /> Yes
+      <input type="radio" name="plasticFree" value="false" onChange={handleFormData} /> No
       <br />
 
+      {/* ✅ Carbon */}
       <label>
-        <input
-          type="radio"
-          name="fairTradeCertified"
-          value={true}
-          onChange={(e) => handleFormData(e)}
-        />
-        Yes
-      </label>
-
-      <label>
-        <input
-          type="radio"
-          name="fairTradeCertified"
-          value={false}
-          onChange={(e) => handleFormData(e)}
-        />
-        No
+        Carbon footprint:
+        <input type="number" name="carbonFootprint" onChange={handleFormData} />
       </label>
       <br />
 
-      <label>Is renewable energy used?</label>
+      {/* ✅ Cruelty Free */}
+      <label>Is cruelty free?</label><br />
+      <input type="radio" name="crueltyFree" value="true" onChange={handleFormData} /> Yes
+      <input type="radio" name="crueltyFree" value="false" onChange={handleFormData} /> No
       <br />
 
-      <label>
-        <input
-          type="radio"
-          name="renewableEnergyUsed"
-          value={true}
-          onChange={(e) => handleFormData(e)}
-        />
-        Yes
-      </label>
-
-      <label>
-        <input
-          type="radio"
-          name="renewableEnergyUsed"
-          value={false}
-          onChange={(e) => handleFormData(e)}
-        />
-        No
-      </label>
+      {/* ✅ Fair Trade */}
+      <label>Is fair trade certified?</label><br />
+      <input type="radio" name="fairTradeCertified" value="true" onChange={handleFormData} /> Yes
+      <input type="radio" name="fairTradeCertified" value="false" onChange={handleFormData} /> No
       <br />
 
+      {/* ✅ Renewable */}
+      <label>Is renewable energy used?</label><br />
+      <input type="radio" name="renewableEnergyUsed" value="true" onChange={handleFormData} /> Yes
+      <input type="radio" name="renewableEnergyUsed" value="false" onChange={handleFormData} /> No
+      <br />
+
+      {/* ✅ Energy */}
       <label>
-        Energy efficiency value?
-        <input
-          type="number"
-          name="energyEfficiencyRating"
-          onChange={(e) => handleFormData(e)}
-        />
+        Energy efficiency:
+        <input type="number" name="energyEfficiencyRating" onChange={handleFormData} />
       </label>
       <br />
 
       <button type="submit">Add Product</button>
-      
     </form>
   );
 }
