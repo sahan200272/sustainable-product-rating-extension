@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth";
-import { BLOG_CATEGORIES, createBlogPost } from "../../services/blogService";
+import {
+    BLOG_CATEGORIES,
+    createBlogPost,
+} from "../../services/blogService";
 
 const INITIAL_FORM = {
     title: "",
@@ -12,7 +15,6 @@ const INITIAL_FORM = {
 
 export default function CreateBlogPage() {
     const { user } = useAuth();
-    const navigate = useNavigate();
 
     const [form, setForm] = useState(INITIAL_FORM);
     const [tags, setTags] = useState([]);
@@ -149,7 +151,6 @@ export default function CreateBlogPage() {
             imagePreviews.forEach((url) => URL.revokeObjectURL(url));
             setImageFiles([]);
             setImagePreviews([]);
-            navigate("/");
         } catch (error) {
             toast.error(
                 error?.response?.data?.error ||

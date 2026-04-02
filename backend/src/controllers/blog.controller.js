@@ -130,6 +130,21 @@ export async function createBlog(req, res, next) {
     }
 }
 
+// Get current user's submitted blogs (Authenticated users)
+export async function getMyBlogs(req, res, next) {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+
+        const result = await blogService.getBlogsByAuthor(req.user.id, { page, limit });
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error fetching user blogs:", error);
+        next(error);
+    }
+}
+
 // Admin Routes
 
 // Get all blogs for admin dashboard
