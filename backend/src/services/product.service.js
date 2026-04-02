@@ -7,6 +7,9 @@ import cloudinaryUpload from "../utils/cloudinaryUpload.js";
 // Import AI functions for sustainability analysis
 import { generateSustainability, generateSustainabilityData } from "./ai.service.js";
 
+// Import sustainability score calculator
+import calculateSustainabilityScore from "../utils/calculateSustainabilityScore.js";
+
 
 // CREATE PRODUCT
 export const createProduct = async (data) => {
@@ -14,6 +17,11 @@ export const createProduct = async (data) => {
     // Basic input validation
     if (!data || typeof data !== "object") {
       throw new Error("Invalid product data");
+    }
+
+    // Calculate sustainability score from form data
+    if (data.sustainability) {
+      data.sustainabilityScore = calculateSustainabilityScore(data.sustainability);
     }
 
     // Generate AI-based sustainability score and description

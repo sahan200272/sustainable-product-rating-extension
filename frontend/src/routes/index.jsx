@@ -24,8 +24,7 @@ export default function AppRoutes() {
             <Route path="*" element={<Navigate to="/login" replace />} />
 
             {/*Product & Sustainability Evaluation Component Routes*/}
-
-             <Route path="/add-product" element={<AddProductPage/>} />
+            <Route path="/add-product" element={<AddProductPage/>} />
 
         </Routes>
     );
