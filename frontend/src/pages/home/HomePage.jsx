@@ -29,6 +29,12 @@ export default function HomePage() {
                                     <span className="text-gray-700">
                                         Welcome, <span className="font-semibold">{user?.name}</span>
                                     </span>
+                                    <Link
+                                        to="/blogs/create"
+                                        className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+                                    >
+                                        Create Blog
+                                    </Link>
                                     {user?.role === "Admin" && (
                                         <Link
                                             to="/admin/dashboard"

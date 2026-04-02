@@ -17,6 +17,7 @@ import {
     generateBlogEducationGuide
 } from '../controllers/blog.controller.js';
 import { authenticate, authorizeRoles } from '../middlewares/authMiddleware.js';
+import upload from '../middlewares/multer.js';
 
 const blogRouter = express.Router();
 
@@ -41,7 +42,7 @@ blogRouter.get('/', getAllBlogs); // GET /api/blogs - only published blogs
 blogRouter.get('/:id', getBlogById); // GET /api/blogs/:id - access control based on status
 
 // User routes (authentication required)
-blogRouter.post('/', authenticate, createBlog); // POST /api/blogs - creates with PENDING status
+blogRouter.post('/', authenticate, upload.array('images', 5), createBlog); // POST /api/blogs - creates with PENDING status
 
 // Admin routes (authentication + admin role required)
 blogRouter.get('/admin/list', authenticate, authorizeRoles('Admin'), adminGetBlogs); // GET /api/blogs/admin/list
