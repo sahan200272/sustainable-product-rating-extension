@@ -113,6 +113,28 @@ export async function getPublishedBlogs({ page = 1, limit = 10, category, search
     };
 }
 
+// Get blogs submitted by a specific user (all statuses)
+export async function getBlogsByAuthor(userId, { page = 1, limit = 20 }) {
+    const skip = (page - 1) * limit;
+
+    const filter = { author: userId };
+
+    const blogs = await Blog.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const total = await Blog.countDocuments(filter);
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+        total,
+        currentPage: page,
+        totalPages,
+        blogs,
+    };
+}
+
 // 3) Get blog by ID
 export async function getBlogById(id) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -257,11 +279,16 @@ export async function rejectBlog(id, adminId, rejectionReason) {
         date: rejectionData.rejectedAt
     });
 
-    // Delete the blog from database
-    await Blog.findByIdAndDelete(id);
+    // Keep the blog and mark as rejected so user can view rejection reason
+    blog.status = "REJECTED";
+    blog.rejectionReason = rejectionReason.trim();
+    blog.approvedBy = adminId;
+    blog.approvedAt = new Date();
+    blog.publishedAt = null;
+    await blog.save();
 
     return {
-        message: "Blog rejected and removed from database",
+        message: "Blog rejected successfully",
         rejectionData: {
             blogTitle: rejectionData.blogTitle,
             authorEmail: rejectionData.authorEmail,

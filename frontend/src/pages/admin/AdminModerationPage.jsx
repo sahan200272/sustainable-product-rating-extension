@@ -42,6 +42,11 @@ export default function AdminModerationPage() {
         return { total, pending, approved, rejected };
     }, [blogs]);
 
+    const pendingBlogs = useMemo(
+        () => blogs.filter((blog) => blog.status === "PENDING"),
+        [blogs]
+    );
+
     const handleApprove = async (blogId) => {
         setActionLoadingId(blogId);
         try {
@@ -129,14 +134,14 @@ export default function AdminModerationPage() {
                                         Loading...
                                     </td>
                                 </tr>
-                            ) : blogs.length === 0 ? (
+                            ) : pendingBlogs.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
-                                        No blog submissions found
+                                        No pending submissions
                                     </td>
                                 </tr>
                             ) : (
-                                blogs.map((blog) => {
+                                pendingBlogs.map((blog) => {
                                     const authorName = `${blog?.author?.firstName || ""} ${blog?.author?.lastName || ""}`.trim() || "Unknown";
                                     const isPending = blog.status === "PENDING";
                                     return (
