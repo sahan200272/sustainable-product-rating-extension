@@ -1,7 +1,11 @@
 import api from "./api";
 
-export const addProduct = async (data) => {
-  // Send data as JSON (no files in basic form)
-  const response = await api.post("/api/products/", data);
+export const addProduct = async (formData) => {
+  // Pass formData directly. Axios sets Content-Type to multipart/form-data automatically.
+  const response = await api.post("/api/products/", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
