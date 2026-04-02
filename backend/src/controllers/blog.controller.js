@@ -1,5 +1,6 @@
 import * as blogService from '../services/blog.service.js';
 import { testGeminiConnection, generateEducationGuide } from '../services/blog-ai.service.js';
+import { blogCloudinaryUpload } from '../utils/cloudinaryUpload.js';
 
 // Public Routes
 
@@ -78,13 +79,39 @@ export async function createBlog(req, res, next) {
             });
         }
 
+        // Parse tags sent through multipart/form-data
+        let parsedTags = [];
+        if (Array.isArray(tags)) {
+            parsedTags = tags;
+        } else if (typeof tags === "string" && tags.trim()) {
+            try {
+                const maybeJson = JSON.parse(tags);
+                parsedTags = Array.isArray(maybeJson)
+                    ? maybeJson
+                    : tags.split(',').map((tag) => tag.trim()).filter(Boolean);
+            } catch {
+                parsedTags = tags.split(',').map((tag) => tag.trim()).filter(Boolean);
+            }
+        }
+
+        let finalImageUrl = imageUrl || "";
+        let finalImageUrls = imageUrl ? [imageUrl] : [];
+
+        // If image files are provided, upload all and use returned URLs
+        if (req.files && req.files.length > 0) {
+            const uploaded = await blogCloudinaryUpload(req.files);
+            finalImageUrls = uploaded?.map((file) => file.url).filter(Boolean) || [];
+            finalImageUrl = finalImageUrls[0] || "";
+        }
+
         // Create blog with PENDING status
         const blog = await blogService.createBlog({
             title,
             content,
             category,
-            tags,
-            imageUrl
+            tags: parsedTags,
+            imageUrl: finalImageUrl,
+            imageUrls: finalImageUrls
         }, req.user.id);
 
         res.status(201).json({

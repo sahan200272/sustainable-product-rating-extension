@@ -1,6 +1,6 @@
 import cloudinary from "../config/cloudinary.js";
 
-const cloudinaryUpload = async(files) => {
+const uploadToCloudinary = async (files, folder) => {
 
     const images = [];
 
@@ -12,7 +12,7 @@ const cloudinaryUpload = async(files) => {
         // upload file into cloudinary
         const uploadedPhoto = await cloudinary.uploader.upload(base64Photo, {
             resource_type: "auto",
-            folder: "products/photos"
+            folder
         });
 
         // push cloudinary public_id and url into array
@@ -23,6 +23,14 @@ const cloudinaryUpload = async(files) => {
     }
 
     return images;
-}
+};
+
+const cloudinaryUpload = async(files) => {
+    return uploadToCloudinary(files, "products/photos");
+};
+
+export const blogCloudinaryUpload = async(files) => {
+    return uploadToCloudinary(files, "blogs/photos");
+};
 
 export default cloudinaryUpload;

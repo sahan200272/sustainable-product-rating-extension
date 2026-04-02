@@ -28,6 +28,10 @@ const blogSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
+    imageUrls: {
+        type: [String],
+        default: []
+    },
     views: {
         type: Number,
         default: 0

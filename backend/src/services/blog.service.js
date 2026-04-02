@@ -4,7 +4,7 @@ import { moderateBlogContent } from './blog-ai.service.js';
 
 // Service function to create a new blog
 export async function createBlogService(blogData) {
-    const { title, content, category, tags, author, imageUrl, isFeatured } = blogData;
+    const { title, content, category, tags, author, imageUrl, imageUrls, isFeatured } = blogData;
 
     // Validate category
     const validCategories = ["Responsible Consumption", "Greenwashing", "Sustainable Brands"];
@@ -19,7 +19,8 @@ export async function createBlogService(blogData) {
         category,
         tags: tags || [],
         author,
-        imageUrl: imageUrl || "",
+        imageUrl: imageUrl || imageUrls?.[0] || "",
+        imageUrls: imageUrls || (imageUrl ? [imageUrl] : []),
         isFeatured: isFeatured || false
     });
 
@@ -35,7 +36,7 @@ export async function createBlogService(blogData) {
 
 // 1) Create blog with workflow
 export async function createBlog(data, userId) {
-    const { title, content, category, tags, imageUrl } = data;
+    const { title, content, category, tags, imageUrl, imageUrls } = data;
 
     // Validate category
     const validCategories = ["Responsible Consumption", "Greenwashing", "Sustainable Brands"];
@@ -67,7 +68,8 @@ export async function createBlog(data, userId) {
         category,
         tags: tags || [],
         author: userId,
-        imageUrl: imageUrl || "",
+        imageUrl: imageUrl || imageUrls?.[0] || "",
+        imageUrls: imageUrls || (imageUrl ? [imageUrl] : []),
         status: "PENDING",
         moderationFlagged: moderationResult.flagged,
         moderationScore: moderationResult.score,
@@ -350,6 +352,7 @@ export async function updateBlogService(id, updateData) {
     if (updateData.category !== undefined) updateFields.category = updateData.category;
     if (updateData.tags !== undefined) updateFields.tags = updateData.tags;
     if (updateData.imageUrl !== undefined) updateFields.imageUrl = updateData.imageUrl;
+    if (updateData.imageUrls !== undefined) updateFields.imageUrls = updateData.imageUrls;
     if (updateData.isFeatured !== undefined) updateFields.isFeatured = updateData.isFeatured;
 
     const blog = await Blog.findByIdAndUpdate(
