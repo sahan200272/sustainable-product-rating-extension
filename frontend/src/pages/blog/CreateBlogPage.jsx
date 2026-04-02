@@ -76,11 +76,6 @@ export default function CreateBlogPage() {
         const files = Array.from(e.target.files || []);
         if (files.length === 0) return;
 
-        if (files.length > 5) {
-            toast.error("You can upload up to 5 images");
-            return;
-        }
-
         const maxSize = 5 * 1024 * 1024;
         for (const file of files) {
             if (!file.type.startsWith("image/")) {
@@ -93,9 +88,37 @@ export default function CreateBlogPage() {
             }
         }
 
+        const existing = [...imageFiles];
+        const merged = [...existing];
+
+        for (const incomingFile of files) {
+            const alreadyExists = existing.some(
+                (f) =>
+                    f.name === incomingFile.name &&
+                    f.size === incomingFile.size &&
+                    f.lastModified === incomingFile.lastModified
+            );
+
+            if (!alreadyExists) merged.push(incomingFile);
+        }
+
+        if (merged.length > 5) {
+            toast.error("You can upload up to 5 images");
+            e.target.value = "";
+            return;
+        }
+
         imagePreviews.forEach((url) => URL.revokeObjectURL(url));
-        setImageFiles(files);
-        setImagePreviews(files.map((file) => URL.createObjectURL(file)));
+        setImageFiles(merged);
+        setImagePreviews(merged.map((file) => URL.createObjectURL(file)));
+        e.target.value = "";
+    };
+
+    const removeImage = (indexToRemove) => {
+        imagePreviews.forEach((url) => URL.revokeObjectURL(url));
+        const nextFiles = imageFiles.filter((_, index) => index !== indexToRemove);
+        setImageFiles(nextFiles);
+        setImagePreviews(nextFiles.map((file) => URL.createObjectURL(file)));
     };
 
     const handleSubmit = async (e) => {
@@ -251,7 +274,7 @@ export default function CreateBlogPage() {
                                 className="flex w-full cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50 px-4 py-8 text-center text-sm font-medium text-emerald-700 hover:bg-emerald-100"
                             >
                                 {imageFiles.length > 0
-                                    ? `${imageFiles.length} image(s) selected`
+                                    ? `${imageFiles.length} image(s) selected (click to add more)`
                                     : "Click to upload images"}
                             </label>
                             <input
@@ -266,12 +289,20 @@ export default function CreateBlogPage() {
                             {imagePreviews.length > 0 ? (
                                 <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                                     {imagePreviews.map((preview, index) => (
-                                        <img
-                                            key={preview}
-                                            src={preview}
-                                            alt={`Preview ${index + 1}`}
-                                            className="h-28 w-full rounded-xl border border-gray-200 object-cover"
-                                        />
+                                        <div key={preview} className="relative">
+                                            <img
+                                                src={preview}
+                                                alt={`Preview ${index + 1}`}
+                                                className="h-28 w-full rounded-xl border border-gray-200 object-cover"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeImage(index)}
+                                                className="absolute right-1 top-1 rounded-full bg-black/60 px-2 py-0.5 text-xs font-semibold text-white"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
                                     ))}
                                 </div>
                             ) : null}
