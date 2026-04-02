@@ -30,3 +30,20 @@ export const createBlogPost = async (blogData) => {
 
     return response.data;
 };
+
+export const getAdminBlogs = async (params = {}) => {
+    const response = await api.get("/api/blogs/admin/list", { params });
+    return response.data;
+};
+
+export const approveBlogPost = async (blogId) => {
+    const response = await api.patch(`/api/blogs/admin/${blogId}/approve`);
+    return response.data;
+};
+
+export const rejectBlogPost = async (blogId, rejectionReason) => {
+    const response = await api.patch(`/api/blogs/admin/${blogId}/reject`, {
+        rejectionReason,
+    });
+    return response.data;
+};

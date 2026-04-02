@@ -3,6 +3,7 @@ import LoginPage from "../pages/login/LoginPage";
 import RegisterPage from "../pages/register/RegisterPage";
 import HomePage from "../pages/home/HomePage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
+import AdminModerationPage from "../pages/admin/AdminModerationPage";
 import CreateBlogPage from "../pages/blog/CreateBlogPage";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -24,6 +25,15 @@ export default function AppRoutes() {
                         requiredRole="Admin" 
                     />
                 } 
+            />
+            <Route
+                path="/admin/moderation"
+                element={
+                    <ProtectedRoute
+                        element={<AdminModerationPage />}
+                        requiredRole="Admin"
+                    />
+                }
             />
             <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>

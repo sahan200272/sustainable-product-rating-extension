@@ -100,6 +100,12 @@ export default function AdminDashboard() {
                             <button className="w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-left font-medium">
                                 ⭐ View All Ratings
                             </button>
+                            <button
+                                onClick={() => navigate("/admin/moderation")}
+                                className="w-full px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-left font-medium"
+                            >
+                                🛡️ Admin Moderation
+                            </button>
                             <button className="w-full px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-left font-medium">
                                 📊 Generate Reports
                             </button>
