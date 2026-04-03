@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { addProduct } from "../../services/productServices";
 import { FiUploadCloud, FiX, FiCheck, FiLoader } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 export default function AddProductForm() {
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -93,8 +95,10 @@ export default function AddProductForm() {
       );
 
       const response = await addProduct(submitData);
-      setSuccessMessage("Product added successfully!");
-      // Optionally reset form here
+      setSuccessMessage("Product added successfully! Redirecting...");
+      setTimeout(() => {
+        navigate("/products");
+      }, 1500);
     } catch (error) {
       console.error("Error submitting:", error);
       setErrorMessage(

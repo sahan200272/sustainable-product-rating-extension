@@ -7,6 +7,7 @@ import AdminModerationPage from "../pages/admin/AdminModerationPage";
 import CreateBlogPage from "../pages/blog/CreateBlogPage";
 import ProtectedRoute from "./ProtectedRoute";
 import AddProductPage from "../pages/product/AddProductPage";
+import ProductsListPage from "../pages/product/ProductsListPage";
 
 export default function AppRoutes() {
     return (
@@ -40,6 +41,7 @@ export default function AppRoutes() {
 
             {/*Product & Sustainability Evaluation Component Routes*/}
             <Route path="/add-product" element={<AddProductPage/>} />
+            <Route path="/products" element={<ProductsListPage />} />
 
         </Routes>
     );
