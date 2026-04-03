@@ -1,10 +1,62 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { getPublicBlogs } from "../../services/blogService";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useAuth } from "../../hooks/useAuth";
+import {
+    getPublicBlogs,
+    likeBlogPost,
+    unlikeBlogPost,
+} from "../../services/blogService";
 
 export default function PublicBlogFeedPage() {
+    const { isAuthenticated, user } = useAuth();
+    const navigate = useNavigate();
     const [blogs, setBlogs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [likingBlogId, setLikingBlogId] = useState("");
+
+    const currentUserId = user?._id || user?.id || "";
+
+    const isLikedByCurrentUser = (blog) => {
+        if (!currentUserId || !Array.isArray(blog?.likedUsers)) return false;
+
+        return blog.likedUsers.some((likedUser) => {
+            if (!likedUser) return false;
+            if (typeof likedUser === "string") return likedUser === currentUserId;
+            if (typeof likedUser === "object") {
+                return (likedUser._id || likedUser.id || likedUser.toString?.()) === currentUserId;
+            }
+            return false;
+        });
+    };
+
+    const handleToggleLike = async (blog) => {
+        if (!isAuthenticated) {
+            toast.error("Please login to like blog posts");
+            navigate("/login");
+            return;
+        }
+
+        const alreadyLiked = isLikedByCurrentUser(blog);
+
+        try {
+            setLikingBlogId(blog._id);
+            const result = alreadyLiked
+                ? await unlikeBlogPost(blog._id)
+                : await likeBlogPost(blog._id);
+
+            const updatedBlog = result?.blog;
+            if (!updatedBlog) return;
+
+            setBlogs((prev) =>
+                prev.map((item) => (item._id === updatedBlog._id ? updatedBlog : item))
+            );
+        } catch (error) {
+            toast.error(error?.response?.data?.error || "Failed to update like");
+        } finally {
+            setLikingBlogId("");
+        }
+    };
 
     useEffect(() => {
         const fetchPublishedBlogs = async () => {
@@ -84,6 +136,24 @@ export default function PublicBlogFeedPage() {
                                         <p className="mt-2 text-sm text-gray-600 line-clamp-3">
                                             {blog.content}
                                         </p>
+
+                                        <div className="mt-4 flex items-center justify-between border-t pt-3">
+                                            <span className="text-sm font-medium text-gray-600">
+                                                {blog.likes || 0} likes
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleToggleLike(blog)}
+                                                disabled={likingBlogId === blog._id}
+                                                className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
+                                                    isLikedByCurrentUser(blog)
+                                                        ? "bg-rose-100 text-rose-700 hover:bg-rose-200"
+                                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                } ${likingBlogId === blog._id ? "opacity-60 cursor-not-allowed" : ""}`}
+                                            >
+                                                {isLikedByCurrentUser(blog) ? "♥ Liked" : "♡ Like"}
+                                            </button>
+                                        </div>
                                     </div>
                                 </article>
                             );

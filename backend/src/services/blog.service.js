@@ -424,8 +424,12 @@ export async function likeBlogService(blogId, userId) {
         throw new Error("Blog not found");
     }
 
+    if (blog.status !== "PUBLISHED") {
+        throw new Error("Only published blogs can be liked");
+    }
+
     // Check if user has already liked the blog
-    const hasLiked = blog.likedUsers.includes(userId);
+    const hasLiked = blog.likedUsers.some((user) => user.equals(userId));
 
     if (hasLiked) {
         throw new Error("You have already liked this blog");
@@ -455,8 +459,12 @@ export async function unlikeBlogService(blogId, userId) {
         throw new Error("Blog not found");
     }
 
+    if (blog.status !== "PUBLISHED") {
+        throw new Error("Only published blogs can be unliked");
+    }
+
     // Check if user has liked the blog
-    const hasLiked = blog.likedUsers.includes(userId);
+    const hasLiked = blog.likedUsers.some((user) => user.equals(userId));
 
     if (!hasLiked) {
         throw new Error("You have not liked this blog");
