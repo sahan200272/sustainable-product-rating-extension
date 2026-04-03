@@ -360,7 +360,11 @@ export async function likeBlog(req, res, next) {
         });
     } catch (error) {
         console.error("Error liking blog:", error);
-        if (error.message === "Invalid blog ID" || error.message === "You have already liked this blog") {
+        if (
+            error.message === "Invalid blog ID" ||
+            error.message === "You have already liked this blog" ||
+            error.message === "Only published blogs can be liked"
+        ) {
             return res.status(400).json({ error: error.message });
         }
         if (error.message === "Blog not found") {
@@ -385,7 +389,11 @@ export async function unlikeBlog(req, res, next) {
         });
     } catch (error) {
         console.error("Error unliking blog:", error);
-        if (error.message === "Invalid blog ID" || error.message === "You have not liked this blog") {
+        if (
+            error.message === "Invalid blog ID" ||
+            error.message === "You have not liked this blog" ||
+            error.message === "Only published blogs can be unliked"
+        ) {
             return res.status(400).json({ error: error.message });
         }
         if (error.message === "Blog not found") {
