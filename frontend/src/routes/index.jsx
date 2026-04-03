@@ -5,6 +5,7 @@ import HomePage from "../pages/home/HomePage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import AddProductPage from "../pages/product/AddProductPage";
+import ProductsListPage from "../pages/product/ProductsListPage";
 
 export default function AppRoutes() {
     return (
@@ -25,6 +26,7 @@ export default function AppRoutes() {
 
             {/*Product & Sustainability Evaluation Component Routes*/}
             <Route path="/add-product" element={<AddProductPage/>} />
+            <Route path="/products" element={<ProductsListPage />} />
 
         </Routes>
     );
