@@ -41,6 +41,11 @@ export const getMyBlogs = async (params = {}) => {
     return response.data;
 };
 
+export const getPublicBlogs = async (params = {}) => {
+    const response = await api.get("/api/blogs", { params });
+    return response.data;
+};
+
 export const approveBlogPost = async (blogId) => {
     const response = await api.patch(`/api/blogs/admin/${blogId}/approve`);
     return response.data;
