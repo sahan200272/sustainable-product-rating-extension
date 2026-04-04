@@ -31,7 +31,7 @@ export default function LoginPage() {
             const response = await loginUser(values);
             login(response.user, response.token);
             toast.success("Welcome back!");
-            navigate(response.user.role === "Admin" ? "/admin/dashboard" : "/");
+            navigate(response.user.role === "Admin" ? "/admin/dashboard" : "/products");
         } catch (error) {
             toast.error(error?.response?.data?.error || "Login failed. Please check your credentials.");
         } finally {
