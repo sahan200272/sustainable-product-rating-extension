@@ -4,7 +4,7 @@ import { moderateBlogContent } from './blog-ai.service.js';
 
 // Service function to create a new blog
 export async function createBlogService(blogData) {
-    const { title, content, category, tags, author, imageUrl, isFeatured } = blogData;
+    const { title, content, category, tags, author, imageUrl, imageUrls, isFeatured } = blogData;
 
     // Validate category
     const validCategories = ["Responsible Consumption", "Greenwashing", "Sustainable Brands"];
@@ -19,7 +19,8 @@ export async function createBlogService(blogData) {
         category,
         tags: tags || [],
         author,
-        imageUrl: imageUrl || "",
+        imageUrl: imageUrl || imageUrls?.[0] || "",
+        imageUrls: imageUrls || (imageUrl ? [imageUrl] : []),
         isFeatured: isFeatured || false
     });
 
@@ -35,7 +36,7 @@ export async function createBlogService(blogData) {
 
 // 1) Create blog with workflow
 export async function createBlog(data, userId) {
-    const { title, content, category, tags, imageUrl } = data;
+    const { title, content, category, tags, imageUrl, imageUrls } = data;
 
     // Validate category
     const validCategories = ["Responsible Consumption", "Greenwashing", "Sustainable Brands"];
@@ -67,7 +68,8 @@ export async function createBlog(data, userId) {
         category,
         tags: tags || [],
         author: userId,
-        imageUrl: imageUrl || "",
+        imageUrl: imageUrl || imageUrls?.[0] || "",
+        imageUrls: imageUrls || (imageUrl ? [imageUrl] : []),
         status: "PENDING",
         moderationFlagged: moderationResult.flagged,
         moderationScore: moderationResult.score,
@@ -108,6 +110,28 @@ export async function getPublishedBlogs({ page = 1, limit = 10, category, search
         currentPage: page,
         totalPages,
         blogs
+    };
+}
+
+// Get blogs submitted by a specific user (all statuses)
+export async function getBlogsByAuthor(userId, { page = 1, limit = 20 }) {
+    const skip = (page - 1) * limit;
+
+    const filter = { author: userId };
+
+    const blogs = await Blog.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const total = await Blog.countDocuments(filter);
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+        total,
+        currentPage: page,
+        totalPages,
+        blogs,
     };
 }
 
@@ -255,11 +279,16 @@ export async function rejectBlog(id, adminId, rejectionReason) {
         date: rejectionData.rejectedAt
     });
 
-    // Delete the blog from database
-    await Blog.findByIdAndDelete(id);
+    // Keep the blog and mark as rejected so user can view rejection reason
+    blog.status = "REJECTED";
+    blog.rejectionReason = rejectionReason.trim();
+    blog.approvedBy = adminId;
+    blog.approvedAt = new Date();
+    blog.publishedAt = null;
+    await blog.save();
 
     return {
-        message: "Blog rejected and removed from database",
+        message: "Blog rejected successfully",
         rejectionData: {
             blogTitle: rejectionData.blogTitle,
             authorEmail: rejectionData.authorEmail,
@@ -350,6 +379,7 @@ export async function updateBlogService(id, updateData) {
     if (updateData.category !== undefined) updateFields.category = updateData.category;
     if (updateData.tags !== undefined) updateFields.tags = updateData.tags;
     if (updateData.imageUrl !== undefined) updateFields.imageUrl = updateData.imageUrl;
+    if (updateData.imageUrls !== undefined) updateFields.imageUrls = updateData.imageUrls;
     if (updateData.isFeatured !== undefined) updateFields.isFeatured = updateData.isFeatured;
 
     const blog = await Blog.findByIdAndUpdate(
@@ -394,8 +424,12 @@ export async function likeBlogService(blogId, userId) {
         throw new Error("Blog not found");
     }
 
+    if (blog.status !== "PUBLISHED") {
+        throw new Error("Only published blogs can be liked");
+    }
+
     // Check if user has already liked the blog
-    const hasLiked = blog.likedUsers.includes(userId);
+    const hasLiked = blog.likedUsers.some((user) => user.equals(userId));
 
     if (hasLiked) {
         throw new Error("You have already liked this blog");
@@ -425,8 +459,12 @@ export async function unlikeBlogService(blogId, userId) {
         throw new Error("Blog not found");
     }
 
+    if (blog.status !== "PUBLISHED") {
+        throw new Error("Only published blogs can be unliked");
+    }
+
     // Check if user has liked the blog
-    const hasLiked = blog.likedUsers.includes(userId);
+    const hasLiked = blog.likedUsers.some((user) => user.equals(userId));
 
     if (!hasLiked) {
         throw new Error("You have not liked this blog");

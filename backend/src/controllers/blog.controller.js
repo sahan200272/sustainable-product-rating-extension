@@ -1,5 +1,6 @@
 import * as blogService from '../services/blog.service.js';
 import { testGeminiConnection, generateEducationGuide } from '../services/blog-ai.service.js';
+import { blogCloudinaryUpload } from '../utils/cloudinaryUpload.js';
 
 // Public Routes
 
@@ -78,13 +79,39 @@ export async function createBlog(req, res, next) {
             });
         }
 
+        // Parse tags sent through multipart/form-data
+        let parsedTags = [];
+        if (Array.isArray(tags)) {
+            parsedTags = tags;
+        } else if (typeof tags === "string" && tags.trim()) {
+            try {
+                const maybeJson = JSON.parse(tags);
+                parsedTags = Array.isArray(maybeJson)
+                    ? maybeJson
+                    : tags.split(',').map((tag) => tag.trim()).filter(Boolean);
+            } catch {
+                parsedTags = tags.split(',').map((tag) => tag.trim()).filter(Boolean);
+            }
+        }
+
+        let finalImageUrl = imageUrl || "";
+        let finalImageUrls = imageUrl ? [imageUrl] : [];
+
+        // If image files are provided, upload all and use returned URLs
+        if (req.files && req.files.length > 0) {
+            const uploaded = await blogCloudinaryUpload(req.files);
+            finalImageUrls = uploaded?.map((file) => file.url).filter(Boolean) || [];
+            finalImageUrl = finalImageUrls[0] || "";
+        }
+
         // Create blog with PENDING status
         const blog = await blogService.createBlog({
             title,
             content,
             category,
-            tags,
-            imageUrl
+            tags: parsedTags,
+            imageUrl: finalImageUrl,
+            imageUrls: finalImageUrls
         }, req.user.id);
 
         res.status(201).json({
@@ -99,6 +126,21 @@ export async function createBlog(req, res, next) {
         if (error.status === 409) {
             return res.status(409).json({ error: error.message });
         }
+        next(error);
+    }
+}
+
+// Get current user's submitted blogs (Authenticated users)
+export async function getMyBlogs(req, res, next) {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+
+        const result = await blogService.getBlogsByAuthor(req.user.id, { page, limit });
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error fetching user blogs:", error);
         next(error);
     }
 }
@@ -318,7 +360,11 @@ export async function likeBlog(req, res, next) {
         });
     } catch (error) {
         console.error("Error liking blog:", error);
-        if (error.message === "Invalid blog ID" || error.message === "You have already liked this blog") {
+        if (
+            error.message === "Invalid blog ID" ||
+            error.message === "You have already liked this blog" ||
+            error.message === "Only published blogs can be liked"
+        ) {
             return res.status(400).json({ error: error.message });
         }
         if (error.message === "Blog not found") {
@@ -343,7 +389,11 @@ export async function unlikeBlog(req, res, next) {
         });
     } catch (error) {
         console.error("Error unliking blog:", error);
-        if (error.message === "Invalid blog ID" || error.message === "You have not liked this blog") {
+        if (
+            error.message === "Invalid blog ID" ||
+            error.message === "You have not liked this blog" ||
+            error.message === "Only published blogs can be unliked"
+        ) {
             return res.status(400).json({ error: error.message });
         }
         if (error.message === "Blog not found") {

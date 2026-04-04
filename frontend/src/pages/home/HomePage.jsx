@@ -1,10 +1,83 @@
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import { getMyBlogs } from "../../services/blogService";
 
 export default function HomePage() {
     const { user, logout, isAuthenticated } = useAuth();
     const navigate = useNavigate();
+    const [myBlogs, setMyBlogs] = useState([]);
+    const [notifications, setNotifications] = useState([]);
+    const [showNotificationPanel, setShowNotificationPanel] = useState(false);
+    const notificationRef = useRef(null);
+
+    useEffect(() => {
+        const fetchMyBlogs = async () => {
+            if (!isAuthenticated) return;
+            try {
+                const data = await getMyBlogs({ page: 1, limit: 20 });
+                setMyBlogs(data?.blogs || []);
+
+                // Build notifications from blogs
+                const rejected = data?.blogs?.filter((blog) => blog.status === "REJECTED") || [];
+                const approved = data?.blogs?.filter((blog) => blog.status === "PUBLISHED") || [];
+                
+                const notificationsList = [];
+                
+                // Add rejection notifications
+                rejected.forEach((blog) => {
+                    notificationsList.push({
+                        id: `rejection-${blog._id}`,
+                        type: "rejection",
+                        title: blog.title,
+                        message: blog.rejectionReason || "No reason provided",
+                        timestamp: blog.updatedAt,
+                        read: false,
+                    });
+                });
+                
+                // Add approval notifications
+                approved.forEach((blog) => {
+                    notificationsList.push({
+                        id: `approval-${blog._id}`,
+                        type: "approval",
+                        title: blog.title,
+                        message: "Your blog has been approved and published!",
+                        timestamp: blog.approvedAt,
+                        read: false,
+                    });
+                });
+
+                setNotifications(notificationsList);
+            } catch {
+                // ignore optional account notification errors
+            }
+        };
+
+        fetchMyBlogs();
+    }, [isAuthenticated]);
+
+    // Close notification panel when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+                setShowNotificationPanel(false);
+            }
+        };
+
+        if (showNotificationPanel) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [showNotificationPanel]);
+
+    const dismissNotification = (id) => {
+        setNotifications(notifications.filter((notif) => notif.id !== id));
+    };
 
     const handleLogout = () => {
         logout();
@@ -29,6 +102,110 @@ export default function HomePage() {
                                     <span className="text-gray-700">
                                         Welcome, <span className="font-semibold">{user?.name}</span>
                                     </span>
+
+                                    {/* Notification Button */}
+                                    <div className="relative" ref={notificationRef}>
+                                        <button
+                                            onClick={() => setShowNotificationPanel(!showNotificationPanel)}
+                                            className="relative p-2 text-gray-600 hover:text-indigo-600 transition-colors"
+                                            title="Notifications"
+                                        >
+                                            <svg
+                                                className="w-6 h-6"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                                                />
+                                            </svg>
+                                            {notifications.length > 0 && (
+                                                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                                                    {notifications.length}
+                                                </span>
+                                            )}
+                                        </button>
+
+                                        {/* Notification Dropdown Panel */}
+                                        {showNotificationPanel && (
+                                            <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
+                                                <div className="sticky top-0 bg-indigo-50 px-4 py-3 border-b">
+                                                    <h3 className="text-sm font-bold text-gray-900">
+                                                        Notifications ({notifications.length})
+                                                    </h3>
+                                                </div>
+
+                                                {notifications.length > 0 ? (
+                                                    <div className="divide-y">
+                                                        {notifications.map((notif) => (
+                                                            <div
+                                                                key={notif.id}
+                                                                className={`px-4 py-3 hover:bg-gray-50 transition-colors ${
+                                                                    notif.type === "rejection"
+                                                                        ? "border-l-4 border-l-red-500"
+                                                                        : "border-l-4 border-l-green-500"
+                                                                }`}
+                                                            >
+                                                                <div className="flex items-start justify-between gap-2">
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <div className="flex items-center gap-2 mb-1">
+                                                                            {notif.type === "rejection" ? (
+                                                                                <span className="text-lg">❌</span>
+                                                                            ) : (
+                                                                                <span className="text-lg">✅</span>
+                                                                            )}
+                                                                            <p className="text-sm font-semibold text-gray-900 truncate">
+                                                                                {notif.title}
+                                                                            </p>
+                                                                        </div>
+                                                                        <p
+                                                                            className={`text-xs leading-relaxed ${
+                                                                                notif.type === "rejection"
+                                                                                    ? "text-red-700"
+                                                                                    : "text-green-700"
+                                                                            }`}
+                                                                        >
+                                                                            {notif.message}
+                                                                        </p>
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            dismissNotification(notif.id)
+                                                                        }
+                                                                        className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                                                                        title="Dismiss"
+                                                                    >
+                                                                        ✕
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div className="px-4 py-6 text-center text-gray-500 text-sm">
+                                                        No notifications yet
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <Link
+                                        to="/blogs"
+                                        className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+                                    >
+                                        Blog Feed
+                                    </Link>
+                                    <Link
+                                        to="/blogs/create"
+                                        className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+                                    >
+                                        Create Blog
+                                    </Link>
                                     {user?.role === "Admin" && (
                                         <Link
                                             to="/admin/dashboard"
@@ -46,6 +223,12 @@ export default function HomePage() {
                                 </>
                             ) : (
                                 <>
+                                    <Link
+                                        to="/blogs"
+                                        className="px-4 py-2 text-emerald-700 hover:text-emerald-800 font-semibold transition-colors"
+                                    >
+                                        Blog Feed
+                                    </Link>
                                     <Link
                                         to="/login"
                                         className="px-4 py-2 text-indigo-600 hover:text-indigo-800 font-semibold transition-colors"

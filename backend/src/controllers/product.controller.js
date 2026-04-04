@@ -29,8 +29,21 @@ export const createProduct = async (req, res, next) => {
       images = await cloudinaryUpload(req.files);
     }
 
+    // Parse sustainability if it's sent as a string (e.g. via FormData)
+    let parsedSustainability = sustainability;
+    if (typeof sustainability === "string") {
+      try {
+        parsedSustainability = JSON.parse(sustainability);
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid sustainability data format"
+        });
+      }
+    }
+
     // Calculate sustainability score using utility function
-    const score = calculateSustainabilityScore(sustainability);
+    const score = calculateSustainabilityScore(parsedSustainability);
 
     // Call service layer to create product in database
     const product = await productService.createProduct({
@@ -39,7 +52,7 @@ export const createProduct = async (req, res, next) => {
       category,
       description,
       images,
-      sustainability,
+      sustainability: parsedSustainability,
       sustainabilityScore: score
     });
 
