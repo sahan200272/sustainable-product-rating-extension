@@ -9,6 +9,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import AddProductPage from "../pages/product/AddProductPage";
 import ProductsListPage from "../pages/product/ProductsListPage";
 import ProductDetailsPage from "../pages/product/ProductDetailsPage";
+import EditProductPage from "../pages/product/EditProductPage";
 
 export default function AppRoutes() {
     return (
@@ -41,7 +42,18 @@ export default function AppRoutes() {
             <Route path="*" element={<Navigate to="/login" replace />} />
 
             {/*Product & Sustainability Evaluation Component Routes*/}
-            <Route path="/add-product" element={<AddProductPage/>} />
+            <Route 
+                path="/add-product" 
+                element={
+                    <ProtectedRoute element={<AddProductPage/>} requiredRole="Admin" />
+                } 
+            />
+            <Route 
+                path="/edit-product/:id" 
+                element={
+                    <ProtectedRoute element={<EditProductPage/>} requiredRole="Admin" />
+                } 
+            />
             <Route path="/products" element={<ProductsListPage />} />
             <Route path="/products/:id" element={<ProductDetailsPage />} />
 
