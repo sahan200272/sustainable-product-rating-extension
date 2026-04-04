@@ -75,12 +75,18 @@ export default function ProductCard({ product }) {
 
       {/* Actions */}
       <div className="px-5 pb-5 pt-0">
-        <Link
-          to={`/products/${product._id}`}
-          className="w-full flex items-center justify-center gap-2 bg-gray-50 hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 font-medium py-2.5 rounded-xl border border-gray-200 hover:border-emerald-200 transition-colors"
-        >
-          <FiInfo /> View Details
-        </Link>
+        {product._id ? (
+          <Link
+            to={`/products/${product._id}`}
+            className="w-full flex items-center justify-center gap-2 bg-gray-50 hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 font-medium py-2.5 rounded-xl border border-gray-200 hover:border-emerald-200 transition-colors"
+          >
+            <FiInfo /> View Details
+          </Link>
+        ) : (
+          <div className="w-full flex items-center justify-center gap-2 bg-indigo-50 text-indigo-700 font-medium py-2.5 rounded-xl border border-indigo-200 cursor-not-allowed">
+            <FiInfo /> AI Generated Estimate (Not in DB)
+          </div>
+        )}
       </div>
     </div>
   );

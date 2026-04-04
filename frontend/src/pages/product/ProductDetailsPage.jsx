@@ -1,13 +1,18 @@
-import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { getProductById } from "../../services/productServices";
+import { useEffect, useState, useContext } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { getProductById, deleteProduct } from "../../services/productServices";
+import { AuthContext } from "../../context/AuthContext";
+import toast from "react-hot-toast";
 import { 
   FiArrowLeft, FiLoader, FiCheck, FiX, 
-  FiBox, FiActivity, FiCpu, FiAlertCircle 
+  FiBox, FiActivity, FiCpu, FiAlertCircle, FiEdit, FiTrash2 
 } from "react-icons/fi";
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState("");
@@ -30,6 +35,18 @@ export default function ProductDetailsPage() {
     };
     fetchProduct();
   }, [id]);
+
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this product? This action cannot be undone.")) {
+      try {
+        await deleteProduct(id);
+        toast.success("Product deleted successfully");
+        navigate("/products");
+      } catch (err) {
+        toast.error("Failed to delete product");
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -74,12 +91,31 @@ export default function ProductDetailsPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-6xl mx-auto">
-        <Link 
-          to="/products" 
-          className="inline-flex items-center text-sm font-medium text-emerald-600 hover:text-emerald-500 mb-8 transition-colors"
-        >
-          <FiArrowLeft className="mr-2" /> Back to Products
-        </Link>
+        <div className="flex justify-between items-center mb-8 gap-4 flex-wrap">
+          <Link 
+            to="/products" 
+            className="inline-flex items-center text-sm font-medium text-emerald-600 hover:text-emerald-500 transition-colors"
+          >
+            <FiArrowLeft className="mr-2" /> Back to Products
+          </Link>
+
+          {user?.role === "Admin" && (
+            <div className="flex gap-3">
+              <Link 
+                to={`/edit-product/${id}`}
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg font-medium transition-colors shadow-sm"
+              >
+                <FiEdit /> Edit Product
+              </Link>
+              <button 
+                onClick={handleDelete}
+                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg font-medium transition-colors shadow-sm"
+              >
+                <FiTrash2 /> Delete Product
+              </button>
+            </div>
+          )}
+        </div>
         
         <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2">
