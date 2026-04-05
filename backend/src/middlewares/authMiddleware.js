@@ -18,6 +18,20 @@ export function authenticate(req, res, next) {
     }
 }
 
+// Verify JWT token optionally (for public routes that can record history if logged in)
+export function optionalAuthenticate(req, res, next) {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (token) {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            req.user = decoded;
+        }
+    } catch (error) {
+        // ignore errors, just proceed as guest
+    }
+    next();
+}
+
 // Check if user is Admin
 export function isAdmin(req, res, next) {
     if (req.user && req.user.role === "Admin") {
