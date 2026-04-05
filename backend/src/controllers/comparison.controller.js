@@ -56,14 +56,31 @@ export async function compareProducts(req, res, next) {
         if (req.user) {
             try {
                 savedComparison = await comparisonService.saveComparison(req.user.id, comparisonResult);
+                comparisonResult._id = savedComparison._id;
             } catch (err) {
                 console.error("Failed to save comparison:", err);
             }
         }
 
+        // Always use the rich comparisonResult which contains fully populated product objects
+        // We explicitly map the Mongoose documents to plain objects to ensure all data serializes properly
+        const safeProduct1 = product1.toObject ? product1.toObject() : product1;
+        const safeProduct2 = product2.toObject ? product2.toObject() : product2;
+
+        const finalData = {
+            ...comparisonResult,
+             products: [safeProduct1, safeProduct2],
+             comparisonScore: {
+                 product1Score: comparisonResult.scores.product1,
+                 product2Score: comparisonResult.scores.product2,
+                 winner: comparisonResult.winner ? comparisonResult.winner.toString() : null,
+                 scoreDifference: comparisonResult.scores.difference
+             }
+        };
+
         return res.status(200).json({
             success: true,
-            data: savedComparison || comparisonResult
+            data: finalData
         });
 
     } catch (error) {
@@ -219,9 +236,20 @@ export async function quickCompareByName(req, res, next) {
         // Run comparison logic
         const comparisonResult = await comparisonService.compareProducts(product1, product2);
 
+        // Normalize structure to match DB schema
+        const finalData = {
+             ...comparisonResult,
+             comparisonScore: {
+                 product1Score: comparisonResult.scores.product1,
+                 product2Score: comparisonResult.scores.product2,
+                 winner: comparisonResult.winner,
+                 scoreDifference: comparisonResult.scores.difference
+             }
+        };
+
         return res.status(200).json({
             success: true,
-            data: comparisonResult
+            data: finalData
         });
 
     } catch (error) {
