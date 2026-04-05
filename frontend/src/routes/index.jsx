@@ -7,6 +7,7 @@ import AdminModerationPage from "../pages/admin/AdminModerationPage";
 import CreateBlogPage from "../pages/blog/CreateBlogPage";
 import PublicBlogFeedPage from "../pages/blog/PublicBlogFeedPage";
 import BlogDetailsPage from "../pages/blog/BlogDetailsPage";
+import EducationHubPage from "../pages/blog/EducationHubPage";
 import ProtectedRoute from "./ProtectedRoute";
 import AddProductPage from "../pages/product/AddProductPage";
 import ProductsListPage from "../pages/product/ProductsListPage";
@@ -20,6 +21,7 @@ export default function AppRoutes() {
             <Route path="/" element={<HomePage />} />
             <Route path="/blogs" element={<PublicBlogFeedPage />} />
             <Route path="/blogs/:id" element={<BlogDetailsPage />} />
+            <Route path="/blogs/:id/education-hub" element={<EducationHubPage />} />
             <Route
                 path="/blogs/create"
                 element={<ProtectedRoute element={<CreateBlogPage />} />}

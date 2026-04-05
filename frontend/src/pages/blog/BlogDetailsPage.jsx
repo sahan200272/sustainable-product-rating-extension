@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth";
 import {
-    generateEducationGuide,
     getPublicBlogById,
     likeBlogPost,
     unlikeBlogPost,
@@ -17,9 +16,6 @@ export default function BlogDetailsPage() {
     const [blog, setBlog] = useState(null);
     const [loading, setLoading] = useState(true);
     const [liking, setLiking] = useState(false);
-
-    const [guideLoading, setGuideLoading] = useState(false);
-    const [educationGuide, setEducationGuide] = useState(null);
 
     const currentUserId = user?._id || user?.id || "";
 
@@ -79,25 +75,6 @@ export default function BlogDetailsPage() {
             toast.error(error?.response?.data?.error || "Failed to update like");
         } finally {
             setLiking(false);
-        }
-    };
-
-    const handleGenerateGuide = async () => {
-        if (!blog) return;
-
-        try {
-            setGuideLoading(true);
-            const response = await generateEducationGuide({
-                title: blog.title,
-                content: blog.content,
-            });
-
-            setEducationGuide(response?.educationGuide || null);
-            toast.success("Education guide generated");
-        } catch (error) {
-            toast.error(error?.response?.data?.error || "Failed to generate education guide");
-        } finally {
-            setGuideLoading(false);
         }
     };
 
@@ -200,25 +177,12 @@ export default function BlogDetailsPage() {
                             Generate personalized learning guidance from this blog.
                         </p>
 
-                        <button
-                            type="button"
-                            onClick={handleGenerateGuide}
-                            disabled={guideLoading}
-                            className="mt-5 w-full rounded-xl bg-black px-4 py-3 text-lg font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-70"
+                        <Link
+                            to={`/blogs/${blog._id}/education-hub`}
+                            className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-black px-4 py-3 text-lg font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-gray-800"
                         >
-                            {guideLoading ? "Generating..." : "Generate Education Guide"}
-                        </button>
-
-                        {educationGuide ? (
-                            <div className="mt-5 rounded-xl border border-emerald-100 bg-emerald-50 p-4">
-                                <p className="mb-2 text-sm font-bold text-emerald-800">Generated Guide</p>
-                                <pre className="whitespace-pre-wrap break-words text-xs leading-6 text-emerald-900">
-                                    {typeof educationGuide === "string"
-                                        ? educationGuide
-                                        : JSON.stringify(educationGuide, null, 2)}
-                                </pre>
-                            </div>
-                        ) : null}
+                            Generate Education Guide
+                        </Link>
                     </aside>
                 </div>
             </div>

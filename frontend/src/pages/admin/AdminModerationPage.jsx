@@ -17,6 +17,9 @@ export default function AdminModerationPage() {
     const [loading, setLoading] = useState(true);
     const [actionLoadingId, setActionLoadingId] = useState("");
     const [blogs, setBlogs] = useState([]);
+    const [selectedBlogForContent, setSelectedBlogForContent] = useState(null);
+    const [selectedBlogForReject, setSelectedBlogForReject] = useState(null);
+    const [rejectionReason, setRejectionReason] = useState("");
 
     const fetchBlogs = async () => {
         setLoading(true);
@@ -60,16 +63,23 @@ export default function AdminModerationPage() {
         }
     };
 
-    const handleReject = async (blogId) => {
-        const reason = window.prompt("Enter rejection reason:");
-        if (!reason || !reason.trim()) {
+    const handleOpenRejectModal = (blogId) => {
+        setSelectedBlogForReject(blogId);
+        setRejectionReason("");
+    };
+
+    const handleReject = async () => {
+        if (!selectedBlogForReject) return;
+        if (!rejectionReason || !rejectionReason.trim()) {
             return toast.error("Rejection reason is required");
         }
 
-        setActionLoadingId(blogId);
+        setActionLoadingId(selectedBlogForReject);
         try {
-            await rejectBlogPost(blogId, reason.trim());
+            await rejectBlogPost(selectedBlogForReject, rejectionReason.trim());
             toast.success("Blog rejected");
+            setSelectedBlogForReject(null);
+            setRejectionReason("");
             await fetchBlogs();
         } catch (error) {
             toast.error(error?.response?.data?.error || "Failed to reject blog");
@@ -187,14 +197,14 @@ export default function AdminModerationPage() {
                                                     </button>
                                                     <button
                                                         disabled={!isPending || actionLoadingId === blog._id}
-                                                        onClick={() => handleReject(blog._id)}
+                                                        onClick={() => handleOpenRejectModal(blog._id)}
                                                         className="rounded-md border border-red-200 px-2 py-1 text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
                                                         title="Reject"
                                                     >
                                                         ✕
                                                     </button>
                                                     <button
-                                                        onClick={() => window.alert(blog.content || "No content available")}
+                                                        onClick={() => setSelectedBlogForContent(blog)}
                                                         className="rounded-md border border-gray-200 px-2 py-1 text-gray-700"
                                                         title="View"
                                                     >
@@ -210,6 +220,69 @@ export default function AdminModerationPage() {
                     </table>
                 </div>
             </div>
+
+            {selectedBlogForContent ? (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-2xl rounded-xl bg-white p-5 shadow-xl">
+                        <div className="mb-3 flex items-center justify-between">
+                            <h2 className="text-lg font-bold text-gray-900">Blog Content</h2>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedBlogForContent(null)}
+                                className="rounded-md border px-2 py-1 text-sm text-gray-700 hover:bg-gray-50"
+                            >
+                                Close
+                            </button>
+                        </div>
+                        <p className="mb-2 text-sm font-semibold text-gray-800">
+                            {selectedBlogForContent.title}
+                        </p>
+                        <div className="max-h-[60vh] overflow-y-auto rounded-lg border bg-gray-50 p-3 text-sm text-gray-700 whitespace-pre-line">
+                            {selectedBlogForContent.content || "No content available"}
+                        </div>
+                    </div>
+                </div>
+            ) : null}
+
+            {selectedBlogForReject ? (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-lg rounded-xl bg-white p-5 shadow-xl">
+                        <h2 className="text-lg font-bold text-gray-900">Reject Blog</h2>
+                        <p className="mt-1 text-sm text-gray-600">
+                            Please provide a rejection reason for the author.
+                        </p>
+
+                        <textarea
+                            value={rejectionReason}
+                            onChange={(e) => setRejectionReason(e.target.value)}
+                            rows={4}
+                            placeholder="Enter rejection reason"
+                            className="mt-4 w-full rounded-lg border border-gray-300 p-3 text-sm focus:border-emerald-500 focus:outline-none"
+                        />
+
+                        <div className="mt-4 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSelectedBlogForReject(null);
+                                    setRejectionReason("");
+                                }}
+                                className="rounded-lg border px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleReject}
+                                disabled={actionLoadingId === selectedBlogForReject}
+                                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+                            >
+                                {actionLoadingId === selectedBlogForReject ? "Rejecting..." : "Reject"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
         </div>
     );
 }
