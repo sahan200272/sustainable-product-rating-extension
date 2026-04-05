@@ -112,15 +112,17 @@ export default function PublicBlogFeedPage() {
                                     key={blog._id}
                                     className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
                                 >
-                                    {coverImage ? (
-                                        <img
-                                            src={coverImage}
-                                            alt={blog.title}
-                                            className="h-44 w-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="h-44 w-full bg-gray-100" />
-                                    )}
+                                    <Link to={`/blogs/${blog._id}`}>
+                                        {coverImage ? (
+                                            <img
+                                                src={coverImage}
+                                                alt={blog.title}
+                                                className="h-44 w-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="h-44 w-full bg-gray-100" />
+                                        )}
+                                    </Link>
 
                                     <div className="p-4">
                                         <div className="mb-2 flex items-center justify-between gap-3">
@@ -130,9 +132,11 @@ export default function PublicBlogFeedPage() {
                                             <span className="text-xs text-gray-500">By {authorName}</span>
                                         </div>
 
-                                        <h2 className="text-lg font-bold text-gray-900 line-clamp-2">
-                                            {blog.title}
-                                        </h2>
+                                        <Link to={`/blogs/${blog._id}`}>
+                                            <h2 className="text-lg font-bold text-gray-900 line-clamp-2 hover:text-indigo-700">
+                                                {blog.title}
+                                            </h2>
+                                        </Link>
                                         <p className="mt-2 text-sm text-gray-600 line-clamp-3">
                                             {blog.content}
                                         </p>
@@ -141,18 +145,26 @@ export default function PublicBlogFeedPage() {
                                             <span className="text-sm font-medium text-gray-600">
                                                 {blog.likes || 0} likes
                                             </span>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleToggleLike(blog)}
-                                                disabled={likingBlogId === blog._id}
-                                                className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
-                                                    isLikedByCurrentUser(blog)
-                                                        ? "bg-rose-100 text-rose-700 hover:bg-rose-200"
-                                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                                } ${likingBlogId === blog._id ? "opacity-60 cursor-not-allowed" : ""}`}
-                                            >
-                                                {isLikedByCurrentUser(blog) ? "♥ Liked" : "♡ Like"}
-                                            </button>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleToggleLike(blog)}
+                                                    disabled={likingBlogId === blog._id}
+                                                    className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
+                                                        isLikedByCurrentUser(blog)
+                                                            ? "bg-rose-100 text-rose-700 hover:bg-rose-200"
+                                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                    } ${likingBlogId === blog._id ? "opacity-60 cursor-not-allowed" : ""}`}
+                                                >
+                                                    {isLikedByCurrentUser(blog) ? "♥ Liked" : "♡ Like"}
+                                                </button>
+                                                <Link
+                                                    to={`/blogs/${blog._id}`}
+                                                    className="rounded-lg bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-700 hover:bg-indigo-100"
+                                                >
+                                                    Read More →
+                                                </Link>
+                                            </div>
                                         </div>
                                     </div>
                                 </article>

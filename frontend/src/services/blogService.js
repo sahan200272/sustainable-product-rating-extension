@@ -46,6 +46,19 @@ export const getPublicBlogs = async (params = {}) => {
     return response.data;
 };
 
+export const getPublicBlogById = async (blogId) => {
+    const response = await api.get(`/api/blogs/${blogId}`);
+    return response.data;
+};
+
+export const generateEducationGuide = async ({ title, content }) => {
+    const response = await api.post("/api/blogs/generate-education-guide", {
+        title,
+        content,
+    });
+    return response.data;
+};
+
 export const likeBlogPost = async (blogId) => {
     const response = await api.post(`/api/blogs/${blogId}/like`);
     return response.data;
