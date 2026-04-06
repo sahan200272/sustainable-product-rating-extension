@@ -10,15 +10,15 @@ import {
     clearHistory,
     updateComparison
 } from '../controllers/comparison.controller.js';
-import { authenticate, isAdmin } from '../middlewares/authMiddleware.js';
+import { authenticate, optionalAuthenticate, isAdmin } from '../middlewares/authMiddleware.js';
 
 const comparisonRouter = express.Router();
 
 // Public route (no authentication required for quick compare)
 comparisonRouter.get('/quick', quickCompareByName);
 
-// Protected routes (require authentication)
-comparisonRouter.post('/items', authenticate, compareProducts);      // Create a new comparison
+// Protected routes (require authentication except POST /items which is optional)
+comparisonRouter.post('/items', optionalAuthenticate, compareProducts);      // Create a new comparison
 comparisonRouter.get('/items', authenticate, getComparisonHistory);   // Get user's comparison history
 comparisonRouter.delete('/items', authenticate, clearHistory);         // Clear user's comparison history
 
