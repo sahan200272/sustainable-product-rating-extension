@@ -30,3 +30,14 @@ export const getUser = async () => {
     const response = await api.get("/api/users/getUser");
     return response.data;
 };
+
+/**
+ * Login a user via Google.
+ * Token storage is handled by AuthContext.
+ * @param {string} credential - The Google JWT credential (ID Token)
+ * @returns {Promise} Response from the API — contains { user, token }.
+ */
+export const googleLogin = async (credential) => {
+    const response = await api.post("/api/users/google-login", { accessToken: credential });
+    return response.data;
+};
