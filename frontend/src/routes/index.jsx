@@ -10,6 +10,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import AddProductPage from "../pages/product/AddProductPage";
 import ProductsListPage from "../pages/product/ProductsListPage";
 import ProductDetailsPage from "../pages/product/ProductDetailsPage";
+import VerifyOtpPage from "../pages/login/VerifyOtpPage";
 import EditProductPage from "../pages/product/EditProductPage";
 import ComparePage from "../pages/compare/ComparePage";
 import ComparisonHistoryPage from "../pages/compare/ComparisonHistoryPage";
@@ -20,6 +21,7 @@ export default function AppRoutes() {
         <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/verify-otp" element={<VerifyOtpPage />} />
             <Route path="/" element={<HomePage />} />
             <Route path="/blogs" element={<PublicBlogFeedPage />} />
             <Route
