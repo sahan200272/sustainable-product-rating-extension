@@ -13,6 +13,7 @@ dist-ssr
 *.local
 
 .env
+Google client ID and Secret.txt
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
