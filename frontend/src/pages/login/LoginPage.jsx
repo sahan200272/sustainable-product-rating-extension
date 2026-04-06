@@ -2,9 +2,11 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../../services/userService";
+import { sendOtp } from "../../services/authService";
 import { useAuth } from "../../hooks/useAuth";
 import { useForm } from "../../hooks/useForm";
 import FormField from "../../components/common/FormField";
+import GoogleLoginBtn from "../../components/common/GoogleLoginBtn";
 import appLogo from "../../assets/icons/app_logo.png";
 import bgImage from "../../assets/images/backGround_image.png";
 
@@ -30,6 +32,22 @@ export default function LoginPage() {
         try {
             const response = await loginUser(values);
             login(response.user, response.token);
+            
+            if (!response.user.emailVerified) {
+                try {
+                    // Send OTP automatically when logging in unverified
+                    console.log("Sending OTP...");
+                    const otpResponse = await sendOtp();
+                    console.log(otpResponse);
+                    toast.success("Please verify your email. A new OTP has been sent.");
+                } catch (otpError) {
+                    console.error("OTP generation error:", otpError);
+                    toast.error(otpError?.response?.data?.error || "Failed to automatically send OTP. Please click resend on the next page.");
+                }
+                navigate("/verify-otp");
+                return;
+            }
+            
             toast.success("Welcome back!");
             navigate(response.user.role === "Admin" ? "/admin/dashboard" : "/");
         } catch (error) {
@@ -145,7 +163,15 @@ export default function LoginPage() {
                             ) : "Sign In →"}
                         </button>
 
-                        <p className="text-center text-xs lg:text-sm text-gray-400">
+                        <div className="relative flex items-center py-2">
+                            <div className="flex-grow border-t border-gray-200"></div>
+                            <span className="flex-shrink-0 mx-4 text-gray-400 text-xs font-semibold uppercase tracking-wider">or</span>
+                            <div className="flex-grow border-t border-gray-200"></div>
+                        </div>
+
+                        <GoogleLoginBtn />
+
+                        <p className="text-center text-xs lg:text-sm text-gray-400 mt-2">
                             🔒 Your data is safe. We never sell your information.
                         </p>
                     </form>

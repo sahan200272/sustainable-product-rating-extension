@@ -11,11 +11,14 @@ import AddProductPage from "../pages/product/AddProductPage";
 import ProductsListPage from "../pages/product/ProductsListPage";
 import ProductDetailsPage from "../pages/product/ProductDetailsPage";
 
+import VerifyOtpPage from "../pages/login/VerifyOtpPage";
+
 export default function AppRoutes() {
     return (
         <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/verify-otp" element={<VerifyOtpPage />} />
             <Route path="/" element={<HomePage />} />
             <Route path="/blogs" element={<PublicBlogFeedPage />} />
             <Route
