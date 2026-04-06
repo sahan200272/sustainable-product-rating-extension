@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 /**
@@ -17,9 +17,14 @@ export default function ProtectedRoute({
     redirectTo = "/login",
 }) {
     const { isAuthenticated, user } = useAuth();
+    const location = useLocation();
 
     if (!isAuthenticated) {
-        return <Navigate to={redirectTo} replace />;
+        return <Navigate to={redirectTo} replace state={{ from: location }} />;
+    }
+
+    if (!user?.emailVerified) {
+        return <Navigate to="/verify-otp" replace state={{ from: location }} />;
     }
 
     if (requiredRole && user?.role !== requiredRole) {

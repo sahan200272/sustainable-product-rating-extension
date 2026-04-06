@@ -163,3 +163,152 @@ export async function getAllUsers(req, res) {
     }
 }
 
+// Controller function for admin to block or unblock a user by email
+export async function blockOrUnblockUser(req, res) {
+    try {
+        const { email } = req.params;
+
+        if (!email) {
+            return res.status(400).json({
+                error: 'Email parameter is required'
+            });
+        }
+
+        const result = await userService.toggleBlockUserByEmail(email);
+
+        return res.status(200).json({
+            message: `User has been ${result.isBlocked ? 'blocked' : 'unblocked'}`,
+            user: result.user
+        });
+    } catch (error) {
+        console.error('Block/unblock user error:', error);
+
+        if (error.message === 'User not found') {
+            return res.status(404).json({
+                error: 'User not found'
+            });
+        }
+
+        return res.status(500).json({
+            error: 'Failed to update user block status'
+        });
+    }
+}
+
+// Controller function to login/register user via Google
+export async function loginWithGoogle(req, res) {
+    try {
+        const { accessToken } = req.body;
+
+        if (!accessToken) {
+            return res.status(400).json({
+                error: 'Google access token is required'
+            });
+        }
+
+        const { user, isNewUser } = await userService.loginWithGoogle(accessToken);
+
+        const token = jwt.sign(
+            {
+                id: user._id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                role: user.role,
+                profilePicture: user.profilePicture,
+                phone: user.phone,
+                emailVerified: user.emailVerified
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        return res.status(200).json({
+            message: isNewUser
+                ? 'User registered and logged in successfully!'
+                : 'Login Successful!',
+            token,
+            user
+        });
+    } catch (error) {
+        console.error('Google login error:', error);
+
+        if (error.message === 'Access token is required') {
+            return res.status(400).json({ error: error.message });
+        }
+
+        if (error.message === 'Account is blocked') {
+            return res.status(403).json({
+                error: 'Your Account is blocked. Please contact support.'
+            });
+        }
+
+        if (
+            error.message === 'Google account email not available' ||
+            error.response?.status === 401
+        ) {
+            return res.status(401).json({
+                error: 'Invalid Google access token'
+            });
+        }
+
+        return res.status(500).json({
+            error: 'Failed to Login with Google'
+        });
+    }
+}
+
+// Controller function to send OTP to authenticated user's email
+export async function sendOTP(req, res) {
+    try {
+        await userService.sendOtpForUser(req.user.email);
+
+        return res.status(200).json({
+            message: 'OTP email sent successfully'
+        });
+    } catch (error) {
+        console.error('Send OTP error:', error);
+
+        if (error.message === 'Email service not configured') {
+            return res.status(500).json({
+                error: 'Email service is not configured on the server'
+            });
+        }
+
+        return res.status(500).json({
+            error: 'Failed to send OTP email'
+        });
+    }
+}
+
+// Controller function to verify OTP for authenticated user
+export async function verifyOTP(req, res) {
+    try {
+        const { code } = req.body;
+
+        await userService.verifyOtpForUser(req.user.email, code);
+
+        return res.status(200).json({
+            message: 'Email verified successfully'
+        });
+    } catch (error) {
+        console.error('Verify OTP error:', error);
+
+        if (error.message === 'Invalid OTP code') {
+            return res.status(400).json({
+                error: 'Invalid OTP. Please try again.'
+            });
+        }
+
+        if (error.message === 'OTP not found') {
+            return res.status(400).json({
+                error: 'No OTP found. Please request a new one.'
+            });
+        }
+
+        return res.status(500).json({
+            error: 'Failed to verify OTP'
+        });
+    }
+}
+

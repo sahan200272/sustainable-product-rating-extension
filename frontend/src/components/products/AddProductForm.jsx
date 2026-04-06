@@ -8,6 +8,15 @@ export default function AddProductForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
+
+  const PREDEFINED_CATEGORIES = [
+    "Electronics",
+    "Fashion & Apparel",
+    "Home & Living",
+    "Beauty & Health",
+    "Food & Groceries",
+  ];
 
   const [formData, setFormData] = useState({
     name: "",
@@ -168,15 +177,39 @@ export default function AddProductForm() {
           <label className="block text-sm font-semibold text-gray-700 mb-1">
             Category
           </label>
-          <input
-            type="text"
-            name="category"
-            required
-            value={formData.category}
-            onChange={handleTextChange}
+          <select
+            name="categorySelect"
+            required={!isCustomCategory}
+            value={PREDEFINED_CATEGORIES.includes(formData.category) ? formData.category : (isCustomCategory ? "Other" : "")}
+            onChange={(e) => {
+              if (e.target.value === "Other") {
+                setFormData((prev) => ({ ...prev, category: "" }));
+                setIsCustomCategory(true);
+              } else {
+                setFormData((prev) => ({ ...prev, category: e.target.value }));
+                setIsCustomCategory(false);
+              }
+            }}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-shadow text-gray-900 bg-gray-50/50"
-            placeholder="e.g. Electronics"
-          />
+          >
+            <option value="" disabled>Select a Category</option>
+            {PREDEFINED_CATEGORIES.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+            <option value="Other">Add New Category...</option>
+          </select>
+          {isCustomCategory && (
+            <input
+              type="text"
+              name="category"
+              required
+              value={formData.category}
+              onChange={handleTextChange}
+              className="mt-3 w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-shadow text-gray-900 bg-gray-50/50"
+              placeholder="Type new category..."
+              autoFocus
+            />
+          )}
         </div>
         <div className="md:col-span-2">
           <label className="block text-sm font-semibold text-gray-700 mb-1">
