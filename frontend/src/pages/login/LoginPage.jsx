@@ -49,7 +49,7 @@ export default function LoginPage() {
             }
             
             toast.success("Welcome back!");
-            navigate(response.user.role === "Admin" ? "/admin/dashboard" : "/products");
+            navigate(response.user.role === "Admin" ? "/admin/dashboard" : "/");
         } catch (error) {
             toast.error(error?.response?.data?.error || "Login failed. Please check your credentials.");
         } finally {

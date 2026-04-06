@@ -10,17 +10,12 @@ import ProtectedRoute from "./ProtectedRoute";
 import AddProductPage from "../pages/product/AddProductPage";
 import ProductsListPage from "../pages/product/ProductsListPage";
 import ProductDetailsPage from "../pages/product/ProductDetailsPage";
-<<<<<<< HEAD
-
 import VerifyOtpPage from "../pages/login/VerifyOtpPage";
-
-=======
 import EditProductPage from "../pages/product/EditProductPage";
 import ComparePage from "../pages/compare/ComparePage";
 import ComparisonHistoryPage from "../pages/compare/ComparisonHistoryPage";
 import ComparisonDetailPage from "../pages/compare/ComparisonDetailPage";
 import ComparisonStatsPage from "../pages/compare/ComparisonStatsPage";
->>>>>>> origin/dev
 export default function AppRoutes() {
     return (
         <Routes>
