@@ -3,6 +3,16 @@ import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { getMyBlogs } from "../../services/blogService";
+import { GREENVY_LOGO_URL, GREENVY_LOGO_ALT } from "../../config/env";
+
+// Import new modular sections
+import HeroSection from "../../components/home/HeroSection";
+import FeatureSection from "../../components/home/FeatureSection";
+import ComparisonSection from "../../components/home/ComparisonSection";
+import TopProductsSection from "../../components/home/TopProductsSection";
+import ReviewsSection from "../../components/home/ReviewsSection";
+import BlogSection from "../../components/home/BlogSection";
+import CtaSection from "../../components/home/CtaSection";
 
 export default function HomePage() {
     const { user, logout, isAuthenticated } = useAuth();
@@ -86,28 +96,37 @@ export default function HomePage() {
     };
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100">
-            {/* Navigation Bar */}
-            <nav className="bg-white shadow-md">
+        <div className="min-h-screen bg-slate-50 font-sans selection:bg-emerald-200">
+            {/* Clean, Modern Navigation Bar */}
+            <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 transition-all">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
+                    <div className="flex justify-between items-center h-20">
                         <div className="flex items-center">
-                            <h1 className="text-2xl font-bold text-indigo-600">
-                                Sustainable Products
-                            </h1>
+                            <Link to="/" className="group">
+                                <h1 className="text-2xl font-black text-emerald-600 tracking-tight hover:text-emerald-700 transition-colors">
+                                    Greenvy
+                                </h1>
+                            </Link>
                         </div>
+                        
+                        <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
+                            <Link to="/products" className="hover:text-emerald-500 transition-colors">Products</Link>
+                            <Link to="/compare" className="hover:text-emerald-500 transition-colors">Compare</Link>
+                            <Link to="/blogs" className="hover:text-emerald-500 transition-colors">Insights</Link>
+                        </div>
+
                         <div className="flex items-center gap-4">
                             {isAuthenticated ? (
                                 <>
-                                    <span className="text-gray-700">
-                                        Welcome, <span className="font-semibold">{user?.name}</span>
+                                    <span className="hidden lg:block text-slate-600 text-sm font-medium">
+                                        Hi, <span className="font-bold text-slate-900">{user?.name}</span>
                                     </span>
 
                                     {/* Notification Button */}
                                     <div className="relative" ref={notificationRef}>
                                         <button
                                             onClick={() => setShowNotificationPanel(!showNotificationPanel)}
-                                            className="relative p-2 text-gray-600 hover:text-indigo-600 transition-colors"
+                                            className="relative p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-full transition-all"
                                             title="Notifications"
                                         >
                                             <svg
@@ -124,7 +143,7 @@ export default function HomePage() {
                                                 />
                                             </svg>
                                             {notifications.length > 0 && (
-                                                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                                                <span className="absolute top-1 right-1 inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full border-2 border-white">
                                                     {notifications.length}
                                                 </span>
                                             )}
@@ -132,62 +151,53 @@ export default function HomePage() {
 
                                         {/* Notification Dropdown Panel */}
                                         {showNotificationPanel && (
-                                            <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
-                                                <div className="sticky top-0 bg-indigo-50 px-4 py-3 border-b">
-                                                    <h3 className="text-sm font-bold text-gray-900">
+                                            <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 z-50 max-h-96 overflow-y-auto">
+                                                <div className="sticky top-0 bg-white/95 backdrop-blur px-5 py-4 border-b border-slate-100">
+                                                    <h3 className="text-sm font-bold text-slate-900">
                                                         Notifications ({notifications.length})
                                                     </h3>
                                                 </div>
 
                                                 {notifications.length > 0 ? (
-                                                    <div className="divide-y">
+                                                    <div className="divide-y divide-slate-50">
                                                         {notifications.map((notif) => (
                                                             <div
                                                                 key={notif.id}
-                                                                className={`px-4 py-3 hover:bg-gray-50 transition-colors ${
+                                                                className={`px-5 py-4 hover:bg-slate-50 transition-colors ${
                                                                     notif.type === "rejection"
                                                                         ? "border-l-4 border-l-red-500"
-                                                                        : "border-l-4 border-l-green-500"
+                                                                        : "border-l-4 border-l-emerald-500"
                                                                 }`}
                                                             >
-                                                                <div className="flex items-start justify-between gap-2">
+                                                                <div className="flex items-start justify-between gap-3">
                                                                     <div className="flex-1 min-w-0">
                                                                         <div className="flex items-center gap-2 mb-1">
                                                                             {notif.type === "rejection" ? (
-                                                                                <span className="text-lg">❌</span>
+                                                                                <span className="text-red-500 text-sm">❌</span>
                                                                             ) : (
-                                                                                <span className="text-lg">✅</span>
+                                                                                <span className="text-emerald-500 text-sm">✅</span>
                                                                             )}
-                                                                            <p className="text-sm font-semibold text-gray-900 truncate">
+                                                                            <p className="text-sm font-bold text-slate-900 truncate">
                                                                                 {notif.title}
                                                                             </p>
                                                                         </div>
-                                                                        <p
-                                                                            className={`text-xs leading-relaxed ${
-                                                                                notif.type === "rejection"
-                                                                                    ? "text-red-700"
-                                                                                    : "text-green-700"
-                                                                            }`}
-                                                                        >
+                                                                        <p className="text-xs text-slate-500 leading-relaxed">
                                                                             {notif.message}
                                                                         </p>
                                                                     </div>
                                                                     <button
-                                                                        onClick={() =>
-                                                                            dismissNotification(notif.id)
-                                                                        }
-                                                                        className="text-gray-400 hover:text-gray-600 flex-shrink-0"
-                                                                        title="Dismiss"
+                                                                        onClick={() => dismissNotification(notif.id)}
+                                                                        className="text-slate-400 hover:text-slate-600 p-1"
                                                                     >
-                                                                        ✕
+                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                                                                     </button>
                                                                 </div>
                                                             </div>
                                                         ))}
                                                     </div>
                                                 ) : (
-                                                    <div className="px-4 py-6 text-center text-gray-500 text-sm">
-                                                        No notifications yet
+                                                    <div className="px-5 py-8 text-center text-slate-500 text-sm">
+                                                        You're all caught up!
                                                     </div>
                                                 )}
                                             </div>
@@ -195,34 +205,24 @@ export default function HomePage() {
                                     </div>
 
                                     <Link
-                                        to="/compare"
-                                        className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
-                                    >
-                                        Compare Products
-                                    </Link>
-                                    <Link
-                                        to="/blogs"
-                                        className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
-                                    >
-                                        Blog Feed
-                                    </Link>
-                                    <Link
                                         to="/blogs/create"
-                                        className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+                                        className="hidden md:inline-flex items-center justify-center px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl font-semibold hover:bg-emerald-100 transition-colors"
                                     >
                                         Create Blog
                                     </Link>
+                                    
                                     {user?.role === "Admin" && (
                                         <Link
                                             to="/admin/dashboard"
-                                            className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
+                                            className="hidden lg:inline-flex px-4 py-2 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-colors"
                                         >
-                                            Admin Dashboard
+                                            Dashboard
                                         </Link>
                                     )}
+
                                     <button
                                         onClick={handleLogout}
-                                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                        className="px-4 py-2 text-slate-500 hover:text-slate-700 font-semibold transition-colors"
                                     >
                                         Logout
                                     </button>
@@ -230,28 +230,16 @@ export default function HomePage() {
                             ) : (
                                 <>
                                     <Link
-                                        to="/compare"
-                                        className="px-4 py-2 text-emerald-700 hover:text-emerald-800 font-semibold transition-colors"
-                                    >
-                                        Compare Products
-                                    </Link>
-                                    <Link
-                                        to="/blogs"
-                                        className="px-4 py-2 text-emerald-700 hover:text-emerald-800 font-semibold transition-colors"
-                                    >
-                                        Blog Feed
-                                    </Link>
-                                    <Link
                                         to="/login"
-                                        className="px-4 py-2 text-indigo-600 hover:text-indigo-800 font-semibold transition-colors"
+                                        className="hidden sm:inline-flex px-5 py-2.5 text-slate-600 hover:text-slate-900 font-bold transition-colors"
                                     >
-                                        Login
+                                        Log in
                                     </Link>
                                     <Link
                                         to="/register"
-                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                        className="inline-flex items-center justify-center px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors shadow-md"
                                     >
-                                        Sign Up
+                                        Sign up
                                     </Link>
                                 </>
                             )}
@@ -260,91 +248,16 @@ export default function HomePage() {
                 </div>
             </nav>
 
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="text-center mb-12">
-                    <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                        {isAuthenticated 
-                            ? `Welcome to Your Dashboard, ${user?.name}!` 
-                            : "Welcome to Sustainable Products"}
-                    </h2>
-                    <p className="text-xl text-gray-600">
-                        Discover and rate sustainable products
-                    </p>
-                    {!isAuthenticated && (
-                        <div className="mt-6">
-                            <Link
-                                to="/register"
-                                className="inline-block px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold text-lg"
-                            >
-                                Get Started Today
-                            </Link>
-                        </div>
-                    )}
-                </div>
-
-                {/* Feature Cards */}
-                <div className="grid md:grid-cols-3 gap-8 mb-12">
-                    <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-                        <div className="text-4xl mb-4">🌿</div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">
-                            Eco-Friendly Products
-                        </h3>
-                        <p className="text-gray-600">
-                            Browse thousands of environmentally conscious products
-                        </p>
-                    </div>
-
-                    <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-                        <div className="text-4xl mb-4">⭐</div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">
-                            Rate Products
-                        </h3>
-                        <p className="text-gray-600">
-                            Share your experience and help others make informed choices
-                        </p>
-                    </div>
-
-                    <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-                        <div className="text-4xl mb-4">📊</div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">
-                            View Analytics
-                        </h3>
-                        <p className="text-gray-600">
-                            Track your contributions to sustainable living
-                        </p>
-                    </div>
-                </div>
-
-                {/* User Info Card - Only show when authenticated */}
-                {isAuthenticated && (
-                    <div className="bg-white rounded-xl shadow-lg p-8">
-                        <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                            Your Profile
-                        </h3>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-gray-600">Name</p>
-                                <p className="text-lg font-semibold text-gray-900">{user?.name}</p>
-                            </div>
-                            <div>
-                                <p className="text-gray-600">Email</p>
-                                <p className="text-lg font-semibold text-gray-900">{user?.email}</p>
-                            </div>
-                            <div>
-                                <p className="text-gray-600">Role</p>
-                                <p className="text-lg font-semibold text-gray-900">{user?.role}</p>
-                            </div>
-                            <div>
-                                <p className="text-gray-600">Account Status</p>
-                                <span className="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
-                                    Active
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
+            {/* Modular Main Content */}
+            <main>
+                <HeroSection />
+                <FeatureSection />
+                <ComparisonSection />
+                <TopProductsSection />
+                <ReviewsSection />
+                <BlogSection />
+                <CtaSection />
+            </main>
         </div>
     );
 }

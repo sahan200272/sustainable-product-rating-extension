@@ -65,6 +65,22 @@ export const getApprovedReviews = async (req, res, next) => {
   }
 };
 
+// Retrieves all recent approved reviews globally
+export const getRecentApprovedReviews = async (req, res, next) => {
+  try {
+    const reviews = await reviewService.getRecentApprovedReviews();
+
+    return res.status(200).json({
+      success: true,
+      count: reviews.length,
+      data: reviews
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Retrieves all reviews by the logged-in user
 export const getMyReviews = async (req, res, next) => {
   try {

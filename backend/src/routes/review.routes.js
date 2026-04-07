@@ -27,6 +27,8 @@ reviewRouter.get(
   reviewController.getPendingReviews
 );
 
+reviewRouter.get("/recent", reviewController.getRecentApprovedReviews);
+
 reviewRouter.patch(
   "/:id/approve",
   authenticate,

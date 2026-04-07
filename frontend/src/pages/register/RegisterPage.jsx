@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../../services/userService";
 import { useForm } from "../../hooks/useForm";
 import FormField from "../../components/common/FormField";
-import appLogo from "../../assets/icons/app_logo.png";
+import { GREENVY_LOGO_URL, GREENVY_LOGO_ALT } from "../../config/env";
 import bgImage from "../../assets/images/backGround_image.png";
 
 const INITIAL_VALUES = {
@@ -58,7 +58,7 @@ export default function RegisterPage() {
 
                 {/* Brand */}
                 <div className="relative z-10 px-10 py-8 flex items-center gap-3">
-                    <img src={appLogo} alt="Greenvy Logo" className="w-11 h-11 lg:w-14 lg:h-14 object-contain drop-shadow-lg" />
+                    <img src={GREENVY_LOGO_URL} alt={GREENVY_LOGO_ALT} loading="lazy" className="w-11 h-11 lg:w-14 lg:h-14 object-contain drop-shadow-lg" />
                     <span className="text-white font-extrabold text-2xl lg:text-3xl tracking-tight drop-shadow-md">Greenvy</span>
                 </div>
 
@@ -110,7 +110,7 @@ export default function RegisterPage() {
 
                     {/* Mobile brand */}
                     <div className="flex lg:hidden items-center gap-2 mb-5">
-                        <img src={appLogo} alt="Greenvy Logo" className="w-8 h-8 object-contain" />
+                        <img src={GREENVY_LOGO_URL} alt={GREENVY_LOGO_ALT} loading="lazy" className="w-8 h-8 object-contain" />
                         <span className="font-extrabold text-emerald-800 text-lg tracking-tight">Greenvy</span>
                     </div>
 
