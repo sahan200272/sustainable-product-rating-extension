@@ -66,6 +66,24 @@ export const getAllProducts = async () => {
 };
 
 
+// GET TOP PRODUCTS
+export const getTopProducts = async () => {
+  try {
+    // Sort products by sustainabilityScore in descending order and limit to 4
+    const products = await Product.find()
+      .sort({ sustainabilityScore: -1 })
+      .limit(4)
+      .lean();
+
+    return products;
+
+  } catch (error) {
+    console.error("[ProductService] getTopProducts Error:", error.message);
+    throw new Error("Failed to fetch top products");
+  }
+};
+
+
 // GET SINGLE PRODUCT BY ID
 export const getSingleProduct = async (id) => {
   try {
