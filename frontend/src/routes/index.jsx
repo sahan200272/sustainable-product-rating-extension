@@ -18,71 +18,80 @@ import ComparePage from "../pages/compare/ComparePage";
 import ComparisonHistoryPage from "../pages/compare/ComparisonHistoryPage";
 import ComparisonDetailPage from "../pages/compare/ComparisonDetailPage";
 import ComparisonStatsPage from "../pages/compare/ComparisonStatsPage";
+import MainLayout from "../components/layouts/MainLayout";
+
 export default function AppRoutes() {
     return (
         <Routes>
+            {/* ── Auth pages — no footer ── */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/verify-otp" element={<VerifyOtpPage />} />
-            <Route path="/" element={<HomePage />} />
-            <Route path="/blogs" element={<PublicBlogFeedPage />} />
-            <Route path="/blogs/:id" element={<BlogDetailsPage />} />
-            <Route path="/blogs/:id/education-hub" element={<EducationHubPage />} />
+
+            {/* ── Public & app pages — wrapped in MainLayout (includes Footer) ── */}
+            <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
+            <Route path="/blogs" element={<MainLayout><PublicBlogFeedPage /></MainLayout>} />
+            <Route path="/blogs/:id" element={<MainLayout><BlogDetailsPage /></MainLayout>} />
+            <Route path="/blogs/:id/education-hub" element={<MainLayout><EducationHubPage /></MainLayout>} />
             <Route
                 path="/blogs/create"
-                element={<ProtectedRoute element={<CreateBlogPage />} />}
+                element={<MainLayout><ProtectedRoute element={<CreateBlogPage />} /></MainLayout>}
             />
+
+            {/* Admin pages */}
             <Route 
                 path="/admin/dashboard" 
                 element={
-                    <ProtectedRoute 
-                        element={<AdminDashboard />} 
-                        requiredRole="Admin" 
-                    />
+                    <MainLayout>
+                        <ProtectedRoute element={<AdminDashboard />} requiredRole="Admin" />
+                    </MainLayout>
                 } 
             />
             <Route
                 path="/admin/moderation"
                 element={
-                    <ProtectedRoute
-                        element={<AdminModerationPage />}
-                        requiredRole="Admin"
-                    />
+                    <MainLayout>
+                        <ProtectedRoute element={<AdminModerationPage />} requiredRole="Admin" />
+                    </MainLayout>
                 }
             />
-            <Route path="*" element={<Navigate to="/login" replace />} />
 
-            {/*Product & Sustainability Evaluation Component Routes*/}
+            {/* Product & Sustainability Evaluation Component Routes */}
             <Route 
                 path="/add-product" 
                 element={
-                    <ProtectedRoute element={<AddProductPage/>} requiredRole="Admin" />
+                    <MainLayout>
+                        <ProtectedRoute element={<AddProductPage />} requiredRole="Admin" />
+                    </MainLayout>
                 } 
             />
             <Route 
                 path="/edit-product/:id" 
                 element={
-                    <ProtectedRoute element={<EditProductPage/>} requiredRole="Admin" />
+                    <MainLayout>
+                        <ProtectedRoute element={<EditProductPage />} requiredRole="Admin" />
+                    </MainLayout>
                 } 
             />
-            <Route path="/products" element={<ProductsListPage />} />
-            <Route path="/products/:id" element={<ProductDetailsPage />} />
+            <Route path="/products" element={<MainLayout><ProductsListPage /></MainLayout>} />
+            <Route path="/products/:id" element={<MainLayout><ProductDetailsPage /></MainLayout>} />
 
             {/* Comparison Component Routes */}
-            <Route path="/compare" element={<ComparePage />} />
+            <Route path="/compare" element={<MainLayout><ComparePage /></MainLayout>} />
             <Route 
                 path="/compare/history" 
-                element={<ProtectedRoute element={<ComparisonHistoryPage />} />} 
+                element={<MainLayout><ProtectedRoute element={<ComparisonHistoryPage />} /></MainLayout>} 
             />
             <Route 
                 path="/compare/stats" 
-                element={<ProtectedRoute element={<ComparisonStatsPage />} requiredRole="Admin" />} 
+                element={<MainLayout><ProtectedRoute element={<ComparisonStatsPage />} requiredRole="Admin" /></MainLayout>} 
             />
             <Route 
                 path="/compare/:id" 
-                element={<ProtectedRoute element={<ComparisonDetailPage />} />} 
+                element={<MainLayout><ProtectedRoute element={<ComparisonDetailPage />} /></MainLayout>} 
             />
 
+            <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
     );
 }
