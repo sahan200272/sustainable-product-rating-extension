@@ -62,11 +62,11 @@ export default function HeroSection() {
                 <div className="mt-12 flex items-center justify-center gap-8 text-sm font-medium text-slate-500">
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                        10k+ Products
+                        1k+ Products
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                        50k+ Reviews
+                        2k+ Reviews
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-emerald-500" />
