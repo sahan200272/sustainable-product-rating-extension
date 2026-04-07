@@ -86,6 +86,23 @@ export const getAllProducts = async (req, res, next) => {
   }
 };
 
+// get top products
+export const getTopProducts = async (req, res, next) => {
+  try {
+    const products = await productService.getTopProducts();
+
+    return res.status(200).json({
+      success: true,
+      message: "Top products retrieved successfully",
+      data: products
+    });
+
+  } catch (error) {
+    console.error("[ProductController] Retrieve Top Products Error:", error.message);
+    next(error);
+  }
+};
+
 // get single product details
 export const getSingleProduct = async (req, res, next) => {
   try {
