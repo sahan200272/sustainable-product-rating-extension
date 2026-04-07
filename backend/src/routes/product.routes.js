@@ -11,6 +11,7 @@ productRoutes.post("/",
 
 productRoutes.get("/", productController.getAllProducts);
 productRoutes.get("/search", productController.searchProducts);
+productRoutes.get("/top", productController.getTopProducts);
 productRoutes.get("/:id", productController.getSingleProduct);
 
 productRoutes.put("/:id",
