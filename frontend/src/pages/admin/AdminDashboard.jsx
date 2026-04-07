@@ -3,7 +3,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { getAllProducts, deleteProduct } from "../../services/productServices";
-import appLogo from "../../assets/icons/app_logo.png";
+import { GREENVY_LOGO_URL, GREENVY_LOGO_ALT } from "../../config/env";
 import {
     FiPlus,
     FiEdit2,
@@ -184,8 +184,9 @@ export default function AdminDashboard() {
                 <aside className="hidden w-64 border-r border-emerald-100 bg-gradient-to-b from-emerald-900 to-cyan-900 p-5 text-white md:flex md:flex-col">
                     <div className="mb-8 flex items-center gap-3">
                         <img
-                            src={appLogo}
-                            alt="Greenvy Logo"
+                            src={GREENVY_LOGO_URL}
+                            alt={GREENVY_LOGO_ALT}
+                            loading="lazy"
                             className="h-12 w-12 rounded-xl object-contain bg-white/10 p-1.5 shadow-lg"
                         />
                         <div className="leading-tight">

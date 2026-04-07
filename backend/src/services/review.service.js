@@ -86,6 +86,17 @@ export const getApprovedReviews = async (productId) => {
   return reviews;
 };
 
+// Retrieves recent approved reviews across all products
+export const getRecentApprovedReviews = async () => {
+  const reviews = await Review.find({ status: "APPROVED" })
+    .populate("user", "firstName lastName profilePicture role")
+    .populate("product", "name brand")
+    .sort({ createdAt: -1 })
+    .limit(3);
+
+  return reviews;
+};
+
 // Retrieves all reviews by a specific user (for "My Reviews" page)
 export const getMyReviews = async (userId) => {
   const reviews = await Review.find({ user: userId })
