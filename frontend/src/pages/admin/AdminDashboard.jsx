@@ -17,6 +17,7 @@ import {
     FiEye,
     FiSettings,
     FiFileText,
+    FiBarChart2,
 } from "react-icons/fi";
 import {
     approveBlogPost,
@@ -287,7 +288,7 @@ export default function AdminDashboard() {
 
                                 <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                                     <h3 className="mb-4 text-3xl font-black text-slate-900">Quick Actions</h3>
-                                    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+                                    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
                                         <button
                                             onClick={() => navigate("/add-product")}
                                             className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-left font-semibold text-blue-700 hover:bg-blue-100"
@@ -311,6 +312,12 @@ export default function AdminDashboard() {
                                             className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-left font-semibold text-emerald-700 hover:bg-emerald-100"
                                         >
                                             <FiSettings className="mr-2 inline h-4 w-4" /> Settings
+                                        </button>
+                                        <button
+                                            onClick={() => navigate("/compare/stats")}
+                                            className="rounded-xl border border-purple-200 bg-purple-50 px-4 py-3 text-left font-semibold text-purple-700 hover:bg-purple-100"
+                                        >
+                                            <FiBarChart2 className="mr-2 inline h-4 w-4" /> Comparison Stats
                                         </button>
                                     </div>
                                 </div>
