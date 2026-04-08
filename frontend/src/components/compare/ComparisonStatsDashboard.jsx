@@ -1,6 +1,28 @@
 import { FiPieChart, FiTrendingUp, FiActivity, FiUsers } from "react-icons/fi";
 import { Line } from "react-chartjs-2";
 import { Link } from "react-router-dom";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 export default function ComparisonStatsDashboard({ stats }) {
   if (!stats) return null;
