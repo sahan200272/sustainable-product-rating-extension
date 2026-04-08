@@ -63,13 +63,18 @@ export const createReview = async (data, userId) => {
     ...data,
     user: userId,
     toxicityScore,
-    status
+    status,
+    isAnonymous: data.isAnonymous === true  // explicit opt-in only
   });
 
   // If auto-approved, update product rating
   if (status === "APPROVED") {
     await recalculateProductRating(data.product);
   }
+
+  // Populate user details so the API response includes firstName/lastName/profilePicture
+  // immediately — this prevents the frontend from showing "Anonymous" until page refresh
+  await review.populate("user", "firstName lastName profilePicture");
 
   return review;
 };
