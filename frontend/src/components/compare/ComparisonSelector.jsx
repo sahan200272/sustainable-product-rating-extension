@@ -77,29 +77,16 @@ export default function ComparisonSelector({ onCompare, onQuickCompare, isLoadin
           <button
             type="button"
             onClick={() => setMode("standard")}
-            className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
-              mode === "standard"
+            className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${mode === "standard"
                 ? "bg-white text-emerald-700 shadow-sm"
                 : "text-gray-500 hover:text-gray-700"
-            }`}
+              }`}
           >
             <span className="flex items-center gap-2">
-              <FiPackage /> Database Dropdowns
+              <FiPackage /> Products Dropdowns
             </span>
           </button>
-          <button
-            type="button"
-            onClick={() => setMode("quick")}
-            className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
-              mode === "quick"
-                ? "bg-white text-indigo-700 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            <span className="flex items-center gap-2">
-              <FiZap /> Quick Name Match
-            </span>
-          </button>
+
         </div>
       </div>
 
@@ -194,13 +181,12 @@ export default function ComparisonSelector({ onCompare, onQuickCompare, isLoadin
           <button
             type="submit"
             disabled={isLoading || (mode === 'standard' && (!selected1 || !selected2 || selected1 === selected2))}
-            className={`px-8 py-3 rounded-xl font-bold transition-all shadow-md flex items-center justify-center min-w-[200px] ${
-              isLoading || (mode === 'standard' && (!selected1 || !selected2 || selected1 === selected2))
+            className={`px-8 py-3 rounded-xl font-bold transition-all shadow-md flex items-center justify-center min-w-[200px] ${isLoading || (mode === 'standard' && (!selected1 || !selected2 || selected1 === selected2))
                 ? "bg-gray-300 text-gray-100 cursor-not-allowed"
                 : mode === "standard"
-                ? "bg-emerald-600 hover:bg-emerald-700 text-white hover:shadow-lg"
-                : "bg-indigo-600 hover:bg-indigo-700 text-white hover:shadow-lg"
-            }`}
+                  ? "bg-emerald-600 hover:bg-emerald-700 text-white hover:shadow-lg"
+                  : "bg-indigo-600 hover:bg-indigo-700 text-white hover:shadow-lg"
+              }`}
           >
             {isLoading ? "Analyzing..." : "Compare Products"}
           </button>
