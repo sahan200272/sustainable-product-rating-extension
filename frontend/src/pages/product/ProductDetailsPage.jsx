@@ -7,6 +7,7 @@ import {
   FiArrowLeft, FiLoader, FiCheck, FiX, 
   FiBox, FiActivity, FiCpu, FiAlertCircle, FiEdit, FiTrash2 
 } from "react-icons/fi";
+import ReviewSection from "../../components/reviews/ReviewSection";
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
@@ -233,6 +234,10 @@ export default function ProductDetailsPage() {
           )}
           
         </div>
+
+        {/* ── Community Reviews Section ── */}
+        <ReviewSection productId={id} />
+
       </div>
     </div>
   );
