@@ -101,6 +101,21 @@ export async function getUserByEmail(email) {
     return sanitizeUser(user);
 }
 
+// Service function to update a user's profile fields by email
+export async function updateUserByEmail(email, updates) {
+    const user = await User.findOneAndUpdate(
+        { email },
+        { $set: updates },
+        { new: true, runValidators: true }
+    );
+
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    return sanitizeUser(user);
+}
+
 // Service function to get all users
 export async function getAllUsers() {
     const users = await User.find();

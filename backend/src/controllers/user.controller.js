@@ -117,6 +117,40 @@ export async function getUser(req, res) {
     }
 }
 
+// Controller function to update the logged-in user's profile
+export async function updateProfile(req, res) {
+    try {
+        const { firstName, lastName, phone, address, profilePicture } = req.body;
+
+        const allowedUpdates = {};
+        if (firstName !== undefined) allowedUpdates.firstName = firstName.trim();
+        if (lastName  !== undefined) allowedUpdates.lastName  = lastName.trim();
+        if (phone     !== undefined) allowedUpdates.phone     = phone.trim();
+        if (address   !== undefined) allowedUpdates.address   = address.trim();
+        if (profilePicture !== undefined) allowedUpdates.profilePicture = profilePicture.trim();
+
+        if (Object.keys(allowedUpdates).length === 0) {
+            return res.status(400).json({ error: "No valid fields provided to update" });
+        }
+
+        const updatedUser = await userService.updateUserByEmail(req.user.email, allowedUpdates);
+
+        return res.status(200).json({
+            message: "Profile updated successfully",
+            user: updatedUser
+        });
+
+    } catch (error) {
+        console.error("Update profile error:", error);
+
+        if (error.message === 'User not found') {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        return res.status(500).json({ error: "Failed to update profile" });
+    }
+}
+
 // Controller function for admin to get any user by email
 export async function getUserByEmailAdmin(req, res) {
     try {
@@ -311,4 +345,3 @@ export async function verifyOTP(req, res) {
         });
     }
 }
-
