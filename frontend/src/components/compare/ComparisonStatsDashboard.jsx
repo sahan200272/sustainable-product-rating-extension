@@ -1,4 +1,4 @@
-import { FiPieChart, FiTrendingUp, FiActivity, FiUsers } from "react-icons/fi";
+import { FiPieChart, FiTrendingUp, FiActivity, FiUsers, FiArrowLeft } from "react-icons/fi";
 import { Line } from "react-chartjs-2";
 import { Link } from "react-router-dom";
 import {
@@ -57,6 +57,16 @@ export default function ComparisonStatsDashboard({ stats }) {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-start">
+        <Link 
+          to="/admin/dashboard" 
+          className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors bg-white px-4 py-2 rounded-lg border border-gray-100 shadow-sm"
+        >
+          <FiArrowLeft className="w-4 h-4" />
+          Back to Dashboard
+        </Link>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Stat Cards */}
@@ -104,6 +114,12 @@ export default function ComparisonStatsDashboard({ stats }) {
           <div className="h-64 w-full">
             <Line data={trendData} options={trendOptions} />
           </div>
+          <div className="mt-4 p-4 bg-emerald-50/50 rounded-xl border border-emerald-100/50">
+            <p className="text-sm text-emerald-800 flex items-center gap-2">
+              <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              This chart visualizes the total number of product comparisons performed across the platform over the last 7 days.
+            </p>
+          </div>
         </div>
 
         {/* Top Compared Table */}
@@ -118,7 +134,7 @@ export default function ComparisonStatsDashboard({ stats }) {
                   <li key={item._id || idx} className="p-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
                     <div className="flex flex-col">
                       <Link to={`/products/${item._id}`} className="font-semibold text-sm text-gray-900 hover:text-indigo-600 transition-colors line-clamp-1">
-                        {item.name || "Unknown Product"}
+                        {item.productDetails?.name || "Unknown Product"}
                       </Link>
                       <span className="text-xs text-gray-500">In {item.count} comparisons</span>
                     </div>
