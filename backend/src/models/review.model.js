@@ -40,6 +40,12 @@ const reviewSchema = new mongoose.Schema(
 
     adminComment: {
       type: String
+    },
+
+    // When true the review card shows "Anonymous" regardless of the user
+    isAnonymous: {
+      type: Boolean,
+      default: false
     }
 
   },

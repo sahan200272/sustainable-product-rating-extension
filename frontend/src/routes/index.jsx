@@ -19,6 +19,8 @@ import ComparisonHistoryPage from "../pages/compare/ComparisonHistoryPage";
 import ComparisonDetailPage from "../pages/compare/ComparisonDetailPage";
 import ComparisonStatsPage from "../pages/compare/ComparisonStatsPage";
 import MainLayout from "../components/layouts/MainLayout";
+import MyProfilePage from "../pages/profile/MyProfilePage";
+import MyReviewsPage from "../pages/profile/MyReviewsPage";
 
 export default function AppRoutes() {
     return (
@@ -42,17 +44,13 @@ export default function AppRoutes() {
             <Route 
                 path="/admin/dashboard" 
                 element={
-                    <MainLayout>
-                        <ProtectedRoute element={<AdminDashboard />} requiredRole="Admin" />
-                    </MainLayout>
+                    <ProtectedRoute element={<AdminDashboard />} requiredRole="Admin" />
                 } 
             />
             <Route
                 path="/admin/moderation"
                 element={
-                    <MainLayout>
-                        <ProtectedRoute element={<AdminModerationPage />} requiredRole="Admin" />
-                    </MainLayout>
+                    <ProtectedRoute element={<AdminModerationPage />} requiredRole="Admin" />
                 }
             />
 
@@ -89,6 +87,16 @@ export default function AppRoutes() {
             <Route 
                 path="/compare/:id" 
                 element={<MainLayout><ProtectedRoute element={<ComparisonDetailPage />} /></MainLayout>} 
+            />
+
+            {/* User profile pages */}
+            <Route
+                path="/profile"
+                element={<MainLayout><ProtectedRoute element={<MyProfilePage />} /></MainLayout>}
+            />
+            <Route
+                path="/my-reviews"
+                element={<MainLayout><ProtectedRoute element={<MyReviewsPage />} /></MainLayout>}
             />
 
             <Route path="*" element={<Navigate to="/login" replace />} />

@@ -8,7 +8,8 @@ import {
 	getAllUsers,
 	blockOrUnblockUser,
 	sendOTP,
-	verifyOTP
+	verifyOTP,
+	updateProfile
 } from '../controllers/user.controller.js';
 import { authenticate, isAdmin } from '../middlewares/authMiddleware.js';
 
@@ -25,6 +26,12 @@ userRouter.post('/google-login', loginWithGoogle);
 
 //Get user details (for both Admin and Customer)
 userRouter.get('/getUser', authenticate, getUser);
+
+// Alias: /api/users/me — semantic REST endpoint for the authenticated user
+userRouter.get('/me', authenticate, getUser);
+
+// Update logged-in user's own profile
+userRouter.patch('/me', authenticate, updateProfile);
 
 // Email verification routes (authenticated user)
 userRouter.post('/send-otp', authenticate, sendOTP);
