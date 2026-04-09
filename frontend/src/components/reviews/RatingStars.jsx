@@ -21,6 +21,7 @@
 
 import { useState } from "react";
 import { FaStar } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 const LABELS = ["", "Poor", "Fair", "Good", "Great", "Excellent"];
 const COLOURS = ["", "#ef4444", "#f97316", "#eab308", "#22c55e", "#10b981"];
@@ -60,7 +61,7 @@ export default function RatingStars({
         {[1, 2, 3, 4, 5].map((star) => {
           const isFilled = star <= active;
           return (
-            <button
+            <motion.button
               key={star}
               type="button"
               role={isInteractive ? "radio" : undefined}
@@ -72,22 +73,29 @@ export default function RatingStars({
               onMouseLeave={() => isInteractive && setHovered(0)}
               onKeyDown={(e) => handleKeyDown(e, star)}
               tabIndex={isInteractive ? (rating === star || (!rating && star === 1) ? 0 : -1) : -1}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ 
+                scale: isFilled && isInteractive ? 1.15 : 1,
+                opacity: 1,
+                color: isFilled ? COLOURS[active || rating] || "#22c55e" : "#d1d5db"
+              }}
+              whileHover={isInteractive ? { scale: 1.25 } : {}}
+              whileTap={isInteractive ? { scale: 0.9 } : {}}
+              transition={{ 
+                type: "spring", 
+                stiffness: 300, 
+                damping: 20,
+                delay: star * 0.05
+              }}
               className={[
                 size,
-                "transition-all duration-150 ease-in-out",
                 isInteractive
-                  ? "cursor-pointer hover:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:rounded"
+                  ? "cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:rounded"
                   : "cursor-default",
               ].join(" ")}
-              style={{
-                // Dynamic colour based on rating value
-                color: isFilled ? COLOURS[active] : "#d1d5db",
-                // Star scales up slightly when hovered
-                transform: isFilled && isInteractive ? "scale(1.15)" : "scale(1)",
-              }}
             >
               <FaStar className="w-full h-full drop-shadow-sm" />
-            </button>
+            </motion.button>
           );
         })}
       </div>
