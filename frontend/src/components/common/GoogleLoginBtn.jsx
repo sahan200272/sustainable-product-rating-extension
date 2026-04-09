@@ -1,6 +1,6 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { googleLogin } from "../../services/userService";
 import { useAuth } from "../../hooks/useAuth";
@@ -8,7 +8,12 @@ import { useAuth } from "../../hooks/useAuth";
 export default function GoogleLoginBtn() {
     const { login } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const isRequestInFlight = useRef(false);
+
+    const redirectTarget = location.state?.from?.pathname
+        ? `${location.state.from.pathname}${location.state.from.search || ""}`
+        : location.state?.redirectTo;
 
     const handleSuccess = async (credentialResponse) => {
         if (isRequestInFlight.current) {
@@ -32,9 +37,13 @@ export default function GoogleLoginBtn() {
             // Assume the backend responds with { user, token }
             login(response.user, response.token);
             toast.success("Successfully logged in with Google!");
-            
-            // Redirect based on user role (assuming same rules apply)
-            navigate(response.user.role === "Admin" ? "/admin/dashboard" : "/");
+
+            if (redirectTarget) {
+                navigate(redirectTarget);
+            } else {
+                // Redirect based on user role (assuming same rules apply)
+                navigate(response.user.role === "Admin" ? "/admin/dashboard" : "/");
+            }
 
         } catch (error) {
             console.error("Google login backend verification failed:", error);

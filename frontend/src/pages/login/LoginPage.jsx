@@ -1,6 +1,6 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { loginUser } from "../../services/userService";
 import { sendOtp } from "../../services/authService";
 import { useAuth } from "../../hooks/useAuth";
@@ -24,7 +24,12 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const { values, handleChange } = useForm(INITIAL_VALUES);
+
+    const redirectTarget = location.state?.from?.pathname
+        ? `${location.state.from.pathname}${location.state.from.search || ""}`
+        : location.state?.redirectTo;
 
     const handleOnSubmit = async (e) => {
         e.preventDefault();
@@ -44,12 +49,18 @@ export default function LoginPage() {
                     console.error("OTP generation error:", otpError);
                     toast.error(otpError?.response?.data?.error || "Failed to automatically send OTP. Please click resend on the next page.");
                 }
-                navigate("/verify-otp");
+                navigate("/verify-otp", {
+                    state: redirectTarget ? { from: location.state?.from, redirectTo: redirectTarget } : undefined,
+                });
                 return;
             }
             
             toast.success("Welcome back!");
-            navigate(response.user.role === "Admin" ? "/admin/dashboard" : "/");
+            if (redirectTarget) {
+                navigate(redirectTarget);
+            } else {
+                navigate(response.user.role === "Admin" ? "/admin/dashboard" : "/");
+            }
         } catch (error) {
             toast.error(error?.response?.data?.error || "Login failed. Please check your credentials.");
         } finally {

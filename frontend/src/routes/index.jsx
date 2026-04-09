@@ -5,6 +5,7 @@ import HomePage from "../pages/home/HomePage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminModerationPage from "../pages/admin/AdminModerationPage";
 import CreateBlogPage from "../pages/blog/CreateBlogPage";
+import EditMyBlogPage from "../pages/blog/EditMyBlogPage";
 import PublicBlogFeedPage from "../pages/blog/PublicBlogFeedPage";
 import BlogDetailsPage from "../pages/blog/BlogDetailsPage";
 import EducationHubPage from "../pages/blog/EducationHubPage";
@@ -21,6 +22,7 @@ import ComparisonStatsPage from "../pages/compare/ComparisonStatsPage";
 import MainLayout from "../components/layouts/MainLayout";
 import MyProfilePage from "../pages/profile/MyProfilePage";
 import MyReviewsPage from "../pages/profile/MyReviewsPage";
+import MyBlogsPage from "../pages/profile/MyBlogsPage";
 
 export default function AppRoutes() {
     return (
@@ -33,11 +35,21 @@ export default function AppRoutes() {
             {/* ── Public & app pages — wrapped in MainLayout (includes Footer) ── */}
             <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
             <Route path="/blogs" element={<MainLayout><PublicBlogFeedPage /></MainLayout>} />
-            <Route path="/blogs/:id" element={<MainLayout><BlogDetailsPage /></MainLayout>} />
-            <Route path="/blogs/:id/education-hub" element={<MainLayout><EducationHubPage /></MainLayout>} />
+            <Route
+                path="/blogs/:id"
+                element={<MainLayout><ProtectedRoute element={<BlogDetailsPage />} /></MainLayout>}
+            />
+            <Route
+                path="/blogs/:id/education-hub"
+                element={<MainLayout><ProtectedRoute element={<EducationHubPage />} /></MainLayout>}
+            />
             <Route
                 path="/blogs/create"
                 element={<MainLayout><ProtectedRoute element={<CreateBlogPage />} /></MainLayout>}
+            />
+            <Route
+                path="/my-blogs/:id/edit"
+                element={<MainLayout><ProtectedRoute element={<EditMyBlogPage />} /></MainLayout>}
             />
 
             {/* Admin pages */}
@@ -97,6 +109,10 @@ export default function AppRoutes() {
             <Route
                 path="/my-reviews"
                 element={<MainLayout><ProtectedRoute element={<MyReviewsPage />} /></MainLayout>}
+            />
+            <Route
+                path="/my-blogs"
+                element={<MainLayout><ProtectedRoute element={<MyBlogsPage />} /></MainLayout>}
             />
 
             <Route path="*" element={<Navigate to="/login" replace />} />
