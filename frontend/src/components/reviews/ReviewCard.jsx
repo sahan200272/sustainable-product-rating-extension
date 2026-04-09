@@ -26,6 +26,7 @@
  */
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import RatingStars from "./RatingStars";
 import DeleteConfirmModal from "./DeleteConfirmModal";
 import { FiTrash2, FiClock, FiLoader, FiUser } from "react-icons/fi";
@@ -145,6 +146,7 @@ function Avatar({ name, imageUrl, isAnon, size = "w-11 h-11" }) {
 export default function ReviewCard({ review, currentUserId, currentRole, onDelete }) {
   const [deleting,  setDeleting]  = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // ── Author resolution ──────────────────────────────────────────────────────
   const isAnon = review.isAnonymous === true;
@@ -175,6 +177,12 @@ export default function ReviewCard({ review, currentUserId, currentRole, onDelet
     }
   };
 
+  const textLimit = 150;
+  const isLongText = review.reviewText?.length > textLimit;
+  const displayText = isLongText && !isExpanded 
+    ? `${review.reviewText.substring(0, textLimit)}...` 
+    : review.reviewText;
+
   return (
     <>
       {/* ── Delete Confirmation Modal ── */}
@@ -185,7 +193,14 @@ export default function ReviewCard({ review, currentUserId, currentRole, onDelet
         isDeleting={deleting}
       />
 
-      <article className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow duration-200 animate-[fadeIn_0.3s_ease]">
+      <motion.article 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        whileHover={{ scale: 1.02, boxShadow: "0px 10px 30px -10px rgba(0,0,0,0.1)" }}
+        transition={{ duration: 0.3 }}
+        className="bg-white border border-gray-100 rounded-2xl p-6 relative z-0"
+      >
 
         {/* ── Header: avatar + meta + actions ── */}
         <div className="flex items-start gap-3.5 mb-4">
@@ -253,19 +268,33 @@ export default function ReviewCard({ review, currentUserId, currentRole, onDelet
         </div>
 
         {/* ── Star Rating ── */}
-        <div className="mb-3">
+        <div className="flex items-center gap-2 mb-3">
           <RatingStars
             rating={review.overallRating}
             readOnly
             showLabel={false}
             size="w-4 h-4"
           />
+          <span className="text-sm font-bold text-gray-700">
+            {Number(review.overallRating).toFixed(1)}
+            <span className="text-gray-400 font-medium">/5</span>
+          </span>
         </div>
 
         {/* ── Review text ── */}
-        <p className="text-sm text-gray-700 leading-relaxed mb-4">
-          {review.reviewText}
-        </p>
+        <div className="mb-4">
+          <motion.p layout className="text-[15px] text-gray-700 leading-relaxed">
+            {displayText}
+          </motion.p>
+          {isLongText && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="mt-1 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors focus:outline-none"
+            >
+              {isExpanded ? "Show less" : "Read more"}
+            </button>
+          )}
+        </div>
 
         {/* ── Admin rejection comment ── */}
         {isOwner && review.status === "REJECTED" && review.adminComment && (
@@ -277,7 +306,7 @@ export default function ReviewCard({ review, currentUserId, currentRole, onDelet
 
         {/* ── Sustainability tags ── */}
         {review.sustainabilityTags?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 mt-2">
             {review.sustainabilityTags.map((tag) => (
               <span
                 key={tag}
@@ -289,7 +318,7 @@ export default function ReviewCard({ review, currentUserId, currentRole, onDelet
             ))}
           </div>
         )}
-      </article>
+      </motion.article>
     </>
   );
 }
