@@ -7,33 +7,27 @@
  * Responsibilities:
  *   - Owns `prependedReview` state — receives the new review from ReviewForm
  *     and passes it down to ReviewList for optimistic display.
+ *   - Manages state for the "Write a Review" modal.
  *   - Provides a visually cohesive section with a divider and heading.
- *   - Adapts the two-column layout on large screens (form left, list right).
- *
- * Props:
- *   productId {string} – MongoDB ObjectId of the product
  */
 
 import { useState, useContext } from "react";
 import ReviewForm from "./ReviewForm";
 import ReviewList from "./ReviewList";
+import Modal from "../common/Modal";
 import { AuthContext } from "../../context/AuthContext";
-import { FiMessageSquare } from "react-icons/fi";
+import { FiMessageSquare, FiEdit3 } from "react-icons/fi";
 import { FaLeaf } from "react-icons/fa";
 
 export default function ReviewSection({ productId }) {
   const { user } = useContext(AuthContext);
 
-  /**
-   * When ReviewForm succeeds, it calls onReviewSubmit(review).
-   * We store that here and pass it to ReviewList as `prependedReview`.
-   * ReviewList will insert it at the top of the card stack immediately,
-   * giving the user instant visual feedback without waiting for moderation.
-   */
   const [prependedReview, setPrependedReview] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleReviewSubmit = (newReview) => {
     setPrependedReview(newReview);
+    setIsModalOpen(false); // Close modal on success
   };
 
   return (
@@ -42,42 +36,52 @@ export default function ReviewSection({ productId }) {
       aria-label="Product Reviews"
       className="mt-10 pt-10 border-t border-gray-100"
     >
-      {/* ── Section heading ── */}
-      <div className="flex items-center gap-2.5 mb-8">
-        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-          <FiMessageSquare className="w-4 h-4 text-emerald-600" />
-        </div>
-        <h2 className="text-2xl font-extrabold text-gray-900">Community Reviews</h2>
-        {/* SDG 12 badge */}
-        <span className="ml-auto flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-full">
-          <FaLeaf className="w-3 h-3" /> SDG 12
-        </span>
-      </div>
-
-      {/*
-        ── Responsive layout ──
-        - Mobile: stacked (form on top, list below)
-        - Desktop ≥lg: side-by-side (form 40%, list 60%)
-      */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
-        {/* ── Left column: Review Form ── */}
-        <div className="lg:col-span-2 lg:sticky lg:top-24">
-          <ReviewForm
-            productId={productId}
-            onSuccess={handleReviewSubmit}
-          />
+      {/* ── Section heading & Actions ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div className="flex items-center gap-2.5">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+            <FiMessageSquare className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-extrabold text-gray-900">Community Reviews</h2>
+            <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 mt-1">
+              <FaLeaf className="w-3 h-3" /> <span>SDG 12: Responsible Consumption</span>
+            </div>
+          </div>
         </div>
 
-        {/* ── Right column: Review List ── */}
-        <div className="lg:col-span-3">
-          <ReviewList
-            productId={productId}
-            prependedReview={prependedReview}
-            currentUserId={user?._id ?? user?.id}
-            currentRole={user?.role}
-          />
-        </div>
+        {/* CTA Button */}
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
+        >
+          <FiEdit3 className="w-4 h-4" />
+          Write a Review
+        </button>
       </div>
+
+      {/* ── Right column: Review List (now full width) ── */}
+      <div className="w-full">
+        <ReviewList
+          productId={productId}
+          prependedReview={prependedReview}
+          currentUserId={user?._id ?? user?.id}
+          currentRole={user?.role}
+        />
+      </div>
+
+      {/* ── Write Review Modal ── */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Write a Review"
+      >
+        <ReviewForm
+          productId={productId}
+          onSuccess={handleReviewSubmit}
+          onCancel={() => setIsModalOpen(false)}
+        />
+      </Modal>
     </section>
   );
 }
