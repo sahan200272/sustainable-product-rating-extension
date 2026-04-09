@@ -201,7 +201,7 @@ This section provides details on the deployment platforms, setup steps, and envi
 
 ### 1. Backend Deployment
 
-- **Platform**: [Render](https://render.com) (Recommended) or Railway / Heroku
+- **Platform**: [Render](https://render.com)
 - **Setup Steps**:
   1.  **Connect Repository**: Link the GitHub repository and set the root directory to `backend`.
   2.  **Runtime Configuration**: Use `Node.js` with the build command `npm install` and start command `npm start`.
