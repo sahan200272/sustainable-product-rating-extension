@@ -258,10 +258,13 @@ export async function rejectBlog(id, adminId, rejectionReason) {
     const admin = await mongoose.model('User').findById(adminId).select('firstName lastName');
 
     // Create rejection notification data for the user
+    const authorName = `${blog.author?.firstName || 'Unknown'} ${blog.author?.lastName || ''}`.trim();
+    const authorEmail = blog.author?.email || null;
+
     const rejectionData = {
         blogTitle: blog.title,
-        authorName: `${blog.author.firstName} ${blog.author.lastName}`,
-        authorEmail: blog.author.email,
+        authorName,
+        authorEmail,
         adminName: admin ? `${admin.firstName} ${admin.lastName}` : 'Admin',
         rejectionReason: rejectionReason.trim(),
         rejectedAt: new Date()
@@ -395,6 +398,71 @@ export async function updateBlogService(id, updateData) {
     return blog;
 }
 
+// Service function to update own blog (author only)
+export async function updateOwnBlogService(id, userId, updateData) {
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        const error = new Error("Invalid blog ID");
+        error.status = 400;
+        throw error;
+    }
+
+    const blog = await Blog.findById(id);
+    if (!blog) {
+        const error = new Error("Blog not found");
+        error.status = 404;
+        throw error;
+    }
+
+    if (blog.author.toString() !== userId.toString()) {
+        const error = new Error("You can only update your own blog");
+        error.status = 403;
+        throw error;
+    }
+
+    // Validate category if provided
+    if (updateData.category) {
+        const validCategories = ["Responsible Consumption", "Greenwashing", "Sustainable Brands"];
+        if (!validCategories.includes(updateData.category)) {
+            const error = new Error("Invalid category. Must be one of: " + validCategories.join(", "));
+            error.status = 400;
+            throw error;
+        }
+    }
+
+    const updateFields = {};
+    if (updateData.title !== undefined) updateFields.title = updateData.title;
+    if (updateData.content !== undefined) updateFields.content = updateData.content;
+    if (updateData.category !== undefined) updateFields.category = updateData.category;
+    if (updateData.tags !== undefined) updateFields.tags = updateData.tags;
+    if (updateData.imageUrl !== undefined) updateFields.imageUrl = updateData.imageUrl;
+    if (updateData.imageUrls !== undefined) updateFields.imageUrls = updateData.imageUrls;
+
+    // Re-send for moderation when owner updates content
+    if (updateFields.title !== undefined || updateFields.content !== undefined) {
+        const nextTitle = updateFields.title ?? blog.title;
+        const nextContent = updateFields.content ?? blog.content;
+
+        const moderationResult = await moderateBlogContent(nextTitle, nextContent);
+        updateFields.moderationFlagged = moderationResult.flagged;
+        updateFields.moderationScore = moderationResult.score;
+        updateFields.moderationReasons = moderationResult.reasons;
+        updateFields.status = "PENDING";
+        updateFields.approvedBy = null;
+        updateFields.approvedAt = null;
+        updateFields.publishedAt = null;
+        updateFields.rejectionReason = null;
+    }
+
+    const updatedBlog = await Blog.findByIdAndUpdate(
+        id,
+        updateFields,
+        { new: true, runValidators: true }
+    ).populate('author', 'firstName lastName email');
+
+    return updatedBlog;
+}
+
 // Service function to delete blog
 export async function deleteBlogService(id) {
     // Validate ObjectId
@@ -408,6 +476,31 @@ export async function deleteBlogService(id) {
         throw new Error("Blog not found");
     }
 
+    return { message: "Blog deleted successfully" };
+}
+
+// Service function to delete own blog (author only)
+export async function deleteOwnBlogService(id, userId) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        const error = new Error("Invalid blog ID");
+        error.status = 400;
+        throw error;
+    }
+
+    const blog = await Blog.findById(id);
+    if (!blog) {
+        const error = new Error("Blog not found");
+        error.status = 404;
+        throw error;
+    }
+
+    if (blog.author.toString() !== userId.toString()) {
+        const error = new Error("You can only delete your own blog");
+        error.status = 403;
+        throw error;
+    }
+
+    await Blog.findByIdAndDelete(id);
     return { message: "Blog deleted successfully" };
 }
 

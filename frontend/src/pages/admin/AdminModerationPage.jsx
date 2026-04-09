@@ -45,10 +45,7 @@ export default function AdminModerationPage() {
         return { total, pending, approved, rejected };
     }, [blogs]);
 
-    const pendingBlogs = useMemo(
-        () => blogs.filter((blog) => blog.status === "PENDING"),
-        [blogs]
-    );
+    const moderationBlogs = useMemo(() => blogs, [blogs]);
 
     const handleApprove = async (blogId) => {
         setActionLoadingId(blogId);
@@ -71,18 +68,18 @@ export default function AdminModerationPage() {
     const handleReject = async () => {
         if (!selectedBlogForReject) return;
         if (!rejectionReason || !rejectionReason.trim()) {
-            return toast.error("Rejection reason is required");
+            return toast.error("Remove reason is required");
         }
 
         setActionLoadingId(selectedBlogForReject);
         try {
             await rejectBlogPost(selectedBlogForReject, rejectionReason.trim());
-            toast.success("Blog rejected");
+            toast.success("Blog removed from public feed");
             setSelectedBlogForReject(null);
             setRejectionReason("");
             await fetchBlogs();
         } catch (error) {
-            toast.error(error?.response?.data?.error || "Failed to reject blog");
+            toast.error(error?.response?.data?.error || "Failed to remove blog");
         } finally {
             setActionLoadingId("");
         }
@@ -144,16 +141,17 @@ export default function AdminModerationPage() {
                                         Loading...
                                     </td>
                                 </tr>
-                            ) : pendingBlogs.length === 0 ? (
+                            ) : moderationBlogs.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
-                                        No pending submissions
+                                        No blog submissions
                                     </td>
                                 </tr>
                             ) : (
-                                pendingBlogs.map((blog) => {
+                                moderationBlogs.map((blog) => {
                                     const authorName = `${blog?.author?.firstName || ""} ${blog?.author?.lastName || ""}`.trim() || "Unknown";
-                                    const isPending = blog.status === "PENDING";
+                                    const isPublished = blog.status === "PUBLISHED";
+                                    const isBlocked = blog.status === "REJECTED";
                                     return (
                                         <tr key={blog._id} className="border-t hover:bg-gray-50">
                                             <td className="px-4 py-3">
@@ -188,7 +186,7 @@ export default function AdminModerationPage() {
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center gap-2">
                                                     <button
-                                                        disabled={!isPending || actionLoadingId === blog._id}
+                                                        disabled={isPublished || actionLoadingId === blog._id}
                                                         onClick={() => handleApprove(blog._id)}
                                                         className="rounded-md border border-green-200 px-2 py-1 text-green-600 disabled:cursor-not-allowed disabled:opacity-40"
                                                         title="Approve"
@@ -196,10 +194,10 @@ export default function AdminModerationPage() {
                                                         ✓
                                                     </button>
                                                     <button
-                                                        disabled={!isPending || actionLoadingId === blog._id}
+                                                        disabled={isBlocked || actionLoadingId === blog._id}
                                                         onClick={() => handleOpenRejectModal(blog._id)}
                                                         className="rounded-md border border-red-200 px-2 py-1 text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
-                                                        title="Reject"
+                                                        title="Remove"
                                                     >
                                                         ✕
                                                     </button>
@@ -247,16 +245,16 @@ export default function AdminModerationPage() {
             {selectedBlogForReject ? (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
                     <div className="w-full max-w-lg rounded-xl bg-white p-5 shadow-xl">
-                        <h2 className="text-lg font-bold text-gray-900">Reject Blog</h2>
+                        <h2 className="text-lg font-bold text-gray-900">Remove Blog</h2>
                         <p className="mt-1 text-sm text-gray-600">
-                            Please provide a rejection reason for the author.
+                            Please provide a reason for removing this blog from public feed.
                         </p>
 
                         <textarea
                             value={rejectionReason}
                             onChange={(e) => setRejectionReason(e.target.value)}
                             rows={4}
-                            placeholder="Enter rejection reason"
+                            placeholder="Enter remove reason"
                             className="mt-4 w-full rounded-lg border border-gray-300 p-3 text-sm focus:border-emerald-500 focus:outline-none"
                         />
 
@@ -277,7 +275,7 @@ export default function AdminModerationPage() {
                                 disabled={actionLoadingId === selectedBlogForReject}
                                 className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
                             >
-                                {actionLoadingId === selectedBlogForReject ? "Rejecting..." : "Reject"}
+                                {actionLoadingId === selectedBlogForReject ? "Removing..." : "Remove"}
                             </button>
                         </div>
                     </div>

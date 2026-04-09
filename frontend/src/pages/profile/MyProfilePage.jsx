@@ -17,6 +17,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { getUser, updateProfile } from "../../services/userService";
 import { getMyReviews } from "../../services/reviewService";
+import { getMyBlogs } from "../../services/blogService";
 import toast from "react-hot-toast";
 import {
   RiUserLine,
@@ -124,6 +125,8 @@ export default function MyProfilePage() {
 
   const [profile, setProfile]     = useState(null);
   const [reviewCount, setReviewCount] = useState(0);
+  const [blogCount, setBlogCount] = useState(0);
+  const [recentBlogs, setRecentBlogs] = useState([]);
   const [loading, setLoading]     = useState(true);
   const [editing, setEditing]     = useState(false);
   const [saving, setSaving]       = useState(false);
@@ -140,13 +143,16 @@ export default function MyProfilePage() {
     let cancelled = false;
     (async () => {
       try {
-        const [userData, reviewData] = await Promise.all([
+        const [userData, reviewData, blogData] = await Promise.all([
           getUser(),
           getMyReviews(),
+          getMyBlogs({ limit: 3 }),
         ]);
         if (cancelled) return;
         setProfile(userData);
         setReviewCount(reviewData?.count ?? reviewData?.data?.length ?? 0);
+        setBlogCount(blogData?.total ?? blogData?.blogs?.length ?? 0);
+        setRecentBlogs(Array.isArray(blogData?.blogs) ? blogData.blogs : []);
         setForm({
           firstName: userData.firstName || "",
           lastName:  userData.lastName  || "",
@@ -294,7 +300,7 @@ export default function MyProfilePage() {
               <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2 mb-2">Quick Links</p>
               {[
                 { to: "/my-reviews", icon: <RiStarLine />,      label: "My Reviews",       sub: `${reviewCount} submitted` },
-                { to: "/blogs",      icon: <RiBookOpenLine />,   label: "My Blogs",         sub: "View your posts" },
+                { to: "/my-blogs",   icon: <RiBookOpenLine />,   label: "My Blogs",         sub: "View your posts" },
                 { to: "/products",   icon: <RiLeafLine />,       label: "Browse Products",  sub: "Find sustainable picks" },
                 { to: "/compare",    icon: <RiArrowRightLine />, label: "Compare Products", sub: "Side-by-side analysis" },
               ].map(({ to, icon, label, sub }) => (
@@ -322,7 +328,7 @@ export default function MyProfilePage() {
             {/* Stats row */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <StatCard icon={<RiStarLine />}        label="Reviews Written" value={reviewCount}                               accent="emerald" />
-              <StatCard icon={<RiBookOpenLine />}     label="Blogs Written"   value={profile?.blogsCount ?? "—"}                accent="sky" />
+              <StatCard icon={<RiBookOpenLine />}     label="Blogs Written"   value={blogCount}                                 accent="sky" />
               <StatCard icon={<RiShieldCheckLine />}  label="Account Status"  value={profile?.isBlocked ? "Blocked" : "Active"} accent={profile?.isBlocked ? "amber" : "indigo"} />
             </div>
 
@@ -445,6 +451,61 @@ export default function MyProfilePage() {
                     </div>
                   </div>
 
+                </div>
+              )}
+            </div>
+
+            {/* Recent blogs */}
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-base font-black text-slate-900">My Recent Blogs</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Latest posts you created</p>
+                </div>
+                <Link
+                  to="/my-blogs"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors"
+                >
+                  <RiBookOpenLine className="text-sm" />
+                  View All
+                </Link>
+              </div>
+
+              {recentBlogs.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-center text-sm text-slate-500">
+                  You haven't written any blogs yet.
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {recentBlogs.map((blog) => (
+                    <Link
+                      key={blog._id}
+                      to={`/blogs/${blog._id}`}
+                      className="rounded-2xl border border-slate-100 p-4 hover:border-emerald-200 hover:shadow-sm transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-bold text-slate-900 line-clamp-2">
+                            {blog.title}
+                          </p>
+                          <p className="text-xs text-slate-400 mt-1">
+                            {blog.category || "Blog"} • {blog.createdAt ? new Date(blog.createdAt).toLocaleDateString() : "—"}
+                          </p>
+                        </div>
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            blog.status === "PUBLISHED"
+                              ? "bg-emerald-50 text-emerald-600"
+                              : blog.status === "REJECTED"
+                                ? "bg-rose-50 text-rose-600"
+                                : "bg-amber-50 text-amber-600"
+                          }`}
+                        >
+                          {blog.status || "Pending"}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               )}
             </div>

@@ -59,7 +59,7 @@ export default function BlogSection() {
                         to="/blogs"
                         className="inline-flex items-center gap-2 px-6 py-3 border border-slate-300 rounded-xl font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
                     >
-                        Explore Education Hub <ArrowRight size={18} />
+                        Explore more blogs <ArrowRight size={18} />
                     </Link>
                 </div>
 

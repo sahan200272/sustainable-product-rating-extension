@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { sendOtp, verifyOtp } from "../../services/authService";
 import { useAuth } from "../../hooks/useAuth";
 import OtpInput from "../../components/common/OtpInput";
@@ -14,14 +14,23 @@ export default function VerifyOtpPage() {
     const [timer, setTimer] = useState(60);
     const { user, verifyEmail, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const redirectTarget = location.state?.from?.pathname
+        ? `${location.state.from.pathname}${location.state.from.search || ""}`
+        : location.state?.redirectTo;
 
     useEffect(() => {
         if (!user) {
             navigate("/login");
         } else if (user.emailVerified) {
-            navigate(user.role === "Admin" ? "/admin/dashboard" : "/");
+            if (redirectTarget) {
+                navigate(redirectTarget);
+            } else {
+                navigate(user.role === "Admin" ? "/admin/dashboard" : "/");
+            }
         }
-    }, [user, navigate]);
+    }, [user, navigate, redirectTarget]);
 
     useEffect(() => {
         if (timer > 0) {
@@ -43,7 +52,11 @@ export default function VerifyOtpPage() {
             await verifyOtp(otp);
             toast.success("Email verified successfully!");
             verifyEmail();
-            navigate(user?.role === "Admin" ? "/admin/dashboard" : "/");
+            if (redirectTarget) {
+                navigate(redirectTarget);
+            } else {
+                navigate(user?.role === "Admin" ? "/admin/dashboard" : "/");
+            }
         } catch (error) {
             toast.error(error?.response?.data?.error || "Invalid OTP code. Please try again.");
         } finally {

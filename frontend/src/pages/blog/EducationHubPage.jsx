@@ -70,6 +70,7 @@ export default function EducationHubPage() {
                 const response = await generateEducationGuide({
                     title: blogInfo.title,
                     content: blogInfo.content,
+                    category: blogInfo.category,
                 });
 
                 const educationGuide = response?.educationGuide || null;
@@ -138,6 +139,7 @@ export default function EducationHubPage() {
             const response = await generateEducationGuide({
                 title: blog.title,
                 content: blog.content,
+                category: blog.category,
             });
 
             const nextGuide = response?.educationGuide;
@@ -401,12 +403,12 @@ export default function EducationHubPage() {
                     </section>
 
                     <section className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
-                        <h2 className="text-3xl font-bold text-gray-900">SDG-12 Connection</h2>
+                        <h2 className="text-3xl font-bold text-gray-900">Category Connection</h2>
                         <div className="mt-4 flex items-start gap-3">
                             <div className="rounded-lg bg-amber-200 px-3 py-2 text-xs font-black text-amber-900">
-                                12
+                                {blog.category?.slice(0, 2)?.toUpperCase() || "CT"}
                             </div>
-                            <p className="text-sm leading-6 text-gray-700">{guide.sdg12Connection}</p>
+                            <p className="text-sm leading-6 text-gray-700">{guide.categoryConnection || guide.sdg12Connection}</p>
                         </div>
                     </section>
                 </div>
