@@ -55,6 +55,7 @@ export default function AppRoutes() {
                 <Route path="users"     element={<AdminUsersPage />} />
                 <Route path="reviews"   element={<AdminReviewsPage />} />
                 <Route path="products"  element={<AdminProductsPage />} />
+                <Route path="products/:id" element={<ProductDetailsPage />} />
                 <Route path="add-product" element={<AddProductPage />} />
                 <Route path="edit-product/:id" element={<EditProductPage />} />
                 <Route path="compare-stats" element={<ComparisonStatsPage />} />
