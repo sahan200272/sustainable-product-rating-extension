@@ -101,6 +101,21 @@ export async function getUserByEmail(email) {
     return sanitizeUser(user);
 }
 
+// Service function to update a user's profile fields by email
+export async function updateUserByEmail(email, updates) {
+    const user = await User.findOneAndUpdate(
+        { email },
+        { $set: updates },
+        { new: true, runValidators: true }
+    );
+
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    return sanitizeUser(user);
+}
+
 // Service function to get all users
 export async function getAllUsers() {
     const users = await User.find();
@@ -126,6 +141,37 @@ export async function toggleBlockUserByEmail(email) {
         isBlocked: user.isBlocked,
         user: sanitizeUser(user)
     };
+}
+
+// Service function to delete a user by email (Admin operation)
+export async function deleteUserByEmail(email) {
+    const user = await User.findOneAndDelete({ email });
+
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    return sanitizeUser(user);
+}
+
+// Service function to update a user's role by email (Admin operation)
+export async function updateUserRoleByEmail(email, role) {
+    const validRoles = ['Admin', 'Customer'];
+    if (!validRoles.includes(role)) {
+        throw new Error('Invalid role');
+    }
+
+    const user = await User.findOneAndUpdate(
+        { email },
+        { $set: { role } },
+        { new: true, runValidators: true }
+    );
+
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    return sanitizeUser(user);
 }
 
 export async function loginWithGoogle(accessToken) {

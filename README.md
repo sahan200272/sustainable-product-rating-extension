@@ -9,6 +9,8 @@ Our app helps online shoppers make eco-friendly choices by rating products based
 - [Tech Stack](#tech-stack)
 - [Setup Instructions](#setup-instructions)
 - [API Documentation](#api-documentation)
+- [Deployment Documentation](#deployment-documentation)
+- [Testing Instruction Report](#testing-instruction-report)
 - [Environment Variables](#environment-variables)
 
 ## Features
@@ -123,8 +125,26 @@ Authorization: Bearer <your_jwt_token>
 | POST | `/api/users/register` | Register a new user account | Public |
 | POST | `/api/users/login` | Login and receive JWT token | Public |
 | GET | `/api/users/getUser` | Get current user profile | Required |
-| POST | `/api/users/admin/getUserByEmail` | Get user by email | Admin only |
-| GET | `/api/users/admin/getAllUsers` | Get all registered users | Admin only |
+
+#### Example: User Registration
+**POST** `/api/users/register`
+- **Request Body**:
+```json
+{
+  "name": "Sahan Perera",
+  "email": "sahan@example.com",
+  "password": "Password123!",
+  "role": "Customer"
+}
+```
+- **Response (201 Created)**:
+```json
+{
+  "success": true,
+  "message": "User registered successfully",
+  "data": { "id": "65e...", "name": "Sahan Perera", "email": "sahan@example.com" }
+}
+```
 
 ## 2. Product Endpoints
 
@@ -132,10 +152,20 @@ Authorization: Bearer <your_jwt_token>
 |--------|----------|-------------|----------------|
 | POST | `/api/products` | Create a new product with images | Admin only |
 | GET | `/api/products` | Get all products (supports pagination) | Public |
-| GET | `/api/products/search?q={query}` | Search products by name/brand/category | Public |
 | GET | `/api/products/:id` | Get single product details | Public |
-| PUT | `/api/products/:id` | Update product information | Admin only |
-| DELETE | `/api/products/:id` | Delete a product | Admin only |
+
+#### Example: Create Product (Admin Only)
+**POST** `/api/products` (Multipart Form Data)
+- **Fields**: `name`, `brand`, `category`, `description`, `sustainabilityScore`
+- **Files**: `images` (Max 5)
+- **Response (201 Created)**:
+```json
+{
+  "success": true,
+  "message": "Product created successfully",
+  "data": { "name": "Eco Bottle", "sustainabilityScore": 85, ... }
+}
+```
 
 ## 3. Review Endpoints
 
@@ -143,40 +173,65 @@ Authorization: Bearer <your_jwt_token>
 |--------|----------|-------------|----------------|
 | POST | `/api/reviews` | Create a product review | Customer only |
 | GET | `/api/reviews/product/:productId` | Get approved reviews for a product | Public |
-| GET | `/api/reviews/my-reviews` | Get current user's reviews | Customer |
-| GET | `/api/reviews/pending` | Get all pending reviews | Admin only |
-| PATCH | `/api/reviews/:id/approve` | Approve a pending review | Admin only |
-| PATCH | `/api/reviews/:id/reject` | Reject a review with reason | Admin only |
-| DELETE | `/api/reviews/:id` | Delete a review | Customer/Admin |
 
-## 4. Blog Endpoints
+#### Example: Submit Review
+**POST** `/api/reviews`
+- **Request Body**:
+```json
+{
+  "productId": "65e...",
+  "comment": "Great product, very sustainable!",
+  "rating": 5
+}
+```
+- **Response (201 Created)**:
+```json
+{
+  "success": true,
+  "message": "Review submitted for moderation",
+  "review": { "comment": "Great product...", "status": "PENDING" }
+}
+```
 
-| Method | Endpoint | Description | Authentication |
-|--------|----------|-------------|----------------|
-| POST | `/api/blogs` | Create new blog (PENDING status) | Required |
-| GET | `/api/blogs` | Get all published blogs | Public |
-| GET | `/api/blogs/:id` | Get blog by ID | Public/Required* |
-| GET | `/api/blogs/admin/list` | Get all blogs (any status) | Admin only |
-| PATCH | `/api/blogs/admin/:id/approve` | Approve and publish a blog | Admin only |
-| PATCH | `/api/blogs/admin/:id/reject` | Reject a blog with reason | Admin only |
-| POST | `/api/blogs/generate-education-guide` | Generate AI sustainability guide | Public |
-| PUT | `/api/blogs/:id` | Update blog (legacy) | Admin only |
-| DELETE | `/api/blogs/:id` | Delete blog (legacy) | Admin only |
+---
 
-*Public for published blogs, authentication required for pending/rejected blogs (author/admin only)
+## Deployment Documentation
 
-## 5. Comparison Endpoints
+This section provides details on the deployment platforms, setup steps, and environment configuration for both the backend and frontend.
 
-| Method | Endpoint | Description | Authentication |
-|--------|----------|-------------|----------------|
-| POST | `/api/comparisons/items` | Create AI-powered product comparison | Required |
-| GET | `/api/comparisons/items` | Get user's comparison history | Required |
-| GET | `/api/comparisons/items/:id` | Get comparison details | Required |
-| GET | `/api/comparisons/quick?product1={name}&product2={name}` | Quick compare by product names | Public |
-| GET | `/api/comparisons/stats` | Get comparison statistics | Admin only |
-| PUT | `/api/comparisons/items/:id` | Update a comparison | Required |
-| DELETE | `/api/comparisons/items/:id` | Delete a specific comparison | Required |
-| DELETE | `/api/comparisons/items` | Clear user's comparison history | Required |
+### 1. Backend Deployment
+
+- **Platform**: [Render](https://render.com) (Recommended) or Railway / Heroku
+- **Setup Steps**:
+  1.  **Connect Repository**: Link the GitHub repository and set the root directory to `backend`.
+  2.  **Runtime Configuration**: Use `Node.js` with the build command `npm install` and start command `npm start`.
+  3.  **Environment Variables**: Configure the variables listed in the [Environment Variables](#backend-environment-variables) section in the Render/Platform dashboard.
+  4.  **Database Connection**: Ensure the `MONGODB_URL` points to a live MongoDB Atlas instance.
+  5.  **Log Monitoring**: Verify successful startup via the deployment logs.
+
+### 2. Frontend Deployment
+
+- **Platform**: [Vercel](https://vercel.com) (Recommended) or Netlify
+- **Setup Steps**:
+  1.  **Connect Repository**: Link the GitHub repository and set the root directory to `frontend`.
+  2.  **Build Settings**:
+      - Framework Preset: `Vite`
+      - Build Command: `npm run build`
+      - Output Directory: `dist`
+  3.  **Environment Variables**: Add `VITE_API_URL` pointing to the deployed backend API.
+  4.  **Deploy**: Trigger the deployment and verify the live site.
+
+### 3. LIVE URLs
+
+- **Deployed Backend API**: [https://sustainable-product-rating-extension.onrender.com](https://sustainable-product-rating-extension.onrender.com)
+- **Deployed Frontend Application**: [https://greenvy.vercel.app](https://greenvy.vercel.app)
+
+### 4. Deployment Evidence
+
+| Evidence Type | Description | Placeholder |
+| ------------- | ----------- | ----------- |
+| **Backend Deployment** | Successful API startup | ![Backend Evidence](https://github.com/sahan200272/sustainable-product-rating-extension/blob/f39ce15bebdc6b51eda5bc065887cd9c31bb3396/Screenshot%202026-04-09%20003029.png) |
+| **Frontend Deployment** | Successful UI build | ![Frontend Evidence](https://github.com/sahan200272/sustainable-product-rating-extension/blob/f39ce15bebdc6b51eda5bc065887cd9c31bb3396/Screenshot%202026-04-09%20002933.png) |
 
 ---
 
@@ -192,8 +247,8 @@ PORT=5000
 NODE_ENV=development
 
 # Database Configuration
-MONGODB_URL=mongodb://localhost:27017/sustainable-products
-MONGODB_URL_TEST=mongodb://localhost:27017/sustainable-products-test
+MONGODB_URL=mongodb+srv://sahan:sah123@cluster0.xlngcrh.mongodb.net/
+MONGODB_URL_TEST=mongodb+srv://sahan:sah123@cluster0.xlngcrh.mongodb.net/test
 
 # JWT Authentication
 JWT_SECRET=your_jwt_secret_key_here_min_32_characters
@@ -307,11 +362,54 @@ This project is licensed under the ISC License.
 
 ---
 
+## Testing Instruction Report
+
+This report outlines the testing strategies, environment configuration, and execution steps for unit, integration, and performance testing.
+
+### 1. Testing Environment Configuration
+
+- **Database**: A dedicated test database `sustainable-products-test` is used to avoid data corruption in the development/production database.
+- **Environment Variables**: Managed via `.env.test` file in the `backend` directory.
+- **Tools**: 
+  - **Jest**: Test runner and assertion library.
+  - **Supertest**: Library for testing HTTP endpoints.
+
+### 2. How to Run Unit Tests
+
+Backend logic (utils, services) are covered by unit tests.
+```bash
+cd backend
+npm test
+```
+
+### 3. Integration Testing Setup and Execution
+
+Integration tests verify the communication between API endpoints and the database.
+- **Setup**: Ensure MongoDB is running and `.env.test` has the correct `MONGODB_URL_TEST`.
+- **Execution**: Run the integration test suite:
+```bash
+cd backend
+node --experimental-vm-modules node_modules/jest/bin/jest.js
+```
+
+### 4. Performance Testing
+
+Performance testing evaluates system responsiveness and stability under load.
+- **Tool**: [Artillery](https://www.artillery.io/) or [Postman Runner](https://learning.postman.com/docs/collections/running-collections/intro-to-collection-runs/)
+- **Setup**: 
+  1. Install artillery: `npm install -g artillery`
+  2. Create a test configuration file.
+- **Execution**: Run a load test against the search endpoint:
+```bash
+artillery quick --count 10 -n 20 http://localhost:3000/api/products/search?q=bottle
+```
+
+---
+
 ## Support
 
 For issues and questions, please contact the development team or create an issue in the repository.
 
-
 ---
 
-**Last Updated:** 27 th February 2026
+**Last Updated:** 10 th April 2026

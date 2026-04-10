@@ -149,7 +149,7 @@ export default function EditProductForm() {
       await updateProduct(id, submitData);
       setSuccessMessage("Product updated successfully! Redirecting...");
       setTimeout(() => {
-        navigate(`/products/${id}`);
+        navigate(`/admin/products/${id}`);
       }, 1500);
     } catch (error) {
       console.error("Error updating:", error);

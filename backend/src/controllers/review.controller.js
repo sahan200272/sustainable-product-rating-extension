@@ -113,6 +113,22 @@ export const getPendingReviews = async (req, res, next) => {
   }
 };
 
+// Retrieves ALL reviews across all statuses (admin only - for review management dashboard)
+export const getAllReviewsAdmin = async (req, res, next) => {
+  try {
+    const reviews = await reviewService.getAllReviewsAdmin();
+
+    return res.status(200).json({
+      success: true,
+      count: reviews.length,
+      data: reviews
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Approves a pending review (admin only)
 export const approveReview = async (req, res, next) => {
   try {

@@ -63,13 +63,18 @@ export const createReview = async (data, userId) => {
     ...data,
     user: userId,
     toxicityScore,
-    status
+    status,
+    isAnonymous: data.isAnonymous === true  // explicit opt-in only
   });
 
   // If auto-approved, update product rating
   if (status === "APPROVED") {
     await recalculateProductRating(data.product);
   }
+
+  // Populate user details so the API response includes firstName/lastName/profilePicture
+  // immediately — this prevents the frontend from showing "Anonymous" until page refresh
+  await review.populate("user", "firstName lastName profilePicture");
 
   return review;
 };
@@ -111,6 +116,16 @@ export const getPendingReviews = async () => {
   const reviews = await Review.find({ status: "PENDING" })
     .populate("user", "firstName lastName email")
     .populate("product", "name brand")
+    .sort({ createdAt: -1 });
+
+  return reviews;
+};
+
+// Retrieves ALL reviews across all statuses for the admin review dashboard
+export const getAllReviewsAdmin = async () => {
+  const reviews = await Review.find({})
+    .populate("user", "firstName lastName email profilePicture")
+    .populate("product", "name brand images sustainabilityScore")
     .sort({ createdAt: -1 });
 
   return reviews;

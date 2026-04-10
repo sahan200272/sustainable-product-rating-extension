@@ -106,7 +106,7 @@ export default function AddProductForm() {
       const response = await addProduct(submitData);
       setSuccessMessage("Product added successfully! Redirecting...");
       setTimeout(() => {
-        navigate("/products");
+        navigate("/admin/products");
       }, 1500);
     } catch (error) {
       console.error("Error submitting:", error);

@@ -1,11 +1,179 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+const GEMINI_MODEL_CANDIDATES = [
+  process.env.GEMINI_PRIMARY_MODEL || "gemini-2.5-flash",
+  process.env.GEMINI_FALLBACK_MODEL,
+].filter(Boolean);
+const MAX_RETRY_ATTEMPTS = 3;
+const BASE_RETRY_DELAY_MS = 700;
+
 // Initialize Gemini AI with API key from environment variables  
 const getGenAI = () => {
-  if (!process.env.GOOGLE_API_KEY) {
-    throw new Error('GOOGLE_API_KEY environment variable is not set');
+  const googleApiKey = process.env.GOOGLE_API_KEY;
+  if (!googleApiKey) {
+    throw new Error('GOOGLE_API_KEY environment variable is not set (blog AI service uses GOOGLE_API_KEY only)');
   }
-  return new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+  return new GoogleGenerativeAI(googleApiKey);
+};
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getErrorText = (error) => {
+  const direct = error?.message || "";
+  const nested = error?.errorDetails?.message || error?.response?.data?.error || "";
+  return `${direct} ${nested}`.toLowerCase();
+};
+
+const isRetryableGeminiError = (error) => {
+  const text = getErrorText(error);
+  return (
+    text.includes("503") ||
+    text.includes("service unavailable") ||
+    text.includes("high demand") ||
+    text.includes("unavailable") ||
+    text.includes("overloaded") ||
+    text.includes("timeout") ||
+    text.includes("econnreset")
+  );
+};
+
+const createServiceUnavailableError = (error) => {
+  const wrappedError = new Error(
+    "AI service is temporarily busy. Please try again in a few seconds."
+  );
+  wrappedError.status = 503;
+  wrappedError.code = "AI_SERVICE_UNAVAILABLE";
+  wrappedError.cause = error;
+  return wrappedError;
+};
+
+const clamp = (num, min, max) => Math.max(min, Math.min(max, num));
+
+const extractKeyPoints = (content) => {
+  const sentences = String(content || "")
+    .split(/[.!?]\s+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length >= 24);
+
+  const unique = [];
+  for (const sentence of sentences) {
+    if (!unique.some((u) => u.toLowerCase() === sentence.toLowerCase())) {
+      unique.push(sentence);
+    }
+    if (unique.length === 5) break;
+  }
+
+  while (unique.length < 5) {
+    unique.push("Choose practical actions that reduce environmental impact in daily decisions.");
+  }
+
+  return unique.map((point) => point.length > 140 ? `${point.slice(0, 137)}...` : point);
+};
+
+const buildFallbackEducationGuide = ({ title, content, category }) => {
+  const normalizedCategory =
+    typeof category === "string" && category.trim().length > 0
+      ? category.trim()
+      : "General Sustainability";
+
+  const keyPoints = extractKeyPoints(content);
+  const safeTitle = String(title || "This topic").trim();
+
+  return {
+    summary: `${safeTitle} highlights practical sustainability ideas in the ${normalizedCategory} category. This guide was generated using a reliable fallback mode so learning can continue even when AI capacity is limited. Focus on measurable actions, smarter consumption, and continuous improvement.`,
+    keyPoints,
+    quiz: [
+      {
+        question: `What is the best first step when applying ideas from "${safeTitle}"?`,
+        options: [
+          "Identify one realistic behavior change and track it weekly",
+          "Wait until you can change everything at once",
+          "Ignore trade-offs and costs",
+          "Focus only on short-term convenience"
+        ],
+        correctAnswer: 0,
+        explanation: "Small, consistent actions are easier to maintain and produce lasting sustainability outcomes."
+      },
+      {
+        question: `How should users evaluate claims in the ${normalizedCategory} category?`,
+        options: [
+          "Rely only on marketing slogans",
+          "Use evidence, transparency, and measurable impact",
+          "Prefer the most expensive option",
+          "Assume all products have the same footprint"
+        ],
+        correctAnswer: 1,
+        explanation: "Good sustainability choices are evidence-based and compare real impact metrics."
+      },
+      {
+        question: "What leads to better long-term sustainability results?",
+        options: [
+          "Random one-time actions",
+          "No follow-up after changes",
+          "Reviewing progress and improving habits over time",
+          "Copying others without context"
+        ],
+        correctAnswer: 2,
+        explanation: "Regular review helps users improve decisions and maintain progress."
+      }
+    ],
+    glossary: [
+      { term: "Sustainability", definition: "Meeting present needs while protecting environmental and social systems for the future." },
+      { term: "Lifecycle Impact", definition: "Total impact of a product from raw material sourcing to disposal or reuse." },
+      { term: "Evidence-Based Choice", definition: "A decision supported by verifiable data, certifications, or measurable outcomes." }
+    ],
+    actionableTips: [
+      "Pick one weekly sustainability goal and record progress.",
+      "Prefer durable, repairable, and reusable products where possible.",
+      "Compare alternatives using transparent impact information.",
+      "Reduce unnecessary consumption before buying replacements.",
+      "Review your habits monthly and set one improvement target."
+    ],
+    categoryConnection: `This content aligns with ${normalizedCategory} by translating core ideas into clear decisions users can apply in daily life. It supports practical behavior change, better product choices, and steady impact improvements.`
+  };
+};
+
+const generateTextWithRetry = async (prompt) => {
+  const genAI = getGenAI();
+  let lastError;
+
+  for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+    for (const modelName of GEMINI_MODEL_CANDIDATES) {
+      try {
+        const model = genAI.getGenerativeModel({ model: modelName });
+        const result = await model.generateContent(prompt);
+
+        if (!result || !result.response) {
+          throw new Error("No response received from Gemini AI");
+        }
+
+        const responseText = result.response.text();
+        if (!responseText || !responseText.trim()) {
+          throw new Error("Empty response from Gemini AI");
+        }
+
+        return responseText;
+      } catch (error) {
+        lastError = error;
+
+        if (!isRetryableGeminiError(error)) {
+          throw error;
+        }
+
+        console.warn(
+          `[Gemini Retry] attempt=${attempt}/${MAX_RETRY_ATTEMPTS}, model=${modelName}, reason=${error?.message || "unknown"}`
+        );
+      }
+    }
+
+    if (attempt < MAX_RETRY_ATTEMPTS) {
+      const jitter = Math.floor(Math.random() * 300);
+      const delay = BASE_RETRY_DELAY_MS * (2 ** (attempt - 1)) + jitter;
+      await sleep(delay);
+    }
+  }
+
+  throw createServiceUnavailableError(lastError);
 };
 
 /**
@@ -13,9 +181,6 @@ const getGenAI = () => {
  */
 export const moderateBlogContent = async (title, content) => {
   try {
-    const genAI = getGenAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
     const prompt = `
     You are a content moderation AI. Analyze the following blog content for inappropriate content.
 
@@ -40,8 +205,7 @@ export const moderateBlogContent = async (title, content) => {
     If content is appropriate, return flagged: false, score: 0, reasons: []
     `;
 
-    const result = await model.generateContent(prompt);
-    const response = result.response.text();
+    const response = await generateTextWithRetry(prompt);
 
     // Remove markdown code fences if present
     const cleanedResponse = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
@@ -67,72 +231,13 @@ export const moderateBlogContent = async (title, content) => {
 };
 
 /**
- * Validate if content is related to SDG-12 before generating education guide
- * @param {string} title - The content title
- * @param {string} content - The content text
- * @returns {Promise<Object>} Validation result with relevance check
- */
-export const validateSDG12Content = async (title, content) => {
-  try {
-    const genAI = getGenAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-    const validationPrompt = `
-You are an expert in UN SDG-12 (Responsible Consumption and Production). Analyze the following content to determine if it's relevant to SDG-12.
-
-Title: "${title}"
-Content: "${content}"
-
-SDG-12 covers:
-- Responsible consumption patterns
-- Sustainable production practices
-- Circular economy and waste reduction
-- Eco-friendly products and materials
-- Life cycle assessment
-- Resource efficiency
-- Sustainable supply chains
-- Consumer behavior for sustainability
-
-Respond with ONLY a JSON object:
-{
-  "isSDG12Relevant": true/false,
-  "relevanceScore": 0-100,
-  "reason": "Brief explanation of why it is or isn't SDG-12 relevant",
-  "sdg12Aspects": ["list of relevant SDG-12 aspects found"] or []
-}
-
-Be strict - only approve content directly related to consumption, production, circular economy, or eco-friendly products.
-`;
-
-    const result = await model.generateContent(validationPrompt);
-    let responseText = result.response.text().trim();
-    
-    // Clean response
-    responseText = responseText.replace(/^```json\s*/i, '').replace(/```\s*$/, '');
-    responseText = responseText.replace(/^```\s*/, '').replace(/```\s*$/, '');
-    
-    const validation = JSON.parse(responseText);
-    return validation;
-    
-  } catch (error) {
-    console.error('Error validating SDG-12 content:', error);
-    // If validation fails, be conservative and reject
-    return {
-      isSDG12Relevant: false,
-      relevanceScore: 0,
-      reason: "Unable to validate content relevance to SDG-12",
-      sdg12Aspects: []
-    };
-  }
-};
-
-/**
  * Generate Education Hub content from blog posts
  * @param {string} title - The blog title
  * @param {string} content - The blog content
+ * @param {string} category - The blog category
  * @returns {Promise<Object>} Education guide object
  */
-export const generateEducationGuide = async (title, content) => {
+export const generateEducationGuide = async (title, content, category) => {
   try {
     // Validate input parameters
     if (!title || typeof title !== 'string' || title.trim().length === 0) {
@@ -143,111 +248,75 @@ export const generateEducationGuide = async (title, content) => {
       throw new Error('Content is required and must be a non-empty string');
     }
 
-    // STEP 1: Validate if content is SDG-12 relevant
-    console.log('Validating SDG-12 relevance...');
-    const validation = await validateSDG12Content(title, content);
-    
-    if (!validation.isSDG12Relevant || validation.relevanceScore < 60) {
-      const error = new Error(`This content is not relevant to SDG-12 (Responsible Consumption and Production). Education Hub only covers sustainable consumption, eco-friendly products, circular economy, and responsible production. Reason: ${validation.reason}`);
-      error.status = 400;
-      error.code = 'NOT_SDG12_RELEVANT';
-      throw error;
-    }
-
-    console.log(`✅ Content validated as SDG-12 relevant (Score: ${validation.relevanceScore}%)`);
-
-    // STEP 2: Generate education guide (only for validated content)
-    const genAI = getGenAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const normalizedCategory =
+      typeof category === 'string' && category.trim().length > 0
+        ? category.trim()
+        : 'General Sustainability';
 
     const prompt = `
-You are an expert educator specializing EXCLUSIVELY in UN SDG-12 (Responsible Consumption and Production). This content has been pre-validated as SDG-12 relevant.
+You are an expert sustainability educator. Create practical learning content based on the blog category and post.
 
-Validated Content:
+Input:
+Category: "${normalizedCategory}"
 Title: "${title}"
 Content: "${content}"
-SDG-12 Aspects Found: ${validation.sdg12Aspects.join(', ')}
 
-STRICT SDG-12 FOCUS AREAS ONLY:
-- Responsible consumption patterns and consumer choices
-- Sustainable production practices and manufacturing
-- Circular economy principles (reduce, reuse, recycle)
-- Eco-friendly product lifecycle and materials
-- Resource efficiency and waste minimization
-- Sustainable supply chain management
-- Environmental footprint reduction
-- Green purchasing and procurement
-
-Create STRICTLY SDG-12 focused educational content. Reject any deviation from these themes. Return ONLY valid JSON:
+Return ONLY valid JSON:
 
 {
-  "summary": "2-3 sentences connecting this topic directly to SDG-12 responsible consumption and production goals",
+  "summary": "2-3 sentences summarizing the blog and why the topic matters",
   "keyPoints": [
-    "SDG-12 responsible consumption principle from this content",
-    "Sustainable production practice or circular economy aspect",
-    "Eco-friendly product selection or lifecycle consideration",
-    "Resource efficiency or waste reduction strategy",
-    "Consumer behavior change for sustainable consumption"
+    "Key concept 1 from the blog",
+    "Key concept 2 from the blog",
+    "Key concept 3 from the blog",
+    "Key concept 4 from the blog",
+    "Key concept 5 from the blog"
   ],
   "quiz": [
     {
-      "question": "According to SDG-12 principles, what is the most important factor when choosing eco-friendly products?",
-      "options": ["Lowest price available", "Product lifecycle and environmental impact", "Brand popularity", "Packaging design"],
-      "correctAnswer": 1,
-      "explanation": "SDG-12 emphasizes considering the entire lifecycle and environmental impact of products to ensure responsible consumption and production patterns."
+      "question": "Question based on the blog content",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctAnswer": 0,
+      "explanation": "Why the correct answer is correct"
     },
     {
-      "question": "How does choosing eco-friendly products contribute to ecosystem health?",
-      "options": ["It has no real impact", "It reduces pollution and resource depletion", "It only benefits manufacturers", "It's just a marketing trend"],
+      "question": "Question based on the blog content",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
       "correctAnswer": 1,
-      "explanation": "Eco-friendly products typically use sustainable materials, generate less pollution, and require fewer natural resources, directly benefiting ecosystem health and biodiversity."
+      "explanation": "Why the correct answer is correct"
     },
     {
-      "question": "What circular economy principle best supports SDG-12 goals?",
-      "options": ["Buy new products frequently", "Reduce, Reuse, Recycle approach", "Focus only on recycling", "Ignore product lifespan"],
-      "correctAnswer": 1,
-      "explanation": "The 3Rs (Reduce, Reuse, Recycle) embody circular economy principles by minimizing waste, extending product life, and keeping materials in productive use, aligning with SDG-12's sustainable consumption goals."
+      "question": "Question based on the blog content",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctAnswer": 2,
+      "explanation": "Why the correct answer is correct"
     }
   ],
   "glossary": [
-    { "term": "SDG-12", "definition": "UN Sustainable Development Goal 12: Responsible Consumption and Production - aims to ensure sustainable consumption and production patterns worldwide" },
-    { "term": "Circular Economy", "definition": "An economic model that eliminates waste by keeping products and materials in use for as long as possible through reuse, sharing, repair, and recycling" },
-    { "term": "Life Cycle Assessment (LCA)", "definition": "A method to evaluate the environmental impacts of a product throughout its entire life cycle, from raw material extraction to disposal" },
-    { "term": "Eco-footprint", "definition": "The measure of human demand on Earth's ecosystems, representing the amount of biologically productive land and sea area needed to sustain consumption" }
+    { "term": "Term 1", "definition": "Definition 1" },
+    { "term": "Term 2", "definition": "Definition 2" },
+    { "term": "Term 3", "definition": "Definition 3" }
   ],
   "actionableTips": [
-    "Look for eco-labels and certifications when shopping (Energy Star, EPEAT, Forest Stewardship Council)",
-    "Choose products with minimal, recyclable, or biodegradable packaging",
-    "Prioritize durability and repairability over disposable alternatives",
-    "Support companies with transparent sustainability reporting and circular business models",
-    "Calculate your consumption footprint and set reduction goals aligned with SDG-12 targets"
+    "Practical action 1",
+    "Practical action 2",
+    "Practical action 3",
+    "Practical action 4",
+    "Practical action 5"
   ],
-  "sdg12Connection": "Explains how this topic directly supports SDG-12 targets of sustainable consumption patterns, responsible production practices, and ecosystem protection"
+  "categoryConnection": "1 paragraph that clearly explains how this blog fits the selected category and why it matters"
 }
 
 Requirements:
-- summary: Must connect to SDG-12 and responsible consumption ONLY
-- keyPoints: Focus STRICTLY on SDG-12 practical knowledge
-- quiz: Educational questions ONLY about SDG-12 consumption and production
-- glossary: Include SDG-12 and related sustainability terms ONLY
-- actionableTips: 5 practical SDG-12 aligned actions users can take
-- sdg12Connection: Clear link to specific SDG-12 targets and objectives
-- REJECT any content not directly related to responsible consumption and production
+- Use the provided category as the main framing for the output
+- Keep language clear and educational
+- Make quiz questions answerable from the blog's ideas
+- Provide exactly 5 keyPoints, 3 quiz questions, and 5 actionableTips
 - Return ONLY the JSON object, no markdown, no text before or after
 `;
 
     // Generate content
-    const result = await model.generateContent(prompt);
-    
-    if (!result || !result.response) {
-      throw new Error('No response received from Gemini AI');
-    }
-
-    let responseText = result.response.text();
-    
-    if (!responseText) {
-      throw new Error('Empty response from Gemini AI');
-    }
+    let responseText = await generateTextWithRetry(prompt);
 
     // Clean the response - remove any markdown formatting
     responseText = responseText.trim();
@@ -269,6 +338,10 @@ Requirements:
       throw new Error(`Invalid JSON response from AI: ${parseError.message}`);
     }
 
+    if (!educationGuide.categoryConnection && typeof educationGuide.sdg12Connection === 'string') {
+      educationGuide.categoryConnection = educationGuide.sdg12Connection;
+    }
+
     // Validate the structure of the response
     const validationError = validateEducationGuide(educationGuide);
     if (validationError) {
@@ -279,18 +352,30 @@ Requirements:
 
   } catch (error) {
     console.error('Error generating education guide:', error);
+    const errorText = getErrorText(error);
     
     // Provide more specific error messages
     if (error.message.includes('API key')) {
       throw new Error('Invalid Google API key. Please check your GOOGLE_API_KEY environment variable.');
     }
     
-    if (error.message.includes('quota')) {
-      throw new Error('Google AI API quota exceeded. Please try again later.');
+    if (
+      error.message.includes('quota') ||
+      error.code === 'AI_SERVICE_UNAVAILABLE' ||
+      errorText.includes('429') ||
+      errorText.includes('resource_exhausted') ||
+      errorText.includes('service unavailable') ||
+      errorText.includes('high demand')
+    ) {
+      return buildFallbackEducationGuide({ title, content, category });
     }
     
     if (error.message.includes('Invalid JSON')) {
       throw new Error('AI response could not be parsed as JSON. Please try again.');
+    }
+
+    if (error.message.includes('Invalid JSON') || error.message.includes('Invalid response structure')) {
+      return buildFallbackEducationGuide({ title, content, category });
     }
 
     // Re-throw with original message for other errors
@@ -309,7 +394,7 @@ const validateEducationGuide = (guide) => {
   }
 
   // Check required fields
-  const requiredFields = ['summary', 'keyPoints', 'quiz', 'glossary', 'actionableTips', 'sdg12Connection'];
+  const requiredFields = ['summary', 'keyPoints', 'quiz', 'glossary', 'actionableTips', 'categoryConnection'];
   for (const field of requiredFields) {
     if (!(field in guide)) {
       return `Missing required field: ${field}`;
@@ -358,9 +443,9 @@ const validateEducationGuide = (guide) => {
     return 'actionableTips must be an array with exactly 5 elements';
   }
 
-  // Validate sdg12Connection
-  if (typeof guide.sdg12Connection !== 'string' || guide.sdg12Connection.trim().length === 0) {
-    return 'sdg12Connection must be a non-empty string';
+  // Validate categoryConnection
+  if (typeof guide.categoryConnection !== 'string' || guide.categoryConnection.trim().length === 0) {
+    return 'categoryConnection must be a non-empty string';
   }
 
   return null; // Valid
@@ -374,13 +459,9 @@ export const testGeminiConnection = async () => {
     // Debug: Check API key when function is actually called
     console.log('🔑 API Key when testing:', process.env.GOOGLE_API_KEY ? 'Loaded (length: ' + process.env.GOOGLE_API_KEY.length + ')' : 'MISSING!');
     
-    const genAI = getGenAI();
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    
     const prompt = 'Respond with this exact JSON: {"status": "working", "message": "API connection successful"}';
-    
-    const result = await model.generateContent(prompt);
-    const response = result.response.text();
+
+    const response = await generateTextWithRetry(prompt);
     
     console.log("Gemini API Test Response:", response);
     return response;
