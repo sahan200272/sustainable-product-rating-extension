@@ -121,6 +121,16 @@ export const getPendingReviews = async () => {
   return reviews;
 };
 
+// Retrieves ALL reviews across all statuses for the admin review dashboard
+export const getAllReviewsAdmin = async () => {
+  const reviews = await Review.find({})
+    .populate("user", "firstName lastName email profilePicture")
+    .populate("product", "name brand images sustainabilityScore")
+    .sort({ createdAt: -1 });
+
+  return reviews;
+};
+
 // Approves a pending review and updates product rating
 export const approveReview = async (reviewId) => {
   const review = await Review.findById(reviewId);
