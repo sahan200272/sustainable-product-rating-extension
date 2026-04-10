@@ -81,3 +81,41 @@ export const deleteReview = async (reviewId) => {
   const response = await api.delete(`/api/reviews/${reviewId}`);
   return response.data;
 };
+
+// ─── Admin-only functions ────────────────────────────────────────────────────
+
+/**
+ * Fetches ALL reviews across all statuses for admin management dashboard.
+ * Requires Admin JWT.
+ *
+ * @returns {Promise<{ success: boolean, count: number, data: object[] }>}
+ */
+export const getAllReviewsAdmin = async () => {
+  const response = await api.get("/api/reviews/admin/all");
+  return response.data;
+};
+
+/**
+ * Approves a review by ID. Requires Admin JWT.
+ *
+ * @param {string} reviewId
+ * @returns {Promise<{ success: boolean, data: object, message: string }>}
+ */
+export const approveReview = async (reviewId) => {
+  const response = await api.patch(`/api/reviews/${reviewId}/approve`);
+  return response.data;
+};
+
+/**
+ * Rejects a review with an optional admin comment. Requires Admin JWT.
+ *
+ * @param {string} reviewId
+ * @param {string} [adminComment]
+ * @returns {Promise<{ success: boolean, data: object, message: string }>}
+ */
+export const rejectReview = async (reviewId, adminComment = "") => {
+  const response = await api.patch(`/api/reviews/${reviewId}/reject`, {
+    adminComment,
+  });
+  return response.data;
+};

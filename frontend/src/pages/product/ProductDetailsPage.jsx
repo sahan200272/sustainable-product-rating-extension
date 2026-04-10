@@ -103,7 +103,7 @@ export default function ProductDetailsPage() {
           {user?.role === "Admin" && (
             <div className="flex gap-3">
               <Link 
-                to={`/edit-product/${id}`}
+                to={`/admin/edit-product/${id}`}
                 className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg font-medium transition-colors shadow-sm"
               >
                 <FiEdit /> Edit Product

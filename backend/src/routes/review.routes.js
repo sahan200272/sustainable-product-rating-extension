@@ -27,6 +27,14 @@ reviewRouter.get(
   reviewController.getPendingReviews
 );
 
+// Admin: Get ALL reviews across all statuses (for review management dashboard)
+reviewRouter.get(
+  "/admin/all",
+  authenticate,
+  authorizeRoles("Admin"),
+  reviewController.getAllReviewsAdmin
+);
+
 reviewRouter.get("/recent", reviewController.getRecentApprovedReviews);
 
 reviewRouter.patch(

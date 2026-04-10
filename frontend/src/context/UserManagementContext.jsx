@@ -13,6 +13,7 @@ const UserManagementContext = createContext(null);
 export function UserManagementProvider({ children }) {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [roleFilter, setRoleFilter] = useState("all");
@@ -43,20 +44,22 @@ export function UserManagementProvider({ children }) {
 
     // ── API Calls ──────────────────────────────────────────────────────────
 
-    const fetchUsers = useCallback(async () => {
-        setLoading(true);
+    const fetchUsers = useCallback(async (isRefresh = false) => {
+        if (isRefresh) setIsRefreshing(true);
+        else setLoading(true);
         try {
             const data = await adminGetAllUsers();
             setUsers(Array.isArray(data) ? data : []);
         } catch (err) {
             toast.error(err?.response?.data?.error || "Failed to load users");
         } finally {
-            setLoading(false);
+            if (isRefresh) setIsRefreshing(false);
+            else setLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        fetchUsers();
+        fetchUsers(false);
     }, [fetchUsers]);
 
     const toggleBlock = useCallback(async (email) => {
@@ -148,7 +151,7 @@ export function UserManagementProvider({ children }) {
             await adminCreateUser(userData);
             toast.success("User created successfully", { id: toastId });
             setShowAddModal(false);
-            await fetchUsers();
+            await fetchUsers(true);
         } catch (err) {
             toast.error(err?.response?.data?.error || "Failed to create user", { id: toastId });
             throw err;
@@ -269,6 +272,7 @@ export function UserManagementProvider({ children }) {
         // Data
         users,
         loading,
+        isRefreshing,
         filteredUsers,
         paginatedUsers,
         totalPages,
