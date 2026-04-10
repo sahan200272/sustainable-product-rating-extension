@@ -223,16 +223,15 @@ This section provides details on the deployment platforms, setup steps, and envi
 
 ### 3. LIVE URLs
 
-- **Deployed Backend API**: [https://your-backend-api.onrender.com/api](https://your-backend-api.onrender.com/api)
-- **Deployed Frontend Application**: [https://your-sustainable-app.vercel.app](https://your-sustainable-app.vercel.app)
+- **Deployed Backend API**: [https://sustainable-product-rating-extension.onrender.com](https://sustainable-product-rating-extension.onrender.com)
+- **Deployed Frontend Application**: [https://greenvy.vercel.app](https://greenvy.vercel.app)
 
 ### 4. Deployment Evidence
 
 | Evidence Type | Description | Placeholder |
 | ------------- | ----------- | ----------- |
-| **Backend Deployment** | Successful API startup | ![Backend Evidence](./screenshots/backend-deploy.png) |
-| **Frontend Deployment** | Successful UI build | ![Frontend Evidence](./screenshots/frontend-deploy.png) |
-| **Database Connection** | MongoDB Atlas cluster status | ![Database Evidence](./screenshots/mongodb-atlas.png) |
+| **Backend Deployment** | Successful API startup | ![Backend Evidence](https://github.com/sahan200272/sustainable-product-rating-extension/blob/f39ce15bebdc6b51eda5bc065887cd9c31bb3396/Screenshot%202026-04-09%20003029.png) |
+| **Frontend Deployment** | Successful UI build | ![Frontend Evidence](https://github.com/sahan200272/sustainable-product-rating-extension/blob/f39ce15bebdc6b51eda5bc065887cd9c31bb3396/Screenshot%202026-04-09%20002933.png) |
 
 ---
 
@@ -248,8 +247,8 @@ PORT=5000
 NODE_ENV=development
 
 # Database Configuration
-MONGODB_URL=mongodb://localhost:27017/sustainable-products
-MONGODB_URL_TEST=mongodb://localhost:27017/sustainable-products-test
+MONGODB_URL=mongodb+srv://sahan:sah123@cluster0.xlngcrh.mongodb.net/
+MONGODB_URL_TEST=mongodb+srv://sahan:sah123@cluster0.xlngcrh.mongodb.net/test
 
 # JWT Authentication
 JWT_SECRET=your_jwt_secret_key_here_min_32_characters
