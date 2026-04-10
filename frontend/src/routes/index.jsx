@@ -29,7 +29,6 @@ const AdminUsersPage = lazy(() => import("../pages/admin/AdminUsersPage"));
 const AdminReviewsPage = lazy(() => import("../pages/admin/AdminReviewsPage"));
 const AdminProductsPage = lazy(() => import("../pages/admin/AdminProductsPage"));
 const AdminBlogModerationPage = lazy(() => import("../pages/admin/AdminBlogModerationPage"));
-const AdminSettingsPage = lazy(() => import("../pages/admin/AdminSettingsPage"));
 const AddProductPage = lazy(() => import("../pages/product/AddProductPage"));
 const EditProductPage = lazy(() => import("../pages/product/EditProductPage"));
 const ComparisonStatsPage = lazy(() => import("../pages/compare/ComparisonStatsPage"));
@@ -60,7 +59,6 @@ export default function AppRoutes() {
                 <Route path="edit-product/:id" element={<EditProductPage />} />
                 <Route path="compare-stats" element={<ComparisonStatsPage />} />
                 <Route path="moderation" element={<AdminBlogModerationPage />} />
-                <Route path="settings"  element={<AdminSettingsPage />} />
             </Route>
 
             {/* ── Public & authenticated pages — MainLayout (Navbar + Footer) ── */}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import toast from "react-hot-toast";
 import { getAllProducts, deleteProduct } from "../../services/productServices";
 import {
@@ -54,22 +55,22 @@ export default function AdminProductsPage() {
 
     return (
         <>
-            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">
-                        Products Datastore
-                    </h2>
-                    <p className="mt-2 text-sm text-gray-500">
-                        Monitor, edit, and orchestrate all products available in the public catalog.
-                    </p>
-                </div>
-                <Link
-                    to="/admin/add-product"
-                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-md transition-all hover:bg-emerald-700 hover:shadow-lg"
-                >
-                    <FiPlus className="h-5 w-5" /> Add New Product
-                </Link>
-            </div>
+            <AdminPageHeader
+                title="Products Datastore"
+                subtitle="Monitor, edit, and orchestrate all products available in the public catalog."
+                breadcrumbs={[
+                    { label: "Dashboard", path: "/admin/dashboard" },
+                    { label: "Products" }
+                ]}
+                actionButton={
+                    <Link
+                        to="/admin/add-product"
+                        className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-md transition-all hover:bg-emerald-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                    >
+                        <FiPlus className="h-5 w-5" /> Add New Product
+                    </Link>
+                }
+            />
 
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
                 <div className="overflow-x-auto">

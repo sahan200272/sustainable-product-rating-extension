@@ -1,4 +1,5 @@
 import { FiUserPlus, FiRefreshCw, FiUsers } from "react-icons/fi";
+import AdminPageHeader from "../AdminPageHeader";
 import { UserManagementProvider, useUserManagement } from "../../../context/UserManagementContext";
 import UserTableFilters from "./UserTableFilters";
 import DataTable from "./DataTable";
@@ -76,31 +77,33 @@ function UserManagementContent() {
     return (
         <div className="space-y-5">
             {/* Page header */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h2 className="text-2xl font-black text-slate-900">User Management</h2>
-                    <p className="mt-0.5 text-sm text-slate-500">
-                        Manage platform users, roles, and account status.
-                    </p>
-                </div>
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => fetchUsers(true)}
-                        disabled={loading || isRefreshing}
-                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-700 disabled:opacity-50"
-                        title="Refresh"
-                    >
-                        <FiRefreshCw className={`h-4 w-4 ${loading || isRefreshing ? "animate-spin" : ""}`} />
-                    </button>
-                    <button
-                        onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 hover:shadow-md"
-                    >
-                        <FiUserPlus className="h-4 w-4" />
-                        Add User
-                    </button>
-                </div>
-            </div>
+            <AdminPageHeader
+                title="User Management"
+                subtitle="Manage platform users, roles, and account status."
+                breadcrumbs={[
+                    { label: "Dashboard", path: "/admin/dashboard" },
+                    { label: "Users" }
+                ]}
+                actionButton={
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => fetchUsers(true)}
+                            disabled={loading || isRefreshing}
+                            className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-700 disabled:opacity-50"
+                            title="Refresh"
+                        >
+                            <FiRefreshCw className={`h-4 w-4 ${loading || isRefreshing ? "animate-spin" : ""}`} />
+                        </button>
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 hover:shadow-md"
+                        >
+                            <FiUserPlus className="h-4 w-4" />
+                            Add User
+                        </button>
+                    </div>
+                }
+            />
 
             {/* Stats */}
             <UserStats />

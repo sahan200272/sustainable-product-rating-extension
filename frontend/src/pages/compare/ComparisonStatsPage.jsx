@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import ComparisonStatsDashboard from "../../components/compare/ComparisonStatsDashboard";
 import { getComparisonStats } from "../../services/comparisonServices";
 import { FiLoader } from "react-icons/fi";
@@ -31,14 +32,15 @@ export default function ComparisonStatsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-black tracking-tight text-slate-900">
-          Comparison Analytics
-        </h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Platform-wide statistics on product comparisons.
-        </p>
-      </div>
+      <AdminPageHeader
+        title="Comparison Analytics"
+        subtitle="Platform-wide statistics on product comparisons."
+        showBackButton={true}
+        breadcrumbs={[
+          { label: "Dashboard", path: "/admin/dashboard" },
+          { label: "Comparison Analytics" }
+        ]}
+      />
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-white rounded-2xl shadow-sm border border-slate-100">

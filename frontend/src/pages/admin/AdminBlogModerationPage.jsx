@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import toast from "react-hot-toast";
 import {
     approveBlogPost,
@@ -123,14 +124,14 @@ export default function AdminBlogModerationPage() {
     return (
         <>
             {/* Header */}
-            <div className="mb-6 flex items-center justify-between">
-                <div>
-                    <h2 className="text-3xl font-black text-gray-900">Blog Moderation</h2>
-                    <p className="mt-1 text-sm text-gray-500">
-                        Review, approve, or remove user-submitted blog posts.
-                    </p>
-                </div>
-            </div>
+            <AdminPageHeader
+                title="Blog Moderation"
+                subtitle="Review, approve, or remove user-submitted blog posts."
+                breadcrumbs={[
+                    { label: "Dashboard", path: "/admin/dashboard" },
+                    { label: "Blog Moderation" }
+                ]}
+            />
 
             {/* Stats */}
             <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">

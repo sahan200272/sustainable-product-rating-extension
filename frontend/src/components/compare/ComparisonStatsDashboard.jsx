@@ -57,15 +57,6 @@ export default function ComparisonStatsDashboard({ stats }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-start">
-        <Link 
-          to="/admin/dashboard" 
-          className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors bg-white px-4 py-2 rounded-lg border border-gray-100 shadow-sm"
-        >
-          <FiArrowLeft className="w-4 h-4" />
-          Back to Dashboard
-        </Link>
-      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         

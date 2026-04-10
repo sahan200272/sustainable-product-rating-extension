@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
@@ -334,15 +335,19 @@ export default function AdminDashboard() {
         <div className="space-y-8">
             {/* ── Page heading ── */}
             <motion.div {...fadeUp(0)}>
-                <p className="text-sm font-medium text-emerald-600">
-                    {greeting}, {displayName.split(" ")[0]} 👋
-                </p>
-                <h2 className="mt-1 text-2xl font-black text-slate-900 tracking-tight">
-                    Dashboard Overview
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                    Real-time snapshot of your entire platform.
-                </p>
+                <AdminPageHeader
+                    title="Dashboard Overview"
+                    subtitle="Real-time snapshot of your entire platform."
+                    breadcrumbs={[
+                        { label: "Admin" },
+                        { label: "Dashboard" }
+                    ]}
+                    actionButton={
+                        <p className="text-sm font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full inline-block">
+                            {greeting}, {displayName.split(" ")[0]} 👋
+                        </p>
+                    }
+                />
             </motion.div>
 
             {/* ── Stat cards — 4 balanced columns ── */}

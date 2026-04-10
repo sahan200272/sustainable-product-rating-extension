@@ -14,6 +14,7 @@
  */
 
 import { useState, useEffect, useMemo, useCallback } from "react";
+import AdminPageHeader from "../AdminPageHeader";
 import toast from "react-hot-toast";
 import {
   FiSearch,
@@ -744,24 +745,24 @@ export default function ReviewManagementSection() {
   return (
     <div className="space-y-6">
       {/* ── Section Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-black tracking-tight text-slate-900">
-            Review Management
-          </h2>
-          <p className="mt-0.5 text-sm text-slate-500">
-            Moderate, approve, and analyse all product reviews.
-          </p>
-        </div>
-        <button
-          onClick={() => fetchReviews(true)}
-          disabled={loading || isRefreshing}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
-        >
-          <FiRefreshCw className={`h-4 w-4 ${loading || isRefreshing ? "animate-spin" : ""}`} />
-          Refresh
-        </button>
-      </div>
+      <AdminPageHeader
+        title="Review Management"
+        subtitle="Moderate, approve, and analyse all product reviews."
+        breadcrumbs={[
+            { label: "Dashboard", path: "/admin/dashboard" },
+            { label: "Reviews" }
+        ]}
+        actionButton={
+            <button
+              onClick={() => fetchReviews(true)}
+              disabled={loading || isRefreshing}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
+            >
+              <FiRefreshCw className={`h-4 w-4 ${loading || isRefreshing ? "animate-spin" : ""}`} />
+              Refresh
+            </button>
+        }
+      />
 
       {/* ── Analytics Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
