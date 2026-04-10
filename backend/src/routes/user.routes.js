@@ -7,6 +7,8 @@ import {
 	getUserByEmailAdmin,
 	getAllUsers,
 	blockOrUnblockUser,
+	deleteUserByEmail,
+	updateUserRole,
 	sendOTP,
 	verifyOTP,
 	updateProfile
@@ -41,5 +43,7 @@ userRouter.post('/verify-otp', authenticate, verifyOTP);
 userRouter.post('/admin/getUserByEmail', authenticate, isAdmin, getUserByEmailAdmin);
 userRouter.get('/admin/getAllUsers', authenticate, isAdmin, getAllUsers);
 userRouter.patch('/admin/block-user/:email', authenticate, isAdmin, blockOrUnblockUser);
+userRouter.delete('/admin/delete-user/:email', authenticate, isAdmin, deleteUserByEmail);
+userRouter.patch('/admin/update-role/:email', authenticate, isAdmin, updateUserRole);
 
 export default userRouter;

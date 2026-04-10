@@ -229,6 +229,68 @@ export async function blockOrUnblockUser(req, res) {
     }
 }
 
+// Controller function to delete a user by email (Admin only)
+export async function deleteUserByEmail(req, res) {
+    try {
+        const { email } = req.params;
+
+        if (!email) {
+            return res.status(400).json({ error: 'Email parameter is required' });
+        }
+
+        // Prevent admin from deleting themselves
+        if (req.user.email === decodeURIComponent(email)) {
+            return res.status(403).json({ error: 'You cannot delete your own account' });
+        }
+
+        const deletedUser = await userService.deleteUserByEmail(decodeURIComponent(email));
+
+        return res.status(200).json({
+            message: 'User deleted successfully',
+            user: deletedUser
+        });
+    } catch (error) {
+        console.error('Delete user error:', error);
+
+        if (error.message === 'User not found') {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        return res.status(500).json({ error: 'Failed to delete user' });
+    }
+}
+
+// Controller function to update a user's role (Admin only)
+export async function updateUserRole(req, res) {
+    try {
+        const { email } = req.params;
+        const { role } = req.body;
+
+        if (!email || !role) {
+            return res.status(400).json({ error: 'Email and role are required' });
+        }
+
+        const updatedUser = await userService.updateUserRoleByEmail(decodeURIComponent(email), role);
+
+        return res.status(200).json({
+            message: `User role updated to ${role}`,
+            user: updatedUser
+        });
+    } catch (error) {
+        console.error('Update role error:', error);
+
+        if (error.message === 'User not found') {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (error.message === 'Invalid role') {
+            return res.status(400).json({ error: 'Invalid role value' });
+        }
+
+        return res.status(500).json({ error: 'Failed to update user role' });
+    }
+}
+
 // Controller function to login/register user via Google
 export async function loginWithGoogle(req, res) {
     try {
