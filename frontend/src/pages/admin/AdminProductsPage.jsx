@@ -8,6 +8,7 @@ import {
     FiTrash2,
     FiBox,
     FiPackage,
+    FiEye,
 } from "react-icons/fi";
 
 /**
@@ -114,21 +115,23 @@ export default function AdminProductsPage() {
                                     <tr key={product._id} className="transition-colors hover:bg-gray-50/50">
                                         <td className="whitespace-nowrap px-6 py-4">
                                             <div className="flex items-center">
-                                                <div className="h-10 w-10 flex-shrink-0">
+                                                <Link to={`/admin/products/${product._id}`} className="h-10 w-10 flex-shrink-0 block">
                                                     {product.images && product.images.length > 0 ? (
                                                         <img
-                                                            className="h-10 w-10 rounded-lg border border-gray-200 object-cover"
+                                                            className="h-10 w-10 rounded-lg border border-gray-200 object-cover hover:opacity-80 transition-opacity"
                                                             src={product.images[0].url || product.images[0]}
                                                             alt=""
                                                         />
                                                     ) : (
-                                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-gray-100">
+                                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-gray-100 hover:bg-gray-200 transition-colors">
                                                             <FiBox className="text-gray-400" />
                                                         </div>
                                                     )}
-                                                </div>
+                                                </Link>
                                                 <div className="ml-4">
-                                                    <div className="text-sm font-bold text-gray-900">{product.name}</div>
+                                                    <Link to={`/admin/products/${product._id}`} className="text-sm font-bold text-gray-900 hover:text-emerald-600 transition-colors">
+                                                        {product.name}
+                                                    </Link>
                                                     <div className="max-w-[200px] truncate text-xs text-gray-500">
                                                         {product.description}
                                                     </div>
@@ -162,6 +165,13 @@ export default function AdminProductsPage() {
                                         </td>
                                         <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                                             <div className="flex justify-end gap-2">
+                                                <Link
+                                                    to={`/admin/products/${product._id}`}
+                                                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 transition-colors hover:bg-emerald-100"
+                                                    title="View Product"
+                                                >
+                                                    <FiEye className="h-4 w-4" />
+                                                </Link>
                                                 <Link
                                                     to={`/admin/edit-product/${product._id}`}
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 transition-colors hover:bg-indigo-100"

@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { getProductById, deleteProduct } from "../../services/productServices";
 import { AuthContext } from "../../context/AuthContext";
 import toast from "react-hot-toast";
@@ -12,7 +12,11 @@ import ReviewSection from "../../components/reviews/ReviewSection";
 export default function ProductDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useContext(AuthContext);
+
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  const backLink = isAdminRoute ? '/admin/products' : '/products';
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -42,7 +46,7 @@ export default function ProductDetailsPage() {
       try {
         await deleteProduct(id);
         toast.success("Product deleted successfully");
-        navigate("/products");
+        navigate(backLink);
       } catch (err) {
         toast.error("Failed to delete product");
       }
@@ -66,7 +70,7 @@ export default function ProductDetailsPage() {
         <p className="text-gray-500 mb-6 max-w-md text-center">
           We couldn't find the requested product. It might have been removed or the link is incorrect.
         </p>
-        <Link to="/products" className="px-6 py-2 bg-emerald-600 font-semibold text-white rounded-xl shadow-md">
+        <Link to={backLink} className="px-6 py-2 bg-emerald-600 font-semibold text-white rounded-xl shadow-md">
           Back to Catalog
         </Link>
       </div>
@@ -94,7 +98,7 @@ export default function ProductDetailsPage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8 gap-4 flex-wrap">
           <Link 
-            to="/products" 
+            to={backLink} 
             className="inline-flex items-center text-sm font-medium text-emerald-600 hover:text-emerald-500 transition-colors"
           >
             <FiArrowLeft className="mr-2" /> Back to Products

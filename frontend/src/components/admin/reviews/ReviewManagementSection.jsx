@@ -512,6 +512,7 @@ export default function ReviewManagementSection() {
   // ── Filter / Sort / Search state
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("ALL");
+  
   const [filterRating, setFilterRating] = useState(0); // 0 = all
   const [filterEcoMin, setFilterEcoMin] = useState(0);
   const [sort, setSort] = useState({ field: "createdAt", dir: "desc" });
