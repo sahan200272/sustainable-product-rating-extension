@@ -71,7 +71,7 @@ function UserStats() {
  * Inner content — needs to be inside the Provider to use the context.
  */
 function UserManagementContent() {
-    const { setShowAddModal, fetchUsers, loading, selectedUsers } = useUserManagement();
+    const { setShowAddModal, fetchUsers, loading, isRefreshing, selectedUsers } = useUserManagement();
 
     return (
         <div className="space-y-5">
@@ -85,12 +85,12 @@ function UserManagementContent() {
                 </div>
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={fetchUsers}
-                        disabled={loading}
+                        onClick={() => fetchUsers(true)}
+                        disabled={loading || isRefreshing}
                         className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-700 disabled:opacity-50"
                         title="Refresh"
                     >
-                        <FiRefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                        <FiRefreshCw className={`h-4 w-4 ${loading || isRefreshing ? "animate-spin" : ""}`} />
                     </button>
                     <button
                         onClick={() => setShowAddModal(true)}
