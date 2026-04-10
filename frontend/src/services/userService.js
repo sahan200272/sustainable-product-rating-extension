@@ -41,7 +41,6 @@ export const getMe = async () => {
     return response.data;
 };
 
-
 /**
  * Login a user via Google.
  * Token storage is handled by AuthContext.
@@ -64,3 +63,60 @@ export const updateProfile = async (payload) => {
     return response.data;
 };
 
+// ─── Admin-only API functions ──────────────────────────────────────────────
+
+/**
+ * Fetch all users (Admin only).
+ * @returns {Promise<Array>} Array of user objects.
+ */
+export const adminGetAllUsers = async () => {
+    const response = await api.get("/api/users/admin/getAllUsers");
+    return response.data;
+};
+
+/**
+ * Toggle block/unblock a user by email (Admin only).
+ * @param {string} email - Target user's email.
+ * @returns {Promise} { message, user }
+ */
+export const adminToggleBlockUser = async (email) => {
+    const response = await api.patch(`/api/users/admin/block-user/${encodeURIComponent(email)}`);
+    return response.data;
+};
+
+/**
+ * Permanently delete a user by email (Admin only).
+ * @param {string} email - Target user's email.
+ * @returns {Promise} { message, user }
+ */
+export const adminDeleteUser = async (email) => {
+    const response = await api.delete(`/api/users/admin/delete-user/${encodeURIComponent(email)}`);
+    return response.data;
+};
+
+/**
+ * Update a user's role (Admin only).
+ * @param {string} email - Target user's email.
+ * @param {string} role  - New role: "Admin" | "Customer"
+ * @returns {Promise} { message, user }
+ */
+export const adminUpdateUserRole = async (email, role) => {
+    const response = await api.patch(`/api/users/admin/update-role/${encodeURIComponent(email)}`, { role });
+    return response.data;
+};
+
+/**
+ * Admin-created user registration.
+ * Reuses the public register endpoint but called by an authenticated admin.
+ * @param {Object} userData - { firstName, lastName, email, password, role, phone, address }
+ * @returns {Promise} { message, user }
+ */
+export const adminCreateUser = async (userData) => {
+    const response = await api.post("/api/users/register", {
+        ...userData,
+        phone: userData.phone || "Not provided",
+        address: userData.address || "Not provided",
+        emailVerified: true,
+    });
+    return response.data;
+};

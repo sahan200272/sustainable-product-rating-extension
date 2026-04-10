@@ -143,6 +143,37 @@ export async function toggleBlockUserByEmail(email) {
     };
 }
 
+// Service function to delete a user by email (Admin operation)
+export async function deleteUserByEmail(email) {
+    const user = await User.findOneAndDelete({ email });
+
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    return sanitizeUser(user);
+}
+
+// Service function to update a user's role by email (Admin operation)
+export async function updateUserRoleByEmail(email, role) {
+    const validRoles = ['Admin', 'Customer'];
+    if (!validRoles.includes(role)) {
+        throw new Error('Invalid role');
+    }
+
+    const user = await User.findOneAndUpdate(
+        { email },
+        { $set: { role } },
+        { new: true, runValidators: true }
+    );
+
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    return sanitizeUser(user);
+}
+
 export async function loginWithGoogle(accessToken) {
     if (!accessToken) {
         throw new Error('Access token is required');

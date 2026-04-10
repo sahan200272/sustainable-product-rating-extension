@@ -18,6 +18,7 @@ import {
     FiSettings,
     FiFileText,
     FiBarChart2,
+    FiUsers,
 } from "react-icons/fi";
 import {
     approveBlogPost,
@@ -25,6 +26,7 @@ import {
     getAdminBlogs,
     rejectBlogPost,
 } from "../../services/blogService";
+import UserManagementSection from "../../components/admin/users/UserManagementSection";
 
 function formatDate(dateString) {
     if (!dateString) return "-";
@@ -191,8 +193,9 @@ export default function AdminDashboard() {
 
     const sidebarItems = [
         { key: "dashboard", label: "Dashboard", icon: <FiGrid className="h-4 w-4" /> },
+        { key: "users", label: "Users", icon: <FiUsers className="h-4 w-4" /> },
         { key: "products", label: "Products", icon: <FiPackage className="h-4 w-4" /> },
-        { key: "moderation", label: "Review blogs", icon: <FiCheckCircle className="h-4 w-4" /> },
+        { key: "moderation", label: "Review Blogs", icon: <FiCheckCircle className="h-4 w-4" /> },
         { key: "settings", label: "Settings", icon: <FiSettings className="h-4 w-4" /> },
     ];
 
@@ -339,6 +342,10 @@ export default function AdminDashboard() {
                                     </div>
                                 </div>
                             </>
+                        )}
+
+                        {activeSection === "users" && (
+                            <UserManagementSection />
                         )}
 
                         {activeSection === "products" && (
