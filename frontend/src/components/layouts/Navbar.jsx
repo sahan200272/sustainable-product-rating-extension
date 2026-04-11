@@ -168,7 +168,7 @@ export default function Navbar() {
         <>
             {/* ─────────────────────────────── NAVBAR ─────────────────────────── */}
             <nav
-                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+                className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 ${
                     scrolled
                         ? "bg-white/90 backdrop-blur-xl shadow-[0_2px_24px_rgba(0,0,0,0.08)] border-b border-slate-100/80"
                         : "bg-white/75 backdrop-blur-lg border-b border-slate-100/50"
@@ -548,9 +548,6 @@ export default function Navbar() {
                     </div>
                 )}
             </nav>
-
-            {/* Spacer: reserve height so content isn't hidden under the fixed navbar */}
-            <div className="h-[68px]" aria-hidden="true" />
         </>
     );
 }
