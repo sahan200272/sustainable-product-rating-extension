@@ -52,7 +52,7 @@ function BlogCard({ blog, index }) {
     <motion.div
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
+      viewport={{ once: false, margin: "-40px" }}
       transition={{ duration: 0.55, ease: "easeOut", delay: index * 0.12 }}
       whileHover={{ y: -6 }}
     >
@@ -165,7 +165,7 @@ export default function BlogSection() {
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: false, margin: "-80px" }}
           transition={{ duration: 0.55, ease: "easeOut" }}
           className="flex flex-col sm:flex-row justify-between items-end mb-12 gap-6"
         >

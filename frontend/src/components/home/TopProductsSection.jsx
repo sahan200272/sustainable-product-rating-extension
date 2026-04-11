@@ -33,7 +33,7 @@ function ScoreBadge({ score }) {
     <motion.div
       initial={{ scale: 0.5, opacity: 0 }}
       whileInView={{ scale: 1, opacity: 1 }}
-      viewport={{ once: true }}
+      viewport={{ once: false }}
       transition={{ type: "spring", stiffness: 350, delay: 0.2 }}
       className={`absolute top-4 right-4 z-20 flex items-center gap-1 px-3 py-1.5 rounded-full
         text-white text-sm font-bold shadow-lg ring-2 ring-white ${color}`}
@@ -62,7 +62,7 @@ function ProductCard({ product, index }) {
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
+      viewport={{ once: false, margin: "-40px" }}
       transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.1 }}
     >
       <Link
@@ -164,7 +164,7 @@ export default function TopProductsSection() {
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: false, margin: "-80px" }}
           transition={{ duration: 0.55, ease: "easeOut" }}
           className="flex flex-col sm:flex-row justify-between items-end mb-12 gap-6"
         >

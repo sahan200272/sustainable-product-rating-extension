@@ -59,7 +59,7 @@ export default function CtaSection() {
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
+          viewport={{ once: false, margin: "-60px" }}
           transition={{ duration: 0.65, ease: "easeOut" }}
         >
           {!isAuthenticated ? (
@@ -79,7 +79,7 @@ export default function CtaSection() {
                     className="absolute bottom-1 left-0 right-0 h-2 bg-white/25 rounded-full -z-0"
                     initial={{ scaleX: 0 }}
                     whileInView={{ scaleX: 1 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false }}
                     transition={{ duration: 0.7, delay: 0.5, ease: "easeOut" }}
                   />
                 </span>
@@ -92,7 +92,7 @@ export default function CtaSection() {
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={{ once: false }}
                 transition={{ duration: 0.5, delay: 0.3 }}
                 className="flex flex-col sm:flex-row items-center justify-center gap-4"
               >
@@ -126,7 +126,7 @@ export default function CtaSection() {
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={{ once: false }}
                 transition={{ duration: 0.5, delay: 0.3 }}
                 className="flex flex-col sm:flex-row items-center justify-center gap-4"
               >
@@ -147,7 +147,7 @@ export default function CtaSection() {
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          viewport={{ once: false }}
           transition={{ duration: 0.6, delay: 0.6 }}
           className="mt-16 flex flex-wrap items-center justify-center gap-6 text-white/60 text-sm font-medium"
         >

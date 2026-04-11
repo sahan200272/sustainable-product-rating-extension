@@ -20,7 +20,7 @@ export default function AnimatedCounter({
   className = "",
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useInView(ref, { once: false, margin: "-80px" });
   const motionValue = useMotionValue(0);
   const rounded = useTransform(motionValue, (v) => Math.round(v));
 

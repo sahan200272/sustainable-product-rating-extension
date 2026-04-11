@@ -139,7 +139,7 @@ export default function FeatureSection() {
           variants={sectionFade}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: false, margin: "-80px" }}
           className="text-center max-w-2xl mx-auto mb-16"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm font-semibold mb-6 shadow-sm">
@@ -165,7 +165,7 @@ export default function FeatureSection() {
           variants={cardStagger}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-60px" }}
+          viewport={{ once: false, margin: "-60px" }}
           className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8"
         >
           {FEATURES.map((feature) => (
@@ -185,7 +185,7 @@ export default function FeatureSection() {
           variants={sectionFade}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true }}
+          viewport={{ once: false }}
           className="mt-10 text-center"
         >
           <motion.div

@@ -45,7 +45,7 @@ const STD_PRODUCT = {
 // ── Animated score ring ───────────────────────────────────────────────────────
 function ScoreRing({ score, isWinner }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true });
+  const inView = useInView(ref, { once: false });
   const motionVal = useMotionValue(0);
   const [display, setDisplay] = useState(0);
 
@@ -92,7 +92,7 @@ function AnimatedBar({ value, gradient }) {
         className={`h-full rounded-full bg-gradient-to-r ${gradient}`}
         initial={{ width: "0%" }}
         whileInView={{ width: `${value}%` }}
-        viewport={{ once: true }}
+        viewport={{ once: false }}
         transition={{ duration: 1.1, ease: "easeOut", delay: 0.1 }}
       />
     </div>
@@ -116,7 +116,7 @@ function ProductCard({ product }) {
         <motion.div
           initial={{ scale: 0, y: -10 }}
           whileInView={{ scale: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: false }}
           transition={{ type: "spring", stiffness: 400, delay: 0.4 }}
           className="absolute -top-5 left-1/2 -translate-x-1/2 z-10"
         >
@@ -216,7 +216,7 @@ export default function ComparisonSection() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: false, margin: "-80px" }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
@@ -247,7 +247,7 @@ export default function ComparisonSection() {
             <motion.div
               initial={{ scale: 0, rotate: -15 }}
               whileInView={{ scale: 1, rotate: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: false }}
               transition={{ type: "spring", stiffness: 350, damping: 20, delay: 0.3 }}
               className="w-14 h-14 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 text-white font-black text-sm flex items-center justify-center shadow-lg shadow-slate-900/25 ring-4 ring-white shrink-0"
             >
@@ -263,7 +263,7 @@ export default function ComparisonSection() {
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: false }}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
           className="mt-14 max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4"
         >
@@ -285,7 +285,7 @@ export default function ComparisonSection() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: false }}
           transition={{ duration: 0.5, delay: 0.3 }}
           className="mt-12 text-center"
         >

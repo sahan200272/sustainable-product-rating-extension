@@ -57,7 +57,7 @@ function StarRow({ rating }) {
           key={i}
           initial={{ scale: 0, opacity: 0 }}
           whileInView={{ scale: 1, opacity: 1 }}
-          viewport={{ once: true }}
+          viewport={{ once: false }}
           transition={{ delay: i * 0.07, type: "spring", stiffness: 400 }}
         >
           <Star
@@ -77,7 +77,7 @@ function ReviewCard({ review, onClick }) {
     <motion.div
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
+      viewport={{ once: false, margin: "-40px" }}
       transition={{ duration: 0.5, ease: "easeOut" }}
       whileHover={{ y: -6 }}
       onClick={onClick}
@@ -213,7 +213,7 @@ export default function ReviewsSection() {
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: false, margin: "-80px" }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
