@@ -3,6 +3,9 @@ import calculateSustainabilityScore from "../../utils/calculateSustainabilitySco
 
 describe("calculateSustainabilityScore Utility", () => {
     
+    // Test Case: Perfect Product Score
+    // Ensures that an item with all positive sustainability traits and optimal metrics
+    // achieves the maximum possible score of 100.
     test("should calculate maximum score of 100 for a perfect product", () => {
         const sustainability = {
             recyclableMaterial: true,
@@ -19,6 +22,9 @@ describe("calculateSustainabilityScore Utility", () => {
         expect(score).toBe(100);
     });
 
+    // Test Case: Minimal Product Score
+    // Verifies that a product with no positive traits and worst metrics 
+    // scores a 0 (the absolute baseline).
     test("should calculate minimum score for a poor product", () => {
         const sustainability = {
             recyclableMaterial: false,
@@ -35,6 +41,9 @@ describe("calculateSustainabilityScore Utility", () => {
         expect(score).toBe(0);
     });
 
+    // Test Case: Partial Score Calculation
+    // Evaluates whether the utility correctly accumulates points for a mix
+    // of positive and negative/neutral traits based on formulas.
     test("should calculate partial score correctly", () => {
         const sustainability = {
             recyclableMaterial: true,    // +10
@@ -51,6 +60,9 @@ describe("calculateSustainabilityScore Utility", () => {
         expect(score).toBe(50);
     });
 
+    // Test Case: Negative Value Handling
+    // Tests the system's ability to penalize products when specific negative
+    // metrics (like extremely high carbon footprint) exceed regular constraints.
     test("should handle carbon footprint > 20 as negative impact", () => {
         const sustainability = {
             recyclableMaterial: false,
