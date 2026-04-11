@@ -16,7 +16,7 @@ import CtaSection from "../../components/home/CtaSection";
  */
 export default function HomePage() {
     return (
-        <div className="min-h-screen bg-slate-50 font-sans selection:bg-emerald-200">
+        <div className="min-h-screen bg-white font-sans selection:bg-emerald-200 selection:text-emerald-900">
             <main>
                 <HeroSection />
                 <FeatureSection />
