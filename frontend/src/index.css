@@ -39,5 +39,12 @@
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* ── Smooth scroll ── */
-html { scroll-behavior: smooth; }
+/* ── Smooth scroll + overflow lock ── */
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+}
