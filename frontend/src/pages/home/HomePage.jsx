@@ -28,9 +28,9 @@ export default function HomePage() {
     return (
         <div 
             key={location.key} 
-            className="min-h-screen bg-white font-sans selection:bg-emerald-200 selection:text-emerald-900"
+            className="min-h-screen bg-white font-sans selection:bg-emerald-200 selection:text-emerald-900 overflow-x-hidden"
         >
-            <main>
+            <main className="overflow-x-hidden">
                 <HeroSection />
                 <FeatureSection />
                 <ComparisonSection />

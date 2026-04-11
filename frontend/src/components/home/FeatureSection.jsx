@@ -75,7 +75,7 @@ function FeatureCard({ feature }) {
       variants={cardVariant}
       whileHover={{ y: -8, scale: 1.02 }}
       transition={{ type: "spring", stiffness: 300, damping: 24 }}
-      className="group relative flex flex-col bg-white/80 backdrop-blur-sm rounded-3xl p-8
+      className="group relative flex flex-col bg-white/80 backdrop-blur-sm rounded-3xl p-5 sm:p-8
                  border border-slate-100 shadow-md hover:shadow-2xl hover:border-emerald-100
                  transition-shadow duration-300 cursor-default overflow-hidden"
     >
@@ -127,7 +127,7 @@ function FeatureCard({ feature }) {
 // ── Main Section ─────────────────────────────────────────────────────────────
 export default function FeatureSection() {
   return (
-    <section className="relative py-28 overflow-hidden bg-gradient-to-br from-white via-emerald-50/30 to-slate-50">
+    <section className="relative py-16 sm:py-20 md:py-28 overflow-hidden bg-gradient-to-br from-white via-emerald-50/30 to-slate-50">
       {/* Decorative blobs */}
       <div className="absolute top-0 right-0 w-[520px] h-[520px] bg-emerald-200 rounded-full blur-[160px] opacity-[0.15] translate-x-1/3 -translate-y-1/4 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[420px] h-[420px] bg-teal-200 rounded-full blur-[140px] opacity-[0.12] -translate-x-1/3 translate-y-1/4 pointer-events-none" />
@@ -140,14 +140,14 @@ export default function FeatureSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: false, margin: "-80px" }}
-          className="text-center max-w-2xl mx-auto mb-16"
+          className="text-center max-w-2xl mx-auto mb-10 sm:mb-16 px-2 sm:px-0"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm font-semibold mb-6 shadow-sm">
             <Leaf size={15} className="text-emerald-500" />
             <span>SDG 12 · Responsible Consumption</span>
           </div>
 
-          <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-5 tracking-tight leading-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 mb-4 sm:mb-5 tracking-tight leading-tight">
             Make Smarter,{" "}
             <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 bg-clip-text text-transparent">
               Sustainable
@@ -155,7 +155,7 @@ export default function FeatureSection() {
             Choices
           </h2>
 
-          <p className="text-lg text-slate-500 leading-relaxed">
+          <p className="text-sm sm:text-base md:text-lg text-slate-500 leading-relaxed">
             Understand product impact, compare smarter, and choose responsibly with data you can trust.
           </p>
         </motion.div>
@@ -166,7 +166,7 @@ export default function FeatureSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: false, margin: "-60px" }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8"
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8"
         >
           {FEATURES.map((feature) => (
             <FeatureCard key={feature.id} feature={feature} />
@@ -196,7 +196,8 @@ export default function FeatureSection() {
             <Link
               to="/products"
               id="features-cta"
-              className="inline-flex items-center justify-center gap-2.5 px-8 py-4
+              className="inline-flex items-center justify-center gap-2.5 px-8 py-3.5 sm:py-4 min-h-[48px]
+                         w-full sm:w-auto
                          bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl
                          font-bold text-base shadow-lg shadow-emerald-500/30
                          hover:shadow-xl hover:shadow-emerald-500/40 transition-shadow duration-300 group"

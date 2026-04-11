@@ -8,8 +8,8 @@ import api from "../../services/api";
 function SkeletonCard() {
   return (
     <div className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
-      <div className="h-52 animate-shimmer rounded-t-2xl" />
-      <div className="p-6 space-y-3">
+      <div className="h-40 sm:h-52 animate-shimmer rounded-t-2xl" />
+      <div className="p-4 sm:p-6 space-y-3">
         <div className="h-3 w-1/3 rounded animate-shimmer" />
         <div className="h-5 w-2/3 rounded animate-shimmer" />
         <div className="flex gap-2 mt-4">
@@ -70,7 +70,7 @@ function ProductCard({ product, index }) {
         className="group flex flex-col bg-white rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 border border-slate-100 shadow-md"
       >
         {/* Image area */}
-        <div className={`h-52 ${bgColor} relative overflow-hidden flex items-center justify-center`}>
+        <div className={`h-40 sm:h-52 ${bgColor} relative overflow-hidden flex items-center justify-center`}>
           {product.images && product.images.length > 0 ? (
             <>
               <img
@@ -103,7 +103,7 @@ function ProductCard({ product, index }) {
         </div>
 
         {/* Content */}
-        <div className="p-5 flex flex-col flex-grow">
+        <div className="p-4 sm:p-5 flex flex-col flex-grow">
           <p className="text-xs font-bold text-slate-400 tracking-wider uppercase mb-1 truncate">
             {product.brand}
           </p>
@@ -154,7 +154,7 @@ export default function TopProductsSection() {
   }, []);
 
   return (
-    <section className="py-28 bg-white border-t border-slate-100 relative overflow-hidden">
+    <section className="py-16 sm:py-20 md:py-28 bg-white border-t border-slate-100 relative overflow-hidden">
       {/* Decorative blob */}
       <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-emerald-100 rounded-full blur-[120px] opacity-30 translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
@@ -166,17 +166,17 @@ export default function TopProductsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, margin: "-80px" }}
           transition={{ duration: 0.55, ease: "easeOut" }}
-          className="flex flex-col sm:flex-row justify-between items-end mb-12 gap-6"
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 sm:mb-12 gap-3 sm:gap-6"
         >
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-100 text-amber-700 text-xs font-bold mb-4">
               <Star size={12} className="fill-amber-500 text-amber-500" />
               Community Favourites
             </div>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-1 sm:mb-2 tracking-tight">
               Top Rated This Week
             </h2>
-            <p className="text-lg text-slate-500">
+            <p className="text-sm sm:text-base text-slate-500">
               Highest performing products across verified sustainability data points.
             </p>
           </div>
@@ -193,11 +193,11 @@ export default function TopProductsSection() {
 
         {/* Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {products.map((product, index) => (
               <ProductCard key={product._id} product={product} index={index} />
             ))}

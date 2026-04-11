@@ -25,14 +25,14 @@ const floatAnim = {
 
 export default function HeroSection() {
   return (
-    <section className="relative pt-24 pb-32 overflow-hidden bg-gradient-to-b from-emerald-50/70 via-white to-white">
+    <section className="relative pt-12 pb-16 sm:pt-16 sm:pb-24 md:pb-32 overflow-hidden bg-gradient-to-b from-emerald-50/70 via-white to-white">
       {/* Background Video */}
       <video
         autoPlay
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover z-0 opacity-50"
+        className="absolute inset-0 w-full h-full object-cover z-0 opacity-30 sm:opacity-50"
       >
         <source src="/videos/Sustainability_Web_App_Hero_Video.mp4" type="video/mp4" />
         <source src="/videos/Sustainability_Web_App_Hero_Video.webm" type="video/webm" />
@@ -46,7 +46,7 @@ export default function HeroSection() {
       <div className="absolute -top-16 right-0 w-[480px] h-[480px] bg-teal-200 rounded-full blur-[140px] opacity-20 pointer-events-none z-0" />
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[700px] h-[200px] bg-emerald-100 rounded-full blur-[80px] opacity-40 pointer-events-none z-0" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center w-full">
 
         {/* Stagger container */}
         <motion.div
@@ -57,7 +57,7 @@ export default function HeroSection() {
         >
           {/* SDG Badge */}
           <motion.div variants={fadeUp}>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 border border-emerald-200 text-emerald-700 text-sm font-semibold mb-8 shadow-sm shadow-emerald-100 backdrop-blur-sm">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/80 border border-emerald-200 text-emerald-700 text-xs sm:text-sm font-semibold mb-6 sm:mb-8 shadow-sm shadow-emerald-100 backdrop-blur-sm">
               <motion.span variants={floatAnim} animate="animate" className="flex items-center">
                 <ShieldCheck size={16} className="text-emerald-500" />
               </motion.span>
@@ -68,7 +68,7 @@ export default function HeroSection() {
           {/* Headline */}
           <motion.h1
             variants={fadeUp}
-            className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-slate-900 tracking-tight max-w-4xl mx-auto leading-[1.1] mb-6"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-slate-900 tracking-tight max-w-4xl mx-auto leading-[1.1] mb-4 sm:mb-6"
           >
             Make Smarter,{" "}
             <br className="hidden md:block" />
@@ -80,15 +80,36 @@ export default function HeroSection() {
           {/* Subtitle */}
           <motion.p
             variants={fadeUp}
-            className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed mb-10"
+            className="text-sm sm:text-base md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed mb-8 sm:mb-10 px-2 sm:px-0"
           >
             AI-powered sustainability insights, transparent comparisons, and
             authentic community reviews — shop with purpose, every time.
           </motion.p>
 
           {/* Search bar */}
-          <motion.div variants={fadeUp} className="w-full max-w-2xl mx-auto mb-8">
-            <div className="relative group">
+          <motion.div variants={fadeUp} className="w-full max-w-2xl mx-auto mb-6 sm:mb-8">
+            {/* Mobile: stacked layout */}
+            <div className="flex sm:hidden flex-col gap-2">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-slate-400" />
+                </div>
+                <input
+                  id="hero-search-mobile"
+                  type="text"
+                  placeholder="Search products or brands..."
+                  className="block w-full pl-12 pr-4 py-3.5 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent shadow-md text-base bg-white/90 backdrop-blur-sm"
+                />
+              </div>
+              <button
+                id="hero-search-btn-mobile"
+                className="w-full min-h-[44px] py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-semibold hover:from-emerald-600 hover:to-teal-600 transition-all duration-200 shadow-sm shadow-emerald-500/30 text-sm"
+              >
+                Search
+              </button>
+            </div>
+            {/* Desktop: inline layout */}
+            <div className="hidden sm:block relative group">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors duration-200" />
               </div>
@@ -112,24 +133,24 @@ export default function HeroSection() {
           {/* CTA Buttons */}
           <motion.div
             variants={fadeUp}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14"
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-10 sm:mb-14 w-full"
           >
-            <motion.div whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
               <Link
                 to="/compare"
                 id="hero-cta-compare"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-bold text-base shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-shadow duration-300"
+                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 sm:py-4 min-h-[48px] bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl font-bold text-base shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-shadow duration-300"
               >
                 <Zap size={18} />
                 Compare Products
               </Link>
             </motion.div>
 
-            <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
               <Link
                 to="/products"
                 id="hero-cta-browse"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-2xl font-bold text-base hover:bg-slate-50 hover:border-emerald-200 hover:shadow-md transition-all duration-300"
+                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 sm:py-4 min-h-[48px] bg-white text-slate-700 border border-slate-200 rounded-2xl font-bold text-base hover:bg-slate-50 hover:border-emerald-200 hover:shadow-md transition-all duration-300"
               >
                 Browse All
                 <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
@@ -140,7 +161,7 @@ export default function HeroSection() {
           {/* Stats row */}
           <motion.div
             variants={fadeUp}
-            className="flex flex-wrap items-center justify-center gap-8 md:gap-12"
+            className="flex flex-wrap items-center justify-center gap-5 sm:gap-8 md:gap-12"
           >
             {[
               { icon: Leaf, to: 1000, suffix: "+", label: "Products Rated" },

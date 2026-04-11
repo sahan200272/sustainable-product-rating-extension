@@ -128,7 +128,7 @@ function ProductCard({ product }) {
       )}
 
       {/* Product header */}
-      <div className={`rounded-t-3xl px-8 pt-10 pb-6 flex flex-col items-center
+      <div className={`rounded-t-3xl px-5 sm:px-8 pt-8 sm:pt-10 pb-5 sm:pb-6 flex flex-col items-center
         ${product.isWinner ? "bg-gradient-to-b from-emerald-50/80 to-white" : "bg-gradient-to-b from-slate-50 to-white"}`}
       >
         <motion.div
@@ -153,7 +153,7 @@ function ProductCard({ product }) {
       </div>
 
       {/* Metrics */}
-      <div className="px-7 pt-5 pb-2">
+      <div className="px-4 sm:px-7 pt-4 sm:pt-5 pb-2">
         <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
           Sustainability Metrics
         </p>
@@ -171,7 +171,7 @@ function ProductCard({ product }) {
       </div>
 
       {/* Feature list */}
-      <div className="px-7 pt-5 pb-8 flex-grow">
+      <div className="px-4 sm:px-7 pt-4 sm:pt-5 pb-6 sm:pb-8 flex-grow">
         <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
           Key Attributes
         </p>
@@ -205,7 +205,7 @@ const IMPACT_STATS = [
 // ── Main Section ──────────────────────────────────────────────────────────────
 export default function ComparisonSection() {
   return (
-    <section className="py-28 bg-slate-50/80 border-t border-slate-100 relative overflow-hidden">
+    <section className="py-16 sm:py-20 md:py-28 bg-slate-50/80 border-t border-slate-100 relative overflow-hidden">
       {/* Decorative blobs */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-300 rounded-full blur-[150px] opacity-[0.09] translate-x-1/3 -translate-y-1/3 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-sky-200 rounded-full blur-[140px] opacity-[0.08] -translate-x-1/3 translate-y-1/3 pointer-events-none" />
@@ -218,27 +218,27 @@ export default function ComparisonSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, margin: "-80px" }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-center max-w-3xl mx-auto mb-16"
+          className="text-center max-w-3xl mx-auto mb-10 sm:mb-16 px-2 sm:px-0"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm font-semibold mb-6">
             <Zap size={15} className="text-emerald-500" />
             <span>Battle of Products</span>
           </div>
 
-          <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-5 tracking-tight leading-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 mb-4 sm:mb-5 tracking-tight leading-tight">
             See the{" "}
             <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
               Difference
             </span>{" "}
             Side by Side
           </h2>
-          <p className="text-lg text-slate-500 leading-relaxed">
+          <p className="text-sm sm:text-base md:text-lg text-slate-500 leading-relaxed">
             Common choices vs. verified sustainable leaders — data-driven, transparent, and honest.
           </p>
         </motion.div>
 
         {/* Cards row */}
-        <div className="flex flex-col lg:flex-row items-stretch justify-center gap-6 lg:gap-10 max-w-4xl mx-auto">
+        <div className="flex flex-col lg:flex-row items-stretch justify-center gap-4 sm:gap-6 lg:gap-10 max-w-4xl mx-auto">
           <ProductCard product={ECO_PRODUCT} />
 
           {/* VS divider */}
@@ -265,7 +265,7 @@ export default function ComparisonSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false }}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-          className="mt-14 max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4"
+          className="mt-10 sm:mt-14 max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4"
         >
           {IMPACT_STATS.map((stat) => (
             <motion.div

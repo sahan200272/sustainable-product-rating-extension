@@ -22,7 +22,7 @@ const relativeTime = (dateStr) => {
 // ── Skeleton card ─────────────────────────────────────────────────────────────
 function SkeletonReview() {
   return (
-    <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
+    <div className="bg-white rounded-3xl p-5 sm:p-8 border border-slate-100 shadow-sm">
       <div className="flex gap-1 mb-3">
         {[...Array(5)].map((_, i) => (
           <div key={i} className="w-4 h-4 rounded animate-shimmer" />
@@ -81,7 +81,7 @@ function ReviewCard({ review, onClick }) {
       transition={{ duration: 0.5, ease: "easeOut" }}
       whileHover={{ y: -6 }}
       onClick={onClick}
-      className="group relative bg-white/80 backdrop-blur-sm rounded-3xl p-8
+      className="group relative bg-white/80 backdrop-blur-sm rounded-3xl p-4 sm:p-8
                  border border-white/80 shadow-md hover:shadow-xl cursor-pointer
                  flex flex-col overflow-hidden transition-shadow duration-300"
     >
@@ -202,7 +202,7 @@ export default function ReviewsSection() {
   const handleCloseModal = () => { setSelectedReview(null); setIsModalOpen(false); };
 
   return (
-    <section className="py-28 bg-gradient-to-br from-slate-50 to-emerald-50/30 border-t border-slate-100 relative overflow-hidden">
+    <section className="py-16 sm:py-20 md:py-28 bg-gradient-to-br from-slate-50 to-emerald-50/30 border-t border-slate-100 relative overflow-hidden">
       {/* Blobs */}
       <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-emerald-100/60 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-1/2 -left-32 w-[400px] h-[400px] bg-teal-50 rounded-full blur-[100px] pointer-events-none" />
@@ -215,36 +215,36 @@ export default function ReviewsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, margin: "-80px" }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-center max-w-3xl mx-auto mb-16"
+          className="text-center max-w-3xl mx-auto mb-10 sm:mb-16 px-2 sm:px-0"
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white shadow-sm border border-emerald-100 text-emerald-700 text-xs font-bold mb-6 uppercase tracking-wider">
             <Star size={13} className="fill-emerald-500 text-emerald-500" />
             Trusted by Conscious Shoppers
           </div>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-5 tracking-tight leading-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 mb-4 sm:mb-5 tracking-tight leading-tight">
             Community{" "}
             <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
               Voice
             </span>
           </h2>
-          <p className="text-lg text-slate-500 leading-relaxed">
+          <p className="text-sm sm:text-base md:text-lg text-slate-500 leading-relaxed">
             Real experiences from mindful consumers, curated by AI moderation to ensure authenticity.
           </p>
         </motion.div>
 
         {/* Cards */}
         {loading ? (
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-8">
             {[...Array(3)].map((_, i) => <SkeletonReview key={i} />)}
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-8">
             {reviews.length > 0 ? (
               reviews.map((review) => (
                 <ReviewCard key={review._id} review={review} onClick={() => handleOpenModal(review)} />
               ))
             ) : (
-              <div className="col-span-3 text-center py-16 bg-white rounded-3xl border border-slate-100 shadow-sm">
+              <div className="col-span-full text-center py-12 sm:py-16 bg-white rounded-3xl border border-slate-100 shadow-sm">
                 <MessageCircle className="mx-auto h-12 w-12 text-slate-300 mb-4" />
                 <h3 className="text-lg font-semibold text-slate-900">No reviews yet</h3>
                 <p className="mt-1 text-slate-500 text-sm">Be the first to share your mindful shopping experience!</p>

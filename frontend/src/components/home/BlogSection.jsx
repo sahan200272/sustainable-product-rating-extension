@@ -8,8 +8,8 @@ import api from "../../services/api";
 function SkeletonBlogCard() {
   return (
     <div className="flex flex-col sm:flex-row bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm">
-      <div className="sm:w-2/5 h-56 sm:h-auto animate-shimmer" />
-      <div className="p-8 sm:w-3/5 space-y-4 flex flex-col justify-center">
+      <div className="sm:w-2/5 h-48 sm:h-auto animate-shimmer" />
+      <div className="p-5 sm:p-8 sm:w-3/5 space-y-4 flex flex-col justify-center">
         <div className="flex gap-2">
           <div className="h-6 w-20 rounded-full animate-shimmer" />
           <div className="h-6 w-16 rounded-full animate-shimmer" />
@@ -61,7 +61,7 @@ function BlogCard({ blog, index }) {
         className="group flex flex-col sm:flex-row bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-md hover:shadow-2xl hover:border-emerald-100 transition-all duration-350"
       >
         {/* Image panel */}
-        <div className={`sm:w-2/5 min-h-[200px] sm:min-h-0 ${style.imgBg} relative overflow-hidden flex items-center justify-center`}>
+        <div className={`sm:w-2/5 min-h-[180px] sm:min-h-0 ${style.imgBg} relative overflow-hidden flex items-center justify-center`}>
           {blog.imageUrl ? (
             <>
               <img
@@ -92,7 +92,7 @@ function BlogCard({ blog, index }) {
         </div>
 
         {/* Content */}
-        <div className="p-8 sm:w-3/5 flex flex-col justify-between">
+        <div className="p-5 sm:p-8 sm:w-3/5 flex flex-col justify-between">
           <div>
             {/* Category + reading time */}
             <div className="flex items-center gap-2.5 mb-4 flex-wrap">
@@ -155,7 +155,7 @@ export default function BlogSection() {
   }, []);
 
   return (
-    <section className="py-28 bg-white border-t border-slate-100 relative overflow-hidden">
+    <section className="py-16 sm:py-20 md:py-28 bg-white border-t border-slate-100 relative overflow-hidden">
       {/* Decorative blob */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-emerald-50 rounded-full blur-[100px] opacity-60 pointer-events-none" />
 
@@ -167,17 +167,17 @@ export default function BlogSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, margin: "-80px" }}
           transition={{ duration: 0.55, ease: "easeOut" }}
-          className="flex flex-col sm:flex-row justify-between items-end mb-12 gap-6"
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 sm:mb-12 gap-3 sm:gap-6"
         >
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-bold mb-4">
               <BookOpen size={12} />
               Eco Insights
             </div>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-1 sm:mb-2 tracking-tight">
               The Insight Hub
             </h2>
-            <p className="text-lg text-slate-500 max-w-lg">
+            <p className="text-sm sm:text-base text-slate-500 max-w-lg">
               Uncovering the environmental reality of modern retail through data-driven articles.
             </p>
           </div>
@@ -195,11 +195,11 @@ export default function BlogSection() {
 
         {/* Blog cards */}
         {loading ? (
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8">
             <SkeletonBlogCard /><SkeletonBlogCard />
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8">
             {blogs.length > 0 ? (
               blogs.map((blog, index) => <BlogCard key={blog._id} blog={blog} index={index} />)
             ) : (
