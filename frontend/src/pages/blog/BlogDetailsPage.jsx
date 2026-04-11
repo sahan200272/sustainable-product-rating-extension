@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth";
 import {
@@ -10,6 +10,7 @@ import {
 
 export default function BlogDetailsPage() {
     const { id } = useParams();
+    const location = useLocation();
     const navigate = useNavigate();
     const { user, isAuthenticated } = useAuth();
 
@@ -18,6 +19,11 @@ export default function BlogDetailsPage() {
     const [liking, setLiking] = useState(false);
 
     const currentUserId = user?._id || user?.id || "";
+    const isAdminUser = (user?.role || "").toLowerCase() === "admin";
+    const isAdminRoute = location.pathname.startsWith("/admin/");
+    const isAdminPreview =
+        isAdminRoute || new URLSearchParams(location.search).get("adminPreview") === "1";
+    const isReadOnlyAdminPreview = isAdminUser && isAdminPreview;
 
     const authorName = useMemo(() => {
         if (!blog?.author) return "Author";
@@ -106,15 +112,15 @@ export default function BlogDetailsPage() {
                 <div className="mb-5 flex items-center justify-between">
                     <h1 className="text-3xl font-bold text-gray-900">Blog Post Details</h1>
                     <Link
-                        to="/blogs"
+                        to={isReadOnlyAdminPreview ? "/admin/moderation" : "/blogs"}
                         className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-700 shadow hover:bg-indigo-50"
                     >
-                        Back to Feed
+                        {isReadOnlyAdminPreview ? "Back to Moderation" : "Back to Feed"}
                     </Link>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                    <article className="lg:col-span-2 rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
+                    <article className={`${isReadOnlyAdminPreview ? "lg:col-span-3" : "lg:col-span-2"} rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm`}>
                         {coverImage ? (
                             <img
                                 src={coverImage}
@@ -133,19 +139,21 @@ export default function BlogDetailsPage() {
                                 <p className="font-semibold text-gray-900">{authorName}</p>
                             </div>
 
-                            <button
-                                type="button"
-                                onClick={handleToggleLike}
-                                disabled={liking}
-                                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                                    isLikedByCurrentUser
-                                        ? "bg-rose-100 text-rose-700 hover:bg-rose-200"
-                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                } ${liking ? "cursor-not-allowed opacity-60" : ""}`}
-                            >
-                                <span>{isLikedByCurrentUser ? "♥" : "♡"}</span>
-                                <span>{blog.likes || 0}</span>
-                            </button>
+                            {!isReadOnlyAdminPreview && (
+                                <button
+                                    type="button"
+                                    onClick={handleToggleLike}
+                                    disabled={liking}
+                                    className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                                        isLikedByCurrentUser
+                                            ? "bg-rose-100 text-rose-700 hover:bg-rose-200"
+                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    } ${liking ? "cursor-not-allowed opacity-60" : ""}`}
+                                >
+                                    <span>{isLikedByCurrentUser ? "♥" : "♡"}</span>
+                                    <span>{blog.likes || 0}</span>
+                                </button>
+                            )}
                         </div>
 
                         <p className="mt-5 whitespace-pre-line text-base leading-7 text-gray-700">
@@ -166,24 +174,26 @@ export default function BlogDetailsPage() {
                         ) : null}
                     </article>
 
-                    <aside className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
-                        <div className="mb-4 flex items-center justify-center">
-                            <div className="h-20 w-20 rounded-2xl bg-emerald-100 flex items-center justify-center text-3xl">
-                                🌿
+                    {!isReadOnlyAdminPreview && (
+                        <aside className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
+                            <div className="mb-4 flex items-center justify-center">
+                                <div className="h-20 w-20 rounded-2xl bg-emerald-100 flex items-center justify-center text-3xl">
+                                    🌿
+                                </div>
                             </div>
-                        </div>
-                        <h3 className="text-3xl font-bold text-gray-900 text-center">AI Education Hub</h3>
-                        <p className="mt-2 text-center text-gray-600">
-                            Generate personalized learning guidance from this blog.
-                        </p>
+                            <h3 className="text-3xl font-bold text-gray-900 text-center">AI Education Hub</h3>
+                            <p className="mt-2 text-center text-gray-600">
+                                Generate personalized learning guidance from this blog.
+                            </p>
 
-                        <Link
-                            to={`/blogs/${blog._id}/education-hub`}
-                            className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-black px-4 py-3 text-lg font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-gray-800"
-                        >
-                            Generate Education Guide
-                        </Link>
-                    </aside>
+                            <Link
+                                to={`/blogs/${blog._id}/education-hub`}
+                                className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-black px-4 py-3 text-lg font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-gray-800"
+                            >
+                                Generate Education Guide
+                            </Link>
+                        </aside>
+                    )}
                 </div>
             </div>
         </div>

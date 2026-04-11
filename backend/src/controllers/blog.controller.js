@@ -45,7 +45,8 @@ export async function getBlogById(req, res, next) {
 
         // Allow access if user is the author or admin
         const blogAuthorId = blog.author?._id ? blog.author._id.toString() : null;
-        if ((blogAuthorId && req.user.id === blogAuthorId) || req.user.role === "ADMIN") {
+        const isAdmin = req.user.role === "Admin" || req.user.role === "ADMIN";
+        if ((blogAuthorId && req.user.id === blogAuthorId) || isAdmin) {
             return res.status(200).json({ blog });
         }
 

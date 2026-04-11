@@ -63,6 +63,7 @@ export default function AppRoutes() {
                 <Route path="edit-product/:id" element={<EditProductPage />} />
                 <Route path="compare-stats" element={<ComparisonStatsPage />} />
                 <Route path="moderation" element={<AdminBlogModerationPage />} />
+                <Route path="moderation/:id" element={<BlogDetailsPage />} />
             </Route>
 
             {/* ── Public & authenticated pages — MainLayout (Navbar + Footer) ── */}
