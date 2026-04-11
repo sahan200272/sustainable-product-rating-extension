@@ -40,8 +40,10 @@ app.use("/", (req, res) => {
 app.use(errorHandler);
 
 // Start the server
-app.listen(PORT, () => {
-    console.log(`app is running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== "test") {
+    app.listen(PORT, () => {
+        console.log(`app is running on http://localhost:${PORT}`);
+    });
+}
 
 export default app;
