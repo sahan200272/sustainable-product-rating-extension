@@ -364,44 +364,44 @@ This project is licensed under the ISC License.
 
 ## Testing Instruction Report
 
-This report outlines the testing strategies, environment configuration, and execution steps for unit, integration, and performance testing.
+`
+
+This report outlines the testing strategies, environment configuration, and execution steps for unit, integration, and performance testing, demonstrating comprehensive testing required for Evaluation 02.
 
 ### 1. Testing Environment Configuration
 
-- **Database**: A dedicated test database `sustainable-products-test` is used to avoid data corruption in the development/production database.
+- **Database**: A dedicated test database (`sustainable-products-test`) is used to avoid data corruption in the main database.
 - **Environment Variables**: Managed via `.env.test` file in the `backend` directory.
-- **Tools**: 
-  - **Jest**: Test runner and assertion library.
-  - **Supertest**: Library for testing HTTP endpoints.
+- **Frameworks Used**: 
+  - **Jest**: Test runner, assertion library, and mocking.
+  - **Supertest**: Assertions for integration testing the API endpoints via an in-memory application instance.
+  - **Artillery**: Load and stress-testing tool to simulate multiple virtual users.
 
 ### 2. How to Run Unit Tests
 
 Backend logic (utils, services) are covered by unit tests.
 ```bash
 cd backend
-npm test
+npm test -- testPathPattern=unit
 ```
 
-### 3. Integration Testing Setup and Execution
+### 3. How to Run Integration Tests
 
-Integration tests verify the communication between API endpoints and the database.
+Integration tests verify the synchronization between the Express API routes, controllers, services, and the live test MongoDB instance.
 - **Setup**: Ensure MongoDB is running and `.env.test` has the correct `MONGODB_URL_TEST`.
 - **Execution**: Run the integration test suite:
 ```bash
 cd backend
-node --experimental-vm-modules node_modules/jest/bin/jest.js
+npm test -- testPathPattern=integration
 ```
 
-### 4. Performance Testing
+### 4. How to Run Performance Tests
 
-Performance testing evaluates system responsiveness and stability under load.
-- **Tool**: [Artillery](https://www.artillery.io/) or [Postman Runner](https://learning.postman.com/docs/collections/running-collections/intro-to-collection-runs/)
-- **Setup**: 
-  1. Install artillery: `npm install -g artillery`
-  2. Create a test configuration file.
-- **Execution**: Run a load test against the search endpoint:
+Performance testing evaluates API system responsiveness, latency, and throughput under heavy concurrent load (stressing the server).
+- **Execution**: Utilizing the pre-configured `reviews.perf.yml` scenario file, Artillery simulates a spike of up to 50 virtual users.
 ```bash
-artillery quick --count 10 -n 20 http://localhost:3000/api/products/search?q=bottle
+cd backend
+npx artillery run src/tests/performance/reviews.perf.yml
 ```
 
 ---
