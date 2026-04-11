@@ -19,6 +19,7 @@ import {
     RiShieldUserLine,
 } from "react-icons/ri";
 import { getMyBlogs } from "../../services/blogService";
+import MobileNavbar from "./MobileNavbar";
 
 // ─── Default avatar fallback ──────────────────────────────────────────────────
 const DEFAULT_AVATAR =
@@ -446,111 +447,28 @@ export default function Navbar() {
                             <button
                                 id="nav-mobile-toggle"
                                 className="md:hidden p-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
-                                onClick={() => setMobileOpen((v) => !v)}
-                                aria-label={mobileOpen ? "Close menu" : "Open menu"}
+                                onClick={() => setMobileOpen(true)}
+                                aria-label="Open menu"
                             >
-                                {mobileOpen ? (
-                                    <RiCloseLine className="text-xl" />
-                                ) : (
-                                    <RiMenuLine className="text-xl" />
-                                )}
+                                <RiMenuLine className="text-xl" />
                             </button>
                         </div>
                     </div>
                 </div>
-
-                {/* ── Mobile Menu ───────────────────────────────────────────────── */}
-                {mobileOpen && (
-                    <div className="md:hidden border-t border-slate-100 bg-white/95 backdrop-blur-lg animate-[fadeIn_0.2s_ease]">
-                        <div className="max-w-7xl mx-auto px-4 py-3 space-y-1">
-                            {NAV_LINKS.map(({ label, to }) => (
-                                <Link
-                                    key={to}
-                                    to={to}
-                                    className={`block px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                                        isActive(to)
-                                            ? "bg-emerald-50 text-emerald-600"
-                                            : "text-slate-700 hover:bg-slate-50"
-                                    }`}
-                                >
-                                    {label}
-                                </Link>
-                            ))}
-
-                            {isAuthenticated ? (
-                                <>
-                                    <hr className="border-slate-100 my-1" />
-                                    {/* Mobile User Info */}
-                                    <div className="flex items-center gap-3 px-4 py-3">
-                                        <img
-                                            src={profilePicture}
-                                            alt={fullName}
-                                            onError={() => setAvatarError(true)}
-                                            loading="lazy"
-                                            className="w-10 h-10 rounded-full object-cover border-2 border-emerald-100"
-                                        />
-                                        <div>
-                                            <p className="text-sm font-bold text-slate-900">{fullName}</p>
-                                            <p className="text-xs text-slate-500">{email}</p>
-                                        </div>
-                                    </div>
-                                    <Link
-                                        to="/blogs/create"
-                                        className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-colors"
-                                    >
-                                        ✏️ Create Blog
-                                    </Link>
-                                    <Link
-                                        to="/profile"
-                                        className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
-                                    >
-                                        View Profile
-                                    </Link>
-                                    <Link
-                                        to="/my-reviews"
-                                        className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
-                                    >
-                                        My Reviews
-                                    </Link>
-                                    {isAdmin && (
-                                        <Link
-                                            to="/admin/dashboard"
-                                            className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
-                                        >
-                                            Admin Dashboard
-                                        </Link>
-                                    )}
-                                    <button
-                                        onClick={handleLogout}
-                                        className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors"
-                                    >
-                                        Logout
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <hr className="border-slate-100 my-1" />
-                                    <Link
-                                        to="/login"
-                                        className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
-                                    >
-                                        Log in
-                                    </Link>
-                                    <Link
-                                        to="/register"
-                                        className="block px-4 py-2.5 rounded-xl text-sm font-bold bg-slate-900 text-white text-center hover:bg-slate-800 transition-colors"
-                                    >
-                                        Sign up free
-                                    </Link>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                )}
             </nav>
 
-            {/* Spacer: reserve height so content isn't hidden under the fixed navbar */}
-            <div className="h-[68px]" aria-hidden="true" />
+            <MobileNavbar
+                isOpen={mobileOpen}
+                setIsOpen={setMobileOpen}
+                navLinks={NAV_LINKS}
+                isAuthenticated={isAuthenticated}
+                fullName={fullName}
+                email={email}
+                profilePicture={profilePicture}
+                isAdmin={isAdmin}
+                handleLogout={handleLogout}
+                onAvatarError={() => setAvatarError(true)}
+            />
         </>
     );
 }
@@ -568,3 +486,4 @@ function DropdownLink({ to, icon, label, id }) {
         </Link>
     );
 }
+
