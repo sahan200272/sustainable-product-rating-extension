@@ -41,6 +41,7 @@ export default function EditProductForm() {
 
   const [imagePreviews, setImagePreviews] = useState([]);
   const [existingImagesList, setExistingImagesList] = useState([]);
+  const [imagesToKeep, setImagesToKeep] = useState([]); // Track which existing images to keep
 
   useEffect(() => {
     const fetchExistingProduct = async () => {
@@ -59,6 +60,8 @@ export default function EditProductForm() {
           
           if (prod.images && prod.images.length > 0) {
             setExistingImagesList(prod.images);
+            // Initialize imagesToKeep with all existing images (user can then remove)
+            setImagesToKeep(prod.images.map((img, idx) => idx));
           }
 
           if (!PREDEFINED_CATEGORIES.includes(prod.category)) {
@@ -116,11 +119,9 @@ export default function EditProductForm() {
   };
 
   const removeExistingImage = (index) => {
-      // Typically we'd keep an array of "images to delete" in state
-      // For simplicity, we just filter it out visually. 
-      // Fully deleting an image from cloudinary usually requires sending the public_id to backend.
-      // But we will just ignore that edge case for this specific edit if it's too complex or just hide it.
-      setExistingImagesList(prev => prev.filter((_, i) => i !== index));
+    // Remove from imagesToKeep - this will actually delete the image on backend
+    setImagesToKeep(prev => prev.filter(i => i !== index));
+    setExistingImagesList(prev => prev.filter((_, i) => i !== index));
   };
 
 
@@ -137,10 +138,15 @@ export default function EditProductForm() {
       submitData.append("category", formData.category);
       submitData.append("description", formData.description);
 
+      // Append new images
       formData.images.forEach((img) => {
         submitData.append("images", img);
       });
 
+      // Append existing images to keep (as JSON array of URLs)
+      submitData.append("existingImages", JSON.stringify(imagesToKeep.map(idx => existingImagesList[idx])));
+
+      // Append sustainability data
       submitData.append(
         "sustainability",
         JSON.stringify(formData.sustainability)
@@ -271,6 +277,9 @@ export default function EditProductForm() {
                {existingImagesList.map((img, i) => (
                  <div key={i} className="relative group rounded-xl overflow-hidden shadow-sm border border-gray-200 h-24">
                    <img src={img.url || img} className="h-full w-full object-cover" />
+                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                     <button type="button" onClick={() => removeExistingImage(i)} className="p-1.5 bg-red-500 text-white rounded-full"><FiX size={16} /></button>
+                   </div>
                  </div>
                ))}
              </div>
