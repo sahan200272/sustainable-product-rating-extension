@@ -139,15 +139,38 @@ export const updateProduct = async (id, data, files) => {
     throw new Error("Product not found");
   }
 
-  // Start with existing images
-  let updatedImages = product.images;
+  // Parse sustainability if it comes as JSON string
+  let sustainability = product.sustainability;
+  if (data.sustainability && typeof data.sustainability === "string") {
+    try {
+      sustainability = JSON.parse(data.sustainability);
+    } catch (error) {
+      console.error("Failed to parse sustainability:", error);
+      sustainability = product.sustainability;
+    }
+  } else if (data.sustainability) {
+    sustainability = data.sustainability;
+  }
 
-  // If new image files are provided, upload and merge with old images
+  // Handle images: check if existingImages list is provided
+  let updatedImages = product.images;
+  
+  // If existingImages are specified, use those as the base
+  if (data.existingImages && typeof data.existingImages === "string") {
+    try {
+      updatedImages = JSON.parse(data.existingImages);
+    } catch (error) {
+      console.error("Failed to parse existingImages:", error);
+      updatedImages = product.images;
+    }
+  } else if (data.existingImages) {
+    updatedImages = data.existingImages;
+  }
+
+  // If new image files are provided, upload and append to kept images
   if (files && files.length > 0) {
     const newImages = await cloudinaryUpload(files);
-
-    // Combine existing and new images
-    updatedImages = [...product.images, ...newImages];
+    updatedImages = [...updatedImages, ...newImages];
   }
 
   // Update basic product fields (if new value exists)
@@ -156,35 +179,15 @@ export const updateProduct = async (id, data, files) => {
   product.category = data.category ?? product.category;
   product.description = data.description ?? product.description;
 
-  // Update images
+  // Update images with the new list
   product.images = updatedImages;
 
-  // Update sustainability fields if provided
-  if (data.sustainability) {
+  // Update sustainability fields
+  product.sustainability = sustainability;
 
-    product.sustainability.recyclableMaterial =
-      data.sustainability.recyclableMaterial ?? product.sustainability.recyclableMaterial;
-
-    product.sustainability.biodegradable =
-      data.sustainability.biodegradable ?? product.sustainability.biodegradable;
-
-    product.sustainability.plasticFree =
-      data.sustainability.plasticFree ?? product.sustainability.plasticFree;
-
-    product.sustainability.carbonFootprint =
-      data.sustainability.carbonFootprint ?? product.sustainability.carbonFootprint;
-
-    product.sustainability.crueltyFree =
-      data.sustainability.crueltyFree ?? product.sustainability.crueltyFree;
-
-    product.sustainability.fairTradeCertified =
-      data.sustainability.fairTradeCertified ?? product.sustainability.fairTradeCertified;
-
-    product.sustainability.renewableEnergyUsed =
-      data.sustainability.renewableEnergyUsed ?? product.sustainability.renewableEnergyUsed;
-
-    product.sustainability.energyEfficiencyRating =
-      data.sustainability.energyEfficiencyRating ?? product.sustainability.energyEfficiencyRating;
+  // Recalculate sustainability score based on updated sustainability data
+  if (sustainability) {
+    product.sustainabilityScore = calculateSustainabilityScore(sustainability);
   }
 
   // Save updated product
