@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import ComparisonSelector from "../../components/compare/ComparisonSelector";
 import ComparisonResult from "../../components/compare/ComparisonResult";
 import { compareProducts, quickCompareByName } from "../../services/comparisonServices";
@@ -74,6 +74,16 @@ export default function ComparePage() {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-6xl mx-auto space-y-10">
         
+        {/* Back Button */}
+        <div>
+          <Link 
+            to="/" 
+            className="inline-flex items-center px-4 py-2 text-sm font-semibold text-emerald-700 bg-emerald-100 rounded-lg hover:bg-emerald-200 transition-colors w-fit"
+          >
+            &larr; Back to Home
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mb-6">

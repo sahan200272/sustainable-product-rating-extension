@@ -44,7 +44,9 @@ export async function getBlogById(req, res, next) {
         }
 
         // Allow access if user is the author or admin
-        if (req.user.id === blog.author._id.toString() || req.user.role === "ADMIN") {
+        const blogAuthorId = blog.author?._id ? blog.author._id.toString() : null;
+        const isAdmin = req.user.role === "Admin" || req.user.role === "ADMIN";
+        if ((blogAuthorId && req.user.id === blogAuthorId) || isAdmin) {
             return res.status(200).json({ blog });
         }
 
@@ -141,6 +143,104 @@ export async function getMyBlogs(req, res, next) {
         res.status(200).json(result);
     } catch (error) {
         console.error("Error fetching user blogs:", error);
+        next(error);
+    }
+}
+
+// Update current user's own blog
+export async function updateMyBlog(req, res, next) {
+    try {
+        const { id } = req.params;
+        const { title, content, category, tags, imageUrl, imageUrls } = req.body;
+
+        let parsedTags = undefined;
+        if (tags !== undefined) {
+            if (Array.isArray(tags)) {
+                parsedTags = tags;
+            } else if (typeof tags === "string") {
+                try {
+                    const maybeJson = JSON.parse(tags);
+                    parsedTags = Array.isArray(maybeJson)
+                        ? maybeJson
+                        : tags.split(',').map((tag) => tag.trim()).filter(Boolean);
+                } catch {
+                    parsedTags = tags.split(',').map((tag) => tag.trim()).filter(Boolean);
+                }
+            }
+        }
+
+        let finalImageUrls = undefined;
+        let finalImageUrl = imageUrl;
+
+        if (imageUrls !== undefined) {
+            if (Array.isArray(imageUrls)) {
+                finalImageUrls = imageUrls;
+            } else if (typeof imageUrls === "string") {
+                try {
+                    const maybeJson = JSON.parse(imageUrls);
+                    finalImageUrls = Array.isArray(maybeJson)
+                        ? maybeJson
+                        : imageUrls.split(',').map((url) => url.trim()).filter(Boolean);
+                } catch {
+                    finalImageUrls = imageUrls.split(',').map((url) => url.trim()).filter(Boolean);
+                }
+            }
+        }
+
+        // If new image files are uploaded, replace image urls with uploaded URLs
+        if (req.files && req.files.length > 0) {
+            const uploaded = await blogCloudinaryUpload(req.files);
+            finalImageUrls = uploaded?.map((file) => file.url).filter(Boolean) || [];
+            finalImageUrl = finalImageUrls[0] || "";
+        } else if (Array.isArray(finalImageUrls)) {
+            finalImageUrl = finalImageUrls[0] || "";
+        }
+
+        const blog = await blogService.updateOwnBlogService(id, req.user.id, {
+            title,
+            content,
+            category,
+            tags: parsedTags,
+            imageUrl: finalImageUrl,
+            imageUrls: finalImageUrls,
+        });
+
+        return res.status(200).json({
+            message: "Blog updated successfully and sent for re-approval",
+            blog,
+        });
+    } catch (error) {
+        console.error("Error updating own blog:", error);
+        if (error.status === 400) {
+            return res.status(400).json({ error: error.message });
+        }
+        if (error.status === 403) {
+            return res.status(403).json({ error: error.message });
+        }
+        if (error.status === 404) {
+            return res.status(404).json({ error: error.message });
+        }
+        next(error);
+    }
+}
+
+// Delete current user's own blog
+export async function deleteMyBlog(req, res, next) {
+    try {
+        const { id } = req.params;
+        const result = await blogService.deleteOwnBlogService(id, req.user.id);
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error("Error deleting own blog:", error);
+        if (error.status === 400) {
+            return res.status(400).json({ error: error.message });
+        }
+        if (error.status === 403) {
+            return res.status(403).json({ error: error.message });
+        }
+        if (error.status === 404) {
+            return res.status(404).json({ error: error.message });
+        }
         next(error);
     }
 }

@@ -22,6 +22,7 @@ export default function CreateBlogPage() {
     const [imageFiles, setImageFiles] = useState([]);
     const [imagePreviews, setImagePreviews] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
     useEffect(() => {
         return () => {
@@ -132,6 +133,7 @@ export default function CreateBlogPage() {
         }
 
         setLoading(true);
+        setUploadProgress(0);
 
         try {
             const payload = {
@@ -142,7 +144,10 @@ export default function CreateBlogPage() {
                 imageFiles,
             };
 
-            const response = await createBlogPost(payload);
+            const response = await createBlogPost(payload, {
+                onUploadProgress: (percent) => setUploadProgress(percent),
+            });
+            setUploadProgress(100);
             toast.success(response?.message || "Blog submitted for approval");
 
             setForm(INITIAL_FORM);
@@ -158,6 +163,7 @@ export default function CreateBlogPage() {
             );
         } finally {
             setLoading(false);
+            setTimeout(() => setUploadProgress(0), 700);
         }
     };
 
@@ -328,17 +334,34 @@ export default function CreateBlogPage() {
                             />
                         </div>
 
-                        <div className="flex items-center justify-between gap-3 rounded-xl bg-emerald-50 px-4 py-3">
-                            <p className="text-sm text-emerald-800">
+                        <div className="rounded-xl bg-emerald-50 px-4 py-3">
+                            <div className="flex items-center justify-between gap-3">
+                                <p className="text-sm text-emerald-800">
                                 Author: <span className="font-semibold">{user?.firstName} {user?.lastName}</span>
-                            </p>
-                            <button
-                                type="submit"
-                                disabled={!canSubmit}
-                                className="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                {loading ? "Publishing..." : "Publish"}
-                            </button>
+                                </p>
+                                <button
+                                    type="submit"
+                                    disabled={!canSubmit}
+                                    className="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    {loading ? "Publishing..." : "Publish"}
+                                </button>
+                            </div>
+
+                            {loading ? (
+                                <div className="mt-3">
+                                    <div className="mb-1.5 flex items-center justify-between text-xs font-semibold text-emerald-700">
+                                        <span>{uploadProgress < 100 ? "Uploading" : "Uploaded. Finalizing..."}</span>
+                                        <span>{uploadProgress}%</span>
+                                    </div>
+                                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-emerald-100">
+                                        <div
+                                            className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                                            style={{ width: `${uploadProgress}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            ) : null}
                         </div>
                     </form>
                 </div>

@@ -1,0 +1,40 @@
+config:
+  # Base URL of the API to test
+  target: "http://localhost:3000"
+  
+  # Phases of the load test
+  phases:
+    # Phase 1: Warm up the system with a low load (10 virtual users per second for 10 seconds)
+    - duration: 10
+      arrivalRate: 10
+      name: "Warm up phase"
+    
+    # Phase 2: Spike the load (50 virtual users per second for 15 seconds)
+    - duration: 15
+      arrivalRate: 50
+      name: "Spike phase"
+
+  # Optional payload if testing with varied data
+  # payload:
+  #   path: "test-data.csv"
+  #   fields:
+  #     - "productId"
+
+scenarios:
+  # Scenario: Simulates users randomly browsing different review feeds
+  - name: "Fetch product reviews and recent reviews"
+    flow:
+      # Step 1: Fetch recent approved globally
+      - get:
+          url: "/api/reviews/recent"
+          
+      # Step 2: Think time simulating user reading
+      - think: 2
+
+      # Step 3: Fetch pending reviews (This simulates admin endpoints, normally requires auth,
+      # but we can simulate the GET request overhead against the router)
+      - get:
+          url: "/api/products" # Hitting public products to add general database fetch load
+          
+      # Step 4: Short pause before end
+      - think: 1

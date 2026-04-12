@@ -2,6 +2,8 @@ import express from 'express';
 import { 
     createBlog, 
     getMyBlogs,
+    updateMyBlog,
+    deleteMyBlog,
     getAllBlogs, 
     getBlogById, 
     updateBlog, 
@@ -17,7 +19,7 @@ import {
     testAI,
     generateBlogEducationGuide
 } from '../controllers/blog.controller.js';
-import { authenticate, authorizeRoles } from '../middlewares/authMiddleware.js';
+import { authenticate, authorizeRoles, optionalAuthenticate } from '../middlewares/authMiddleware.js';
 import upload from '../middlewares/multer.js';
 
 const blogRouter = express.Router();
@@ -41,10 +43,12 @@ blogRouter.post('/generate-education-guide', generateBlogEducationGuide); // POS
 // User routes (authentication required)
 blogRouter.post('/', authenticate, upload.array('images', 5), createBlog); // POST /api/blogs - creates with PENDING status
 blogRouter.get('/my-blogs', authenticate, getMyBlogs); // GET /api/blogs/my-blogs - includes PENDING/REJECTED/PUBLISHED for current user
+blogRouter.patch('/my-blogs/:id', authenticate, upload.array('images', 5), updateMyBlog); // PATCH /api/blogs/my-blogs/:id - update own blog
+blogRouter.delete('/my-blogs/:id', authenticate, deleteMyBlog); // DELETE /api/blogs/my-blogs/:id - delete own blog
 
 // Public routes (no authentication required)
 blogRouter.get('/', getAllBlogs); // GET /api/blogs - only published blogs
-blogRouter.get('/:id', getBlogById); // GET /api/blogs/:id - access control based on status
+blogRouter.get('/:id', optionalAuthenticate, getBlogById); // GET /api/blogs/:id - access control based on status
 
 // Admin routes (authentication + admin role required)
 blogRouter.get('/admin/list', authenticate, authorizeRoles('Admin'), adminGetBlogs); // GET /api/blogs/admin/list

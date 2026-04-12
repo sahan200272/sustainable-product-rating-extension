@@ -981,16 +981,15 @@ This section provides details on the deployment platforms, setup steps, and envi
 
 ### 3. LIVE URLs
 
-- **Deployed Backend API**: [https://your-backend-api.onrender.com/api](https://your-backend-api.onrender.com/api)
-- **Deployed Frontend Application**: [https://your-sustainable-app.vercel.app](https://your-sustainable-app.vercel.app)
+- **Deployed Backend API**: [https://sustainable-product-rating-extension.onrender.com](https://sustainable-product-rating-extension.onrender.com)
+- **Deployed Frontend Application**: [https://greenvy.vercel.app](https://greenvy.vercel.app)
 
 ### 4. Deployment Evidence
 
 | Evidence Type | Description | Placeholder |
 | ------------- | ----------- | ----------- |
-| **Backend Deployment** | Successful API startup | ![Backend Evidence](./screenshots/backend-deploy.png) |
-| **Frontend Deployment** | Successful UI build | ![Frontend Evidence](./screenshots/frontend-deploy.png) |
-| **Database Connection** | MongoDB Atlas cluster status | ![Database Evidence](./screenshots/mongodb-atlas.png) |
+| **Backend Deployment** | Successful API startup | ![Backend Evidence](https://github.com/sahan200272/sustainable-product-rating-extension/blob/f39ce15bebdc6b51eda5bc065887cd9c31bb3396/Screenshot%202026-04-09%20003029.png) |
+| **Frontend Deployment** | Successful UI build | ![Frontend Evidence](https://github.com/sahan200272/sustainable-product-rating-extension/blob/f39ce15bebdc6b51eda5bc065887cd9c31bb3396/Screenshot%202026-04-09%20002933.png) |
 
 ---
 
@@ -1006,8 +1005,8 @@ PORT=5000
 NODE_ENV=development
 
 # Database Configuration
-MONGODB_URL=mongodb://localhost:27017/sustainable-products
-MONGODB_URL_TEST=mongodb://localhost:27017/sustainable-products-test
+MONGODB_URL=mongodb+srv://sahan:sah123@cluster0.xlngcrh.mongodb.net/
+MONGODB_URL_TEST=mongodb+srv://sahan:sah123@cluster0.xlngcrh.mongodb.net/test
 
 # JWT Authentication
 JWT_SECRET=your_jwt_secret_key_here_min_32_characters
@@ -1123,44 +1122,44 @@ This project is licensed under the ISC License.
 
 ## Testing Instruction Report
 
-This report outlines the testing strategies, environment configuration, and execution steps for unit, integration, and performance testing.
+`
+
+This report outlines the testing strategies, environment configuration, and execution steps for unit, integration, and performance testing, demonstrating comprehensive testing required for Evaluation 02.
 
 ### 1. Testing Environment Configuration
 
-- **Database**: A dedicated test database `sustainable-products-test` is used to avoid data corruption in the development/production database.
+- **Database**: A dedicated test database (`sustainable-products-test`) is used to avoid data corruption in the main database.
 - **Environment Variables**: Managed via `.env.test` file in the `backend` directory.
-- **Tools**: 
-  - **Jest**: Test runner and assertion library.
-  - **Supertest**: Library for testing HTTP endpoints.
+- **Frameworks Used**: 
+  - **Jest**: Test runner, assertion library, and mocking.
+  - **Supertest**: Assertions for integration testing the API endpoints via an in-memory application instance.
+  - **Artillery**: Load and stress-testing tool to simulate multiple virtual users.
 
 ### 2. How to Run Unit Tests
 
 Backend logic (utils, services) are covered by unit tests.
 ```bash
 cd backend
-npm test
+npm test -- testPathPattern=unit
 ```
 
-### 3. Integration Testing Setup and Execution
+### 3. How to Run Integration Tests
 
-Integration tests verify the communication between API endpoints and the database.
+Integration tests verify the synchronization between the Express API routes, controllers, services, and the live test MongoDB instance.
 - **Setup**: Ensure MongoDB is running and `.env.test` has the correct `MONGODB_URL_TEST`.
 - **Execution**: Run the integration test suite:
 ```bash
 cd backend
-node --experimental-vm-modules node_modules/jest/bin/jest.js
+npm test -- testPathPattern=integration
 ```
 
-### 4. Performance Testing
+### 4. How to Run Performance Tests
 
-Performance testing evaluates system responsiveness and stability under load.
-- **Tool**: [Artillery](https://www.artillery.io/) or [Postman Runner](https://learning.postman.com/docs/collections/running-collections/intro-to-collection-runs/)
-- **Setup**: 
-  1. Install artillery: `npm install -g artillery`
-  2. Create a test configuration file.
-- **Execution**: Run a load test against the search endpoint:
+Performance testing evaluates API system responsiveness, latency, and throughput under heavy concurrent load (stressing the server).
+- **Execution**: Utilizing the pre-configured `reviews.perf.yml` scenario file, Artillery simulates a spike of up to 50 virtual users.
 ```bash
-artillery quick --count 10 -n 20 http://localhost:3000/api/products/search?q=bottle
+cd backend
+npx artillery run src/tests/performance/reviews.perf.yml
 ```
 
 ---
