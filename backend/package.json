@@ -5,6 +5,8 @@
   "main": "src/server.js",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:perf": "artillery run src/tests/performance/api.perf.yml",
+    "test:perf:report": "artillery run --output src/tests/performance/report.json src/tests/performance/api.perf.yml && artillery report src/tests/performance/report.json",
     "start": "nodemon src/server.js",
     "dev": "nodemon src/server.js"
   },
@@ -27,6 +29,7 @@
     "nodemon": "^3.1.11"
   },
   "devDependencies": {
+    "artillery": "^2.0.21",
     "jest": "^30.2.0",
     "supertest": "^7.2.2"
   }

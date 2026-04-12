@@ -1,5 +1,6 @@
 import { lazy } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import PageTransition from "../components/layouts/PageTransition";
 import LoginPage from "../pages/login/LoginPage";
 import RegisterPage from "../pages/register/RegisterPage";
 import HomePage from "../pages/home/HomePage";
@@ -34,8 +35,11 @@ const EditProductPage = lazy(() => import("../pages/product/EditProductPage"));
 const ComparisonStatsPage = lazy(() => import("../pages/compare/ComparisonStatsPage"));
 
 export default function AppRoutes() {
+    const location = useLocation();
+
     return (
-        <Routes>
+        <PageTransition>
+        <Routes location={location}>
             {/* ── Auth pages — no layout ── */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -59,6 +63,7 @@ export default function AppRoutes() {
                 <Route path="edit-product/:id" element={<EditProductPage />} />
                 <Route path="compare-stats" element={<ComparisonStatsPage />} />
                 <Route path="moderation" element={<AdminBlogModerationPage />} />
+                 <Route path="moderation/:id" element={<BlogDetailsPage />} />
             </Route>
 
             {/* ── Public & authenticated pages — MainLayout (Navbar + Footer) ── */}
@@ -113,5 +118,6 @@ export default function AppRoutes() {
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
+        </PageTransition>
     );
 }

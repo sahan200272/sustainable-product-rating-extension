@@ -1,7 +1,22 @@
-import mongoose from "mongoose";
-import request from "supertest";
-import dotenv from "dotenv";
-import app from "../../server.js";
+import { jest } from "@jest/globals";
+
+// Mock AI service BEFORE importing app or mongoose
+jest.unstable_mockModule("../../services/ai.service.js", () => ({
+  generateSustainabilityData: jest.fn().mockResolvedValue({
+    score: 80,
+    analysis: "Mocked AI analysis"
+  }),
+  generateSustainability: jest.fn().mockResolvedValue({
+    score: 80,
+    analysis: "Mocked AI analysis"
+  })
+}));
+
+// Use dynamic imports for modules that depend on the mocks
+const { default: mongoose } = await import("mongoose");
+const { default: request } = await import("supertest");
+const { default: dotenv } = await import("dotenv");
+const { default: app } = await import("../../server.js");
 
 // Load environment variables from .env.test file
 dotenv.config({ path: '.env.test' });
@@ -12,13 +27,11 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await mongoose.connection.close();
-
-  // Clear only the products collection
-
+  // Clear only the products collection BEFORE closing connection
   if (mongoose.connection.readyState === 1) {
     await mongoose.connection.db.collection("products").deleteMany({});
   }
+  await mongoose.connection.close();
 });
 
 describe("Product API Integration Tests", () => {
@@ -55,43 +68,19 @@ describe("Product API Integration Tests", () => {
       const res = await request(app).post("/api/products").send({});
       expect(res.statusCode).toBe(400);
       expect(res.body.message).toBe("Missing required fields");
-      //expect(res.body.error).toBeDefined();
     });
 
   });
 
-  // check get all products available in DB
   describe("GET /api/products", () => {
 
     it("should retrieve all products", async () => {
       const response = await request(app).get("/api/products");
 
-      expect(response.statusCode).toBe(201);
+      expect(response.statusCode).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.message).toBe("Products retrieved successfully");
     });
   });
-
-  /* describe("Update Product", () => {
-    it("should update a product successfully", async () => {
-      const productId = "replace_with_existing_id";
-      const response = await request(app)
-        .put(`/api/products/${productId}`)
-        .send({ name: "Updated Name" });
-
-      expect(response.statusCode).toBe(200);
-      expect(response.body.data.name).toBe("Updated Name");
-    });
-  });
-
-  describe("Delete Product", () => {
-    it("should delete a product successfully", async () => {
-      const productId = "replace_with_existing_id";
-      const response = await request(app).delete(`/api/products/${productId}`);
-
-      expect(response.statusCode).toBe(200);
-      expect(response.body.message).toBe("Product deleted successfully");
-    });
-  }); */
 
 });

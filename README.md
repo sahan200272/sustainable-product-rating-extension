@@ -105,7 +105,7 @@ Our app helps online shoppers make eco-friendly choices by rating products based
 
 ## API Documentation
 
-Base URL: `http://localhost:3000/api`
+Base URL: `http://localhost:3000/`
 
 ### Authentication
 
@@ -114,9 +114,19 @@ Most endpoints require authentication via JWT token. Include the token in the Au
 Authorization: Bearer <your_jwt_token>
 ```
 
----
+### Status Codes Reference
+| Status Code | Meaning |
+|-------------|---------|
+| 200 | OK - Request successful |
+| 201 | Created - Resource created successfully |
+| 400 | Bad Request - Invalid request body or missing fields |
+| 401 | Unauthorized - Missing or invalid JWT token |
+| 403 | Forbidden - Insufficient permissions or access denied |
+| 404 | Not Found - Resource does not exist |
+| 409 | Conflict - Duplicate entry (e.g., email already exists) |
+| 500 | Server Error - Internal server error |
 
-### API Endpoints
+---
 
 ## 1. User Endpoints
 
@@ -124,74 +134,822 @@ Authorization: Bearer <your_jwt_token>
 |--------|----------|-------------|----------------|
 | POST | `/api/users/register` | Register a new user account | Public |
 | POST | `/api/users/login` | Login and receive JWT token | Public |
+| POST | `/api/users/google-login` | Login using Google OAuth | Public |
 | GET | `/api/users/getUser` | Get current user profile | Required |
+| POST | `/api/users/send-otp` | Send OTP to user email | Required |
+| POST | `/api/users/verify-otp` | Verify email with OTP | Required |
+| POST | `/api/users/admin/getUserByEmail` | Get user by email (Admin only) | Admin |
+| GET | `/api/users/admin/getAllUsers` | Get all users (Admin only) | Admin |
+| PATCH | `/api/users/admin/block-user/:email` | Block/unblock user (Admin only) | Admin |
 
-#### Example: User Registration
+#### Example 1: User Registration
 **POST** `/api/users/register`
 - **Request Body**:
 ```json
 {
-  "name": "Sahan Perera",
+  "firstName": "Sahan",
+  "lastName": "Perera",
   "email": "sahan@example.com",
   "password": "Password123!",
+  "phone": "0771234567",
   "role": "Customer"
 }
 ```
 - **Response (201 Created)**:
 ```json
 {
-  "success": true,
   "message": "User registered successfully",
-  "data": { "id": "65e...", "name": "Sahan Perera", "email": "sahan@example.com" }
+  "user": {
+    "_id": "65e7a1b2c3d4e5f6g7h8i9j0",
+    "firstName": "Sahan",
+    "lastName": "Perera",
+    "email": "sahan@example.com",
+    "role": "Customer",
+    "emailVerified": false
+  }
 }
 ```
+
+#### Example 2: User Login
+**POST** `/api/users/login`
+- **Request Body**:
+```json
+{
+  "email": "sahan@example.com",
+  "password": "Password123!"
+}
+```
+- **Response (200 OK)**:
+```json
+{
+  "message": "Login Successful!",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "_id": "65e7a1b2c3d4e5f6g7h8i9j0",
+    "firstName": "Sahan",
+    "email": "sahan@example.com",
+    "role": "Customer"
+  }
+}
+```
+
+#### Example 3: Get Current User
+**GET** `/api/users/getUser`
+- **Headers**: `Authorization: Bearer <jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "user": {
+    "_id": "65e7a1b2c3d4e5f6g7h8i9j0",
+    "firstName": "Sahan",
+    "email": "sahan@example.com",
+    "role": "Customer",
+    "emailVerified": true,
+    "isBlocked": false
+  }
+}
+```
+
+#### Example 4: Send OTP
+**POST** `/api/users/send-otp`
+- **Headers**: `Authorization: Bearer <jwt_token>`
+- **Request Body**: (empty)
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "OTP sent to email successfully"
+}
+```
+
+#### Example 5: Verify OTP
+**POST** `/api/users/verify-otp`
+- **Headers**: `Authorization: Bearer <jwt_token>`
+- **Request Body**:
+```json
+{
+  "otp": "123456"
+}
+```
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Email verified successfully",
+  "user": { "emailVerified": true }
+}
+```
+
+---
 
 ## 2. Product Endpoints
 
 | Method | Endpoint | Description | Authentication |
 |--------|----------|-------------|----------------|
-| POST | `/api/products` | Create a new product with images | Admin only |
-| GET | `/api/products` | Get all products (supports pagination) | Public |
+| POST | `/api/products` | Create a new product with images | Public (no auth required) |
+| GET | `/api/products` | Get all products | Public |
+| GET | `/api/products/search?name=keyword` | Search products by name | Public |
+| GET | `/api/products/top` | Get top-rated products | Public |
 | GET | `/api/products/:id` | Get single product details | Public |
+| PUT | `/api/products/:id` | Update product (Admin only) | Admin |
+| DELETE | `/api/products/:id` | Delete product (Admin only) | Admin |
 
-#### Example: Create Product (Admin Only)
-**POST** `/api/products` (Multipart Form Data)
-- **Fields**: `name`, `brand`, `category`, `description`, `sustainabilityScore`
-- **Files**: `images` (Max 5)
+#### Example 1: Create Product
+**POST** `/api/products` (Multipart/Form-Data)
+- **Fields**:
+  - `name` (string, required): Product name
+  - `brand` (string, required): Brand name
+  - `category` (string, required): Product category
+  - `description` (string, required): Product description
+  - `sustainability` (JSON string, required): Sustainability factors
+  - `images` (files, max 5): Product images
+- **Request Body Example**:
+```
+name: Eco Water Bottle
+brand: EcoFlow
+category: Household
+description: Sustainable water bottle made from recycled materials
+sustainability: {"materials": "80", "packaging": "75", "production": "85"}
+images: [file1.jpg, file2.jpg]
+```
 - **Response (201 Created)**:
 ```json
 {
   "success": true,
   "message": "Product created successfully",
-  "data": { "name": "Eco Bottle", "sustainabilityScore": 85, ... }
+  "data": {
+    "_id": "65e7a1b2c3d4e5f6g7h8i9j0",
+    "name": "Eco Water Bottle",
+    "brand": "EcoFlow",
+    "category": "Household",
+    "sustainabilityScore": 80,
+    "images": ["https://cloudinary.com/image1.jpg"],
+    "rating": 0,
+    "reviewCount": 0
+  }
 }
 ```
+
+#### Example 2: Get All Products
+**GET** `/api/products`
+- **Query Parameters** (optional):
+  - `limit`: Number of products per page
+  - `page`: Page number
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Products retrieved successfully",
+  "data": [
+    {
+      "_id": "65e7a1b2c3d4e5f6g7h8i9j0",
+      "name": "Eco Water Bottle",
+      "brand": "EcoFlow",
+      "sustainabilityScore": 80,
+      "rating": 4.5,
+      "reviewCount": 12
+    }
+  ]
+}
+```
+
+#### Example 3: Search Products
+**GET** `/api/products/search?name=bottle`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Found 5 product(s) matching \"bottle\"",
+  "count": 5,
+  "data": [
+    {
+      "_id": "65e7a1b2c3d4e5f6g7h8i9j0",
+      "name": "Eco Water Bottle",
+      "sustainabilityScore": 80
+    }
+  ]
+}
+```
+
+#### Example 4: Get Top Products
+**GET** `/api/products/top`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Top products retrieved successfully",
+  "data": [
+    {
+      "_id": "65e7a1b2c3d4e5f6g7h8i9j0",
+      "name": "Eco Water Bottle",
+      "sustainabilityScore": 95,
+      "rating": 4.8
+    }
+  ]
+}
+```
+
+#### Example 5: Get Single Product
+**GET** `/api/products/:id`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Product retrieved successfully",
+  "data": {
+    "_id": "65e7a1b2c3d4e5f6g7h8i9j0",
+    "name": "Eco Water Bottle",
+    "brand": "EcoFlow",
+    "category": "Household",
+    "description": "Sustainable water bottle made from recycled materials",
+    "sustainabilityScore": 80,
+    "images": ["https://cloudinary.com/image1.jpg"],
+    "rating": 4.5,
+    "reviewCount": 12,
+    "sustainability": {
+      "materials": "80",
+      "packaging": "75",
+      "production": "85"
+    }
+  }
+}
+```
+
+#### Example 6: Update Product (Admin Only)
+**PUT** `/api/products/:id` (Multipart/Form-Data)
+- **Headers**: `Authorization: Bearer <admin_jwt_token>`
+- **Fields**: Same as create product (all optional)
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Product updated successfully",
+  "data": { "name": "Updated Product Name", ... }
+}
+```
+
+#### Example 7: Delete Product (Admin Only)
+**DELETE** `/api/products/:id`
+- **Headers**: `Authorization: Bearer <admin_jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Product deleted successfully"
+}
+```
+
+---
 
 ## 3. Review Endpoints
 
 | Method | Endpoint | Description | Authentication |
 |--------|----------|-------------|----------------|
-| POST | `/api/reviews` | Create a product review | Customer only |
+| POST | `/api/reviews` | Create a product review | Customer |
 | GET | `/api/reviews/product/:productId` | Get approved reviews for a product | Public |
+| GET | `/api/reviews/my-reviews` | Get all reviews by logged-in user | Required |
+| GET | `/api/reviews/pending` | Get pending reviews (Admin only) | Admin |
+| GET | `/api/reviews/recent` | Get recent approved reviews globally | Public |
+| PATCH | `/api/reviews/:id/approve` | Approve a review (Admin only) | Admin |
+| PATCH | `/api/reviews/:id/reject` | Reject a review (Admin only) | Admin |
+| DELETE | `/api/reviews/:id` | Delete a review | Customer/Admin |
 
-#### Example: Submit Review
+#### Example 1: Create Review
 **POST** `/api/reviews`
+- **Headers**: `Authorization: Bearer <customer_jwt_token>`
 - **Request Body**:
 ```json
 {
-  "productId": "65e...",
-  "comment": "Great product, very sustainable!",
-  "rating": 5
+  "productId": "65e7a1b2c3d4e5f6g7h8i9j0",
+  "rating": 5,
+  "comment": "Excellent sustainable product! Great quality and eco-friendly."
 }
 ```
 - **Response (201 Created)**:
 ```json
 {
   "success": true,
-  "message": "Review submitted for moderation",
-  "review": { "comment": "Great product...", "status": "PENDING" }
+  "message": "Review submitted and approved",
+  "data": {
+    "_id": "65e7a2b2c3d4e5f6g7h8i9j1",
+    "productId": "65e7a1b2c3d4e5f6g7h8i9j0",
+    "userId": "65e7a0b2c3d4e5f6g7h8i9j0",
+    "rating": 5,
+    "comment": "Excellent sustainable product!",
+    "status": "APPROVED",
+    "createdAt": "2024-04-12T10:30:00Z"
+  }
 }
 ```
+
+#### Example 2: Get Approved Reviews for Product
+**GET** `/api/reviews/product/:productId`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "count": 5,
+  "data": [
+    {
+      "_id": "65e7a2b2c3d4e5f6g7h8i9j1",
+      "userId": "65e7a0b2c3d4e5f6g7h8i9j0",
+      "rating": 5,
+      "comment": "Excellent sustainable product!",
+      "status": "APPROVED",
+      "createdAt": "2024-04-12T10:30:00Z"
+    }
+  ]
+}
+```
+
+#### Example 3: Get My Reviews
+**GET** `/api/reviews/my-reviews`
+- **Headers**: `Authorization: Bearer <jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "count": 3,
+  "data": [
+    {
+      "_id": "65e7a2b2c3d4e5f6g7h8i9j1",
+      "productId": "65e7a1b2c3d4e5f6g7h8i9j0",
+      "rating": 5,
+      "comment": "Excellent product",
+      "status": "APPROVED"
+    },
+    {
+      "_id": "65e7a2b2c3d4e5f6g7h8i9j2",
+      "productId": "65e7a1b2c3d4e5f6g7h8i9j1",
+      "rating": 3,
+      "comment": "Average",
+      "status": "REJECTED",
+      "rejectionReason": "Contains inappropriate language"
+    }
+  ]
+}
+```
+
+#### Example 4: Get Pending Reviews (Admin Only)
+**GET** `/api/reviews/pending`
+- **Headers**: `Authorization: Bearer <admin_jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "count": 2,
+  "data": [
+    {
+      "_id": "65e7a2b2c3d4e5f6g7h8i9j3",
+      "productId": "65e7a1b2c3d4e5f6g7h8i9j0",
+      "userId": "65e7a0b2c3d4e5f6g7h8i9j0",
+      "rating": 4,
+      "comment": "Good product",
+      "status": "PENDING",
+      "createdAt": "2024-04-12T11:00:00Z"
+    }
+  ]
+}
+```
+
+#### Example 5: Approve Review (Admin Only)
+**PATCH** `/api/reviews/:id/approve`
+- **Headers**: `Authorization: Bearer <admin_jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Review approved successfully",
+  "data": { "status": "APPROVED" }
+}
+```
+
+#### Example 6: Reject Review (Admin Only)
+**PATCH** `/api/reviews/:id/reject`
+- **Headers**: `Authorization: Bearer <admin_jwt_token>`
+- **Request Body**:
+```json
+{
+  "rejectionReason": "Contains inappropriate language"
+}
+```
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Review rejected successfully",
+  "data": { "status": "REJECTED", "rejectionReason": "Contains inappropriate language" }
+}
+```
+
+#### Example 7: Delete Review
+**DELETE** `/api/reviews/:id`
+- **Headers**: `Authorization: Bearer <jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Review deleted successfully"
+}
+```
+
+---
+
+## 4. Blog Endpoints
+
+| Method | Endpoint | Description | Authentication |
+|--------|----------|-------------|----------------|
+| POST | `/api/blogs` | Create a new blog post | Required |
+| GET | `/api/blogs` | Get all published blogs | Public |
+| GET | `/api/blogs/:id` | Get single blog post | Public/Auth |
+| GET | `/api/blogs/my-blogs` | Get current user's all blogs | Required |
+| GET | `/api/blogs/admin/list` | Get all blogs for moderation (Admin only) | Admin |
+| PATCH | `/api/blogs/admin/:id/approve` | Approve a blog (Admin only) | Admin |
+| PATCH | `/api/blogs/admin/:id/reject` | Reject a blog (Admin only) | Admin |
+| POST | `/api/blogs/generate-education-guide` | Generate an education guide using AI | Public |
+| GET | `/api/blogs/admin/test-ai` | Test AI connection (Admin only) | Admin |
+| POST | `/api/blogs/:id/like` | Like a blog post | Required |
+| POST | `/api/blogs/:id/unlike` | Unlike a blog post | Required |
+| PUT | `/api/blogs/:id` | Update blog (Admin only) | Admin |
+| DELETE | `/api/blogs/:id` | Delete blog (Admin only) | Admin |
+
+#### Example 1: Create Blog Post
+**POST** `/api/blogs` (Multipart/Form-Data)
+- **Headers**: `Authorization: Bearer <jwt_token>`
+- **Fields**:
+  - `title` (string, required): Blog title
+  - `content` (string, required): Blog content
+  - `category` (string, required): Blog category
+  - `tags` (array, optional): Tags for the blog
+  - `images` (files, optional): Blog images
+- **Request Body Example**:
+```
+title: Sustainable Living Guide
+content: Learn how to reduce your carbon footprint...
+category: Lifestyle
+tags: sustainability, eco-friendly, tips
+images: [file1.jpg]
+```
+- **Response (201 Created)**:
+```json
+{
+  "success": true,
+  "message": "Blog created successfully",
+  "blog": {
+    "_id": "65e7a3b2c3d4e5f6g7h8i9j0",
+    "title": "Sustainable Living Guide",
+    "content": "Learn how to reduce your carbon footprint...",
+    "category": "Lifestyle",
+    "tags": ["sustainability", "eco-friendly", "tips"],
+    "author": "65e7a0b2c3d4e5f6g7h8i9j0",
+    "status": "PENDING",
+    "likes": 0,
+    "createdAt": "2024-04-12T10:30:00Z"
+  }
+}
+```
+
+#### Example 2: Get All Published Blogs
+**GET** `/api/blogs?page=1&limit=10&category=Lifestyle`
+- **Query Parameters** (optional):
+  - `page`: Page number (default: 1)
+  - `limit`: Items per page (default: 10)
+  - `category`: Filter by category
+  - `search`: Search blogs by title
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "65e7a3b2c3d4e5f6g7h8i9j0",
+      "title": "Sustainable Living Guide",
+      "content": "Learn how to reduce your carbon footprint...",
+      "category": "Lifestyle",
+      "author": { "firstName": "Sahan", "email": "sahan@example.com" },
+      "status": "PUBLISHED",
+      "likes": 25,
+      "createdAt": "2024-04-12T10:30:00Z"
+    }
+  ],
+  "page": 1,
+  "pages": 5
+}
+```
+
+#### Example 3: Get Single Blog
+**GET** `/api/blogs/:id`
+- **Response (200 OK)**:
+```json
+{
+  "blog": {
+    "_id": "65e7a3b2c3d4e5f6g7h8i9j0",
+    "title": "Sustainable Living Guide",
+    "content": "Learn how to reduce your carbon footprint...",
+    "category": "Lifestyle",
+    "tags": ["sustainability", "eco-friendly"],
+    "author": { "firstName": "Sahan", "email": "sahan@example.com" },
+    "status": "PUBLISHED",
+    "likes": 25,
+    "images": ["https://cloudinary.com/image1.jpg"],
+    "createdAt": "2024-04-12T10:30:00Z"
+  }
+}
+```
+
+#### Example 4: Get My Blogs
+**GET** `/api/blogs/my-blogs`
+- **Headers**: `Authorization: Bearer <jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "blogs": [
+    {
+      "_id": "65e7a3b2c3d4e5f6g7h8i9j0",
+      "title": "Sustainable Living Guide",
+      "status": "PUBLISHED",
+      "likes": 25
+    },
+    {
+      "_id": "65e7a3b2c3d4e5f6g7h8i9j1",
+      "title": "Eco-Friendly Products",
+      "status": "PENDING",
+      "likes": 0
+    }
+  ]
+}
+```
+
+#### Example 5: Get All Blogs for Moderation (Admin Only)
+**GET** `/api/blogs/admin/list`
+- **Headers**: `Authorization: Bearer <admin_jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "65e7a3b2c3d4e5f6g7h8i9j1",
+      "title": "Eco-Friendly Products",
+      "author": { "firstName": "John", "email": "john@example.com" },
+      "status": "PENDING",
+      "createdAt": "2024-04-12T11:00:00Z"
+    }
+  ]
+}
+```
+
+#### Example 6: Approve Blog (Admin Only)
+**PATCH** `/api/blogs/admin/:id/approve`
+- **Headers**: `Authorization: Bearer <admin_jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Blog approved successfully",
+  "blog": { "status": "PUBLISHED" }
+}
+```
+
+#### Example 7: Reject Blog (Admin Only)
+**PATCH** `/api/blogs/admin/:id/reject`
+- **Headers**: `Authorization: Bearer <admin_jwt_token>`
+- **Request Body**:
+```json
+{
+  "rejectionReason": "Content needs revision"
+}
+```
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Blog rejected successfully",
+  "blog": { "status": "REJECTED", "rejectionReason": "Content needs revision" }
+}
+```
+
+#### Example 8: Generate Education Guide (AI-Powered)
+**POST** `/api/blogs/generate-education-guide`
+- **Request Body**:
+```json
+{
+  "topic": "Sustainable Fashion",
+  "targetAudience": "General"
+}
+```
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Education guide generated successfully",
+  "guide": {
+    "title": "Sustainable Fashion Guide",
+    "content": "...generated AI content...",
+    "generatedAt": "2024-04-12T12:00:00Z"
+  }
+}
+```
+
+#### Example 9: Like a Blog
+**POST** `/api/blogs/:id/like`
+- **Headers**: `Authorization: Bearer <jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Blog liked successfully",
+  "likes": 26
+}
+```
+
+#### Example 10: Unlike a Blog
+**POST** `/api/blogs/:id/unlike`
+- **Headers**: `Authorization: Bearer <jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Blog unliked successfully",
+  "likes": 25
+}
+```
+
+---
+
+## 5. Product Comparison Endpoints
+
+| Method | Endpoint | Description | Authentication |
+|--------|----------|-------------|----------------|
+| POST | `/api/comparisons/items` | Compare two products | Optional |
+| GET | `/api/comparisons/items` | Get user's comparison history | Required |
+| GET | `/api/comparisons/items/:id` | Get single comparison by ID | Required |
+| PUT | `/api/comparisons/items/:id` | Update a comparison | Required |
+| DELETE | `/api/comparisons/items/:id` | Delete a comparison | Required |
+| DELETE | `/api/comparisons/items` | Clear user's comparison history | Required |
+| GET | `/api/comparisons/quick` | Quick compare by product name | Public |
+| GET | `/api/comparisons/stats` | Get comparison statistics (Admin only) | Admin |
+
+#### Example 1: Compare Two Products
+**POST** `/api/comparisons/items`
+- **Headers**: `Authorization: Bearer <jwt_token>` (optional)
+- **Request Body**:
+```json
+{
+  "productId1": "65e7a1b2c3d4e5f6g7h8i9j0",
+  "productId2": "65e7a1b2c3d4e5f6g7h8i9j1"
+}
+```
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "65e7a4b2c3d4e5f6g7h8i9j0",
+    "products": [
+      {
+        "_id": "65e7a1b2c3d4e5f6g7h8i9j0",
+        "name": "Eco Bottle A",
+        "sustainabilityScore": 85,
+        "rating": 4.5,
+        "reviewCount": 12
+      },
+      {
+        "_id": "65e7a1b2c3d4e5f6g7h8i9j1",
+        "name": "Eco Bottle B",
+        "sustainabilityScore": 80,
+        "rating": 4.2,
+        "reviewCount": 8
+      }
+    ],
+    "comparisonScore": {
+      "product1Score": 85,
+      "product2Score": 80,
+      "winner": "65e7a1b2c3d4e5f6g7h8i9j0",
+      "scoreDifference": 5
+    }
+  }
+}
+```
+
+#### Example 2: Get Comparison History
+**GET** `/api/comparisons/items`
+- **Headers**: `Authorization: Bearer <jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "65e7a4b2c3d4e5f6g7h8i9j0",
+      "product1": { "name": "Eco Bottle A", "sustainabilityScore": 85 },
+      "product2": { "name": "Eco Bottle B", "sustainabilityScore": 80 },
+      "createdAt": "2024-04-12T10:30:00Z"
+    }
+  ]
+}
+```
+
+#### Example 3: Get Single Comparison
+**GET** `/api/comparisons/items/:id`
+- **Headers**: `Authorization: Bearer <jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "65e7a4b2c3d4e5f6g7h8i9j0",
+    "products": [
+      { "name": "Eco Bottle A", "sustainabilityScore": 85 },
+      { "name": "Eco Bottle B", "sustainabilityScore": 80 }
+    ],
+    "comparisonScore": {
+      "product1Score": 85,
+      "product2Score": 80,
+      "winner": "65e7a1b2c3d4e5f6g7h8i9j0",
+      "scoreDifference": 5
+    }
+  }
+}
+```
+
+#### Example 4: Update Comparison
+**PUT** `/api/comparisons/items/:id`
+- **Headers**: `Authorization: Bearer <jwt_token>`
+- **Request Body**:
+```json
+{
+  "productId1": "65e7a1b2c3d4e5f6g7h8i9j2",
+  "productId2": "65e7a1b2c3d4e5f6g7h8i9j3"
+}
+```
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Comparison updated successfully",
+  "data": { ... }
+}
+```
+
+#### Example 5: Delete Comparison
+**DELETE** `/api/comparisons/items/:id`
+- **Headers**: `Authorization: Bearer <jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Comparison deleted successfully"
+}
+```
+
+#### Example 6: Clear Comparison History
+**DELETE** `/api/comparisons/items`
+- **Headers**: `Authorization: Bearer <jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Comparison history cleared successfully"
+}
+```
+
+#### Example 7: Quick Compare by Name
+**GET** `/api/comparisons/quick?productName1=Bottle&productName2=Bag`
+- **Query Parameters**:
+  - `productName1`: First product name
+  - `productName2`: Second product name
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "data": {
+    "products": [...],
+    "comparisonScore": {...}
+  }
+}
+```
+
+#### Example 8: Get Comparison Statistics (Admin Only)
+**GET** `/api/comparisons/stats`
+- **Headers**: `Authorization: Bearer <admin_jwt_token>`
+- **Response (200 OK)**:
+```json
+{
+  "success": true,
+  "data": {
+    "totalComparisons": 150,
+    "mostComparedProducts": [
+      { "product": "Eco Bottle", "comparisons": 25 }
+    ],
+    "averageComparisonScoreDifference": 12.5
+  }
+}
+```
+
+---
 
 ---
 
@@ -201,7 +959,7 @@ This section provides details on the deployment platforms, setup steps, and envi
 
 ### 1. Backend Deployment
 
-- **Platform**: [Render](https://render.com) (Recommended) or Railway / Heroku
+- **Platform**: [Render](https://render.com)
 - **Setup Steps**:
   1.  **Connect Repository**: Link the GitHub repository and set the root directory to `backend`.
   2.  **Runtime Configuration**: Use `Node.js` with the build command `npm install` and start command `npm start`.
@@ -364,44 +1122,44 @@ This project is licensed under the ISC License.
 
 ## Testing Instruction Report
 
-This report outlines the testing strategies, environment configuration, and execution steps for unit, integration, and performance testing.
+`
+
+This report outlines the testing strategies, environment configuration, and execution steps for unit, integration, and performance testing, demonstrating comprehensive testing required for Evaluation 02.
 
 ### 1. Testing Environment Configuration
 
-- **Database**: A dedicated test database `sustainable-products-test` is used to avoid data corruption in the development/production database.
+- **Database**: A dedicated test database (`sustainable-products-test`) is used to avoid data corruption in the main database.
 - **Environment Variables**: Managed via `.env.test` file in the `backend` directory.
-- **Tools**: 
-  - **Jest**: Test runner and assertion library.
-  - **Supertest**: Library for testing HTTP endpoints.
+- **Frameworks Used**: 
+  - **Jest**: Test runner, assertion library, and mocking.
+  - **Supertest**: Assertions for integration testing the API endpoints via an in-memory application instance.
+  - **Artillery**: Load and stress-testing tool to simulate multiple virtual users.
 
 ### 2. How to Run Unit Tests
 
 Backend logic (utils, services) are covered by unit tests.
 ```bash
 cd backend
-npm test
+npm test -- testPathPattern=unit
 ```
 
-### 3. Integration Testing Setup and Execution
+### 3. How to Run Integration Tests
 
-Integration tests verify the communication between API endpoints and the database.
+Integration tests verify the synchronization between the Express API routes, controllers, services, and the live test MongoDB instance.
 - **Setup**: Ensure MongoDB is running and `.env.test` has the correct `MONGODB_URL_TEST`.
 - **Execution**: Run the integration test suite:
 ```bash
 cd backend
-node --experimental-vm-modules node_modules/jest/bin/jest.js
+npm test -- testPathPattern=integration
 ```
 
-### 4. Performance Testing
+### 4. How to Run Performance Tests
 
-Performance testing evaluates system responsiveness and stability under load.
-- **Tool**: [Artillery](https://www.artillery.io/) or [Postman Runner](https://learning.postman.com/docs/collections/running-collections/intro-to-collection-runs/)
-- **Setup**: 
-  1. Install artillery: `npm install -g artillery`
-  2. Create a test configuration file.
-- **Execution**: Run a load test against the search endpoint:
+Performance testing evaluates API system responsiveness, latency, and throughput under heavy concurrent load (stressing the server).
+- **Execution**: Utilizing the pre-configured `reviews.perf.yml` scenario file, Artillery simulates a spike of up to 50 virtual users.
 ```bash
-artillery quick --count 10 -n 20 http://localhost:3000/api/products/search?q=bottle
+cd backend
+npx artillery run src/tests/performance/reviews.perf.yml
 ```
 
 ---

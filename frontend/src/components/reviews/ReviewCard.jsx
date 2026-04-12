@@ -196,7 +196,7 @@ export default function ReviewCard({ review, currentUserId, currentRole, onDelet
       <motion.article 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
+        viewport={{ once: false, margin: "-50px" }}
         whileHover={{ scale: 1.02, boxShadow: "0px 10px 30px -10px rgba(0,0,0,0.1)" }}
         transition={{ duration: 0.3 }}
         className="bg-white border border-gray-100 rounded-2xl p-6 relative z-0"

@@ -13,6 +13,7 @@ import {
     FiTrash2,
     FiEye,
 } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 function formatDate(dateString) {
     if (!dateString) return "-";
@@ -33,12 +34,16 @@ function scoreColor(score = 0) {
  * No layout shell (AdminLayout provides sidebar + topbar).
  */
 export default function AdminBlogModerationPage() {
+    const navigate = useNavigate();
     const [blogs, setBlogs] = useState([]);
     const [blogsLoading, setBlogsLoading] = useState(true);
     const [actionLoadingId, setActionLoadingId] = useState("");
-    const [selectedBlogForContent, setSelectedBlogForContent] = useState(null);
     const [selectedBlogForReject, setSelectedBlogForReject] = useState(null);
     const [rejectionReason, setRejectionReason] = useState("");
+
+    const handlePreviewBlog = (blogId) => {
+        navigate(`/admin/moderation/${blogId}`);
+    };
 
     const fetchBlogs = async () => {
         setBlogsLoading(true);
@@ -247,7 +252,7 @@ export default function AdminBlogModerationPage() {
                                                     <FiTrash2 className="h-4 w-4" />
                                                 </button>
                                                 <button
-                                                    onClick={() => setSelectedBlogForContent(blog)}
+                                                    onClick={() => handlePreviewBlog(blog._id)}
                                                     className="rounded-md border border-gray-200 px-2 py-1 text-gray-700"
                                                     title="View"
                                                 >
@@ -262,31 +267,6 @@ export default function AdminBlogModerationPage() {
                     </tbody>
                 </table>
             </div>
-
-            {/* ── View content modal ── */}
-            {selectedBlogForContent && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                    <div className="w-full max-w-2xl rounded-xl bg-white p-5 shadow-xl">
-                        <div className="mb-3 flex items-center justify-between">
-                            <h2 className="text-lg font-bold text-gray-900">Blog Content</h2>
-                            <button
-                                type="button"
-                                onClick={() => setSelectedBlogForContent(null)}
-                                className="rounded-md border px-2 py-1 text-sm text-gray-700 hover:bg-gray-50"
-                            >
-                                Close
-                            </button>
-                        </div>
-                        <p className="mb-2 text-sm font-semibold text-gray-800">
-                            {selectedBlogForContent.title}
-                        </p>
-                        <div className="max-h-[60vh] overflow-y-auto whitespace-pre-line rounded-lg border bg-gray-50 p-3 text-sm text-gray-700">
-                            {selectedBlogForContent.content || "No content available"}
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* ── Reject / remove modal ── */}
             {selectedBlogForReject && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">

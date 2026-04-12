@@ -17,7 +17,8 @@ export default function MainLayout({ children }) {
     return (
         <div className="flex flex-col min-h-screen">
             <Navbar />
-            <main className="flex-1">{children}</main>
+            {/* pt-[68px] offsets the fixed navbar height so content isn't hidden behind it */}
+            <main className="flex-1 pt-[68px]">{children}</main>
             <Footer />
         </div>
     );
